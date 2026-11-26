@@ -1,0 +1,182 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_facade"]
+albedo_color = Color(0.96, 0.93, 0.89, 1)
+roughness = 0.84
+
+[sub_resource type="Shader" id="Shader_lip"]
+code = "shader_type spatial;\n\nuniform vec4 base_color : source_color = vec4(0.96, 0.93, 0.89, 1.0);\nuniform vec4 accent_color : source_color = vec4(0.612, 0.812, 0.757, 1.0);\nuniform float half_height = 0.085;\nuniform float accent_thickness = 0.018;\nvarying vec3 local_position;\nvarying vec3 local_normal;\n\nvoid vertex() {\n\tlocal_position = VERTEX;\n\tlocal_normal = NORMAL;\n}\n\nvoid fragment() {\n\tfloat edge = half_height - accent_thickness;\n\tfloat blend = max(fwidth(local_position.y) * 0.5, 0.0001);\n\tfloat accent = max(step(0.5, local_normal.y), smoothstep(edge - blend, edge + blend, local_position.y));\n\tALBEDO = mix(base_color.rgb, accent_color.rgb, accent);\n\tROUGHNESS = 0.78;\n}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lip_mint"]
+shader = SubResource("Shader_lip")
+shader_parameter/base_color = Color(0.96, 0.93, 0.89, 1)
+shader_parameter/accent_color = Color(0.612, 0.812, 0.757, 1)
+shader_parameter/half_height = 0.085
+shader_parameter/accent_thickness = 0.018
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lip_peach"]
+shader = SubResource("Shader_lip")
+shader_parameter/base_color = Color(0.96, 0.93, 0.89, 1)
+shader_parameter/accent_color = Color(0.929, 0.753, 0.596, 1)
+shader_parameter/half_height = 0.085
+shader_parameter/accent_thickness = 0.018
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lip_coral"]
+shader = SubResource("Shader_lip")
+shader_parameter/base_color = Color(0.96, 0.93, 0.89, 1)
+shader_parameter/accent_color = Color(0.91, 0.639, 0.616, 1)
+shader_parameter/half_height = 0.085
+shader_parameter/accent_thickness = 0.018
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lip_lavender"]
+shader = SubResource("Shader_lip")
+shader_parameter/base_color = Color(0.96, 0.93, 0.89, 1)
+shader_parameter/accent_color = Color(0.765, 0.694, 0.851, 1)
+shader_parameter/half_height = 0.085
+shader_parameter/accent_thickness = 0.018
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lip_top_mint"]
+shader = SubResource("Shader_lip")
+shader_parameter/base_color = Color(0.96, 0.93, 0.89, 1)
+shader_parameter/accent_color = Color(0.612, 0.812, 0.757, 1)
+shader_parameter/half_height = 0.08
+shader_parameter/accent_thickness = 0.018
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_facade"]
+size = Vector3(3.8, 2.6, 0.22)
+
+[sub_resource type="BoxMesh" id="BoxMesh_facade"]
+size = Vector3(3.8, 2.6, 0.22)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_start"]
+size = Vector3(1.35, 0.17, 0.16)
+
+[sub_resource type="BoxMesh" id="BoxMesh_start"]
+size = Vector3(1.35, 0.17, 0.16)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_step_1"]
+size = Vector3(1.25, 0.17, 0.16)
+
+[sub_resource type="BoxMesh" id="BoxMesh_step_1"]
+size = Vector3(1.25, 0.17, 0.16)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_step_2"]
+size = Vector3(1.25, 0.17, 0.16)
+
+[sub_resource type="BoxMesh" id="BoxMesh_step_2"]
+size = Vector3(1.25, 0.17, 0.16)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jump"]
+size = Vector3(1.25, 0.17, 0.16)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jump"]
+size = Vector3(1.25, 0.17, 0.16)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_step_3"]
+size = Vector3(1.25, 0.17, 0.16)
+
+[sub_resource type="BoxMesh" id="BoxMesh_step_3"]
+size = Vector3(1.25, 0.17, 0.16)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_step_4"]
+size = Vector3(1.25, 0.17, 0.16)
+
+[sub_resource type="BoxMesh" id="BoxMesh_step_4"]
+size = Vector3(1.25, 0.17, 0.16)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_top_lip"]
+size = Vector3(3.8, 0.16, 0.50)
+
+[sub_resource type="BoxMesh" id="BoxMesh_top_lip"]
+size = Vector3(3.8, 0.16, 0.14)
+
+[node name="DynamicClimbingWall" type="Node3D" groups=["climbable_wall"]]
+
+[node name="Facade" type="StaticBody3D" parent="."]
+collision_layer = 1
+position = Vector3(0, 1.3, -0.15)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Facade"]
+shape = SubResource("BoxShape3D_facade")
+
+[node name="Masonry" type="MeshInstance3D" parent="Facade"]
+material_override = SubResource("StandardMaterial3D_facade")
+mesh = SubResource("BoxMesh_facade")
+
+[node name="StartLip" type="StaticBody3D" parent="."]
+collision_layer = 1
+position = Vector3(-0.76, 0.595, 0.02)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StartLip"]
+shape = SubResource("BoxShape3D_start")
+
+[node name="MasonryLip" type="MeshInstance3D" parent="StartLip"]
+material_override = SubResource("ShaderMaterial_lip_mint")
+mesh = SubResource("BoxMesh_start")
+
+[node name="StepLip01" type="StaticBody3D" parent="."]
+collision_layer = 1
+position = Vector3(-0.50, 0.905, 0.02)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StepLip01"]
+shape = SubResource("BoxShape3D_step_1")
+
+[node name="MasonryLip" type="MeshInstance3D" parent="StepLip01"]
+material_override = SubResource("ShaderMaterial_lip_mint")
+mesh = SubResource("BoxMesh_step_1")
+
+[node name="StepLip02" type="StaticBody3D" parent="."]
+collision_layer = 1
+position = Vector3(-0.12, 1.215, 0.02)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StepLip02"]
+shape = SubResource("BoxShape3D_step_2")
+
+[node name="MasonryLip" type="MeshInstance3D" parent="StepLip02"]
+material_override = SubResource("ShaderMaterial_lip_peach")
+mesh = SubResource("BoxMesh_step_2")
+
+[node name="JumpLip" type="StaticBody3D" parent="."]
+collision_layer = 1
+position = Vector3(0.33, 1.815, 0.02)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpLip"]
+shape = SubResource("BoxShape3D_jump")
+
+[node name="MasonryLip" type="MeshInstance3D" parent="JumpLip"]
+material_override = SubResource("ShaderMaterial_lip_coral")
+mesh = SubResource("BoxMesh_jump")
+
+[node name="StepLip03" type="StaticBody3D" parent="."]
+collision_layer = 1
+position = Vector3(0.67, 2.135, 0.02)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StepLip03"]
+shape = SubResource("BoxShape3D_step_3")
+
+[node name="MasonryLip" type="MeshInstance3D" parent="StepLip03"]
+material_override = SubResource("ShaderMaterial_lip_mint")
+mesh = SubResource("BoxMesh_step_3")
+
+[node name="StepLip04" type="StaticBody3D" parent="."]
+collision_layer = 1
+position = Vector3(0.35, 2.455, 0.02)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StepLip04"]
+shape = SubResource("BoxShape3D_step_4")
+
+[node name="MasonryLip" type="MeshInstance3D" parent="StepLip04"]
+material_override = SubResource("ShaderMaterial_lip_lavender")
+mesh = SubResource("BoxMesh_step_4")
+
+[node name="TopCoping" type="StaticBody3D" parent="."]
+collision_layer = 1
+position = Vector3(0, 2.68, -0.21)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TopCoping"]
+shape = SubResource("BoxShape3D_top_lip")
+
+[node name="MasonryLip" type="MeshInstance3D" parent="TopCoping"]
+position = Vector3(0, 0, 0.18)
+material_override = SubResource("ShaderMaterial_lip_top_mint")
+mesh = SubResource("BoxMesh_top_lip")

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ChibiScarfLayout" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character/chibi_scarf_layout.gd" id="1_layout"]
+
+[resource]
+script = ExtResource("1_layout")
+source_pin_points = PackedVector3Array(0.329660952, 0.744142413, 0.144056618, 0.308586746, 0.708708227, 0.204286292, -0.307176113, 0.707957268, 0.201809406, -0.329957455, 0.74404341, 0.144256845)
+bone_local_offsets = PackedVector3Array(-0.0485068411, 0.0168512762, -0.106953822, 0.0201197118, -0.00326042995, -0.0923511982, -0.0178558771, -0.00535231829, -0.0901503339, 0.0459038541, 0.0224683024, -0.107302807)
+pin_bones = PackedStringArray("hand_l", "hand_l", "hand_r", "hand_r")
