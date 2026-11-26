@@ -8,6 +8,10 @@ Add each active target here with its owner, status, and a short description. Che
 
 ## Concept art
 
+### 2026-11-27
+
+- Approved the Berry Journal in-game menu concept after reviewing all four spreads. [Gear](concept_art/Menus/berry-journal-gear.png), [Map](concept_art/Menus/berry-journal-map.png), [Journal](concept_art/Menus/berry-journal-v2.png), and [Options](concept_art/Menus/berry-journal-options.png).
+
 ### 2026-11-26
 
 - Removed the dark rounded backing from the scarf’s strawberry print, packed the transparent 4096 × 4096 texture into the Blender file, and rerendered both views.
