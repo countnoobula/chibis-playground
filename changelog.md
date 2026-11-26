@@ -14,6 +14,7 @@ Add each active target here with its owner, status, and a short description. Che
 
 ### 2026-11-26
 
+- Approved [Scarf in the Sky](concept_art/Menus/scarf-in-the-sky-v7.png) as the Strawberry Hollow main menu concept. The canopy uses the posed 3D scarf as a shape reference, with a continuous sheet, overlapping hems, and gathered hand grips.
 - Removed the dark rounded backing from the scarf’s strawberry print, packed the transparent 4096 × 4096 texture into the Blender file, and rerendered both views.
 - Rendered Chibi gliding with her peach scarf, with two cloth corners gathered in each hand and the Strawberry Hollow print overhead. Verified the direct hand contact and fitted the existing goggles and strap to her head bone in the Blender scene.
 - Shaped the hand-held parachute like a pink gingham picnic blanket with four inward-curled corners. Updated the posed render and close-up, and verified the four mesh folds, steering loops, and packed logo in Blender.
