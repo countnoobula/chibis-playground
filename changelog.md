@@ -2,9 +2,156 @@
 
 ## In progress
 
+### Roaming Atlas and First Steps Valley
+
+**Owner** Codex · **Checkpoint** 2 of 11 · **Status** implementing title and transition · **Current tasks** 0/5 · **User-approved checkpoints** 1/11
+
+#### 1. Art and tracker
+
+- [x] Archive both concept PNGs
+- [x] Compare both SHA-256 pairs
+- [x] Update AGENTS.md
+- [x] Add milestone tracker
+- [x] Record design decisions
+
+**Review.** Compare the overview and western extension at the cottage gate, river mouth, and fishing pier. Confirm how these views should join.
+
+User-approved. [Verification and review decision](#atlas-art-and-tracker--2026-11-27)
+
+#### 2. Title and transition
+
+- [ ] Create illustrated Play ribbon and mobile patch
+- [ ] Replace Continue and New Game with Play; keep Options and Quit
+- [ ] Reflow desktop and touch layouts; update hit areas, focus order, and accessible names
+- [ ] Emit play_requested; let the main menu own the reversible 0.3-second crossfade
+- [ ] Verify focus restoration and consume the initiating input
+
+**Review.** Try Title → Play → Atlas → Back with mouse, keyboard/controller, and touch. First Steps Valley opens selected. Check Options, Quit, Escape/Cancel, held confirm, and double tap.
+
+Pending implementation, evidence, and user review.
+
+#### 3. Working atlas
+
+- [ ] Paint one continuous map from the two concepts
+- [ ] Separate destination pins and fixed postcard panel
+- [ ] Implement drag, touch, and controller navigation
+- [ ] Wire Intro, First Steps Valley, and Rooftop Gym availability
+- [ ] Launch Rooftop Gym and update the documented route and flow test
+
+**Review.** Pan from forest to lake and back. Verify the shoreline joins, pins stay anchored, and selecting a destination updates its postcard. Show a short status and disable launch for pending scenes.
+
+Pending implementation, evidence, and user review.
+
+#### 4. Terrain and designer defaults
+
+- [ ] Pin MIT-licensed Terrain3D 1.1.0 stable with its license
+- [ ] Verify clean Godot 4.7.2 Forward Mobile import
+- [ ] Create a reusable four-material woodland starter
+- [ ] Sculpt the trailhead and creek bend
+- [ ] Enable valley launch from the atlas
+
+**Review.** Walk the bend at runner height. Paint Meadow Grass, Warm Path, Creek Earth, and Mossy Stone in a separate terrain and reopen it to verify independent terrain data.
+
+Pending implementation, evidence, and user review.
+
+#### 5. Water and caustics
+
+- [ ] Place the existing Chibi water body and profile
+- [ ] Sculpt wading shelf, dive pool, and sloping exit
+- [ ] Connect the terrain receiver to the shared caustic shader and water parameters
+- [ ] Exercise wading, swimming, diving, and exit
+- [ ] Capture repeatable views above and below water
+
+**Review.** Compare the legibility of the bed with the Underwater concept. Check surface effects, the camera transition, moving light on terrain and rocks, and dry banks.
+
+Pending implementation, evidence, and user review.
+
+#### 6. First dry crossing
+
+- [ ] Vault a root
+- [ ] Hop two boulders
+- [ ] Cross a balance log
+- [ ] Add safe section checkpoints, retry, and developer station starts
+- [ ] Verify missed-jump recovery
+
+**Review.** Cross dry, deliberately fall in, swim to shore, and retry. Judge the landing silhouettes and spacing from the chase camera.
+
+Pending implementation, evidence, and user review.
+
+#### 7. Ambient breeze
+
+- [ ] Animate plant tips
+- [ ] Animate scarf and ahoge
+- [ ] Keep trunks and plant roots anchored
+- [ ] Compare movement with breeze enabled and disabled
+
+**Review.** Observe Chibi standing still. Repeat identical run and jump inputs and verify that direction, speed, and trajectory match.
+
+Pending implementation, evidence, and user review.
+
+#### 8. Root ledges
+
+- [ ] Place pole entry
+- [ ] Author a climbable root face
+- [ ] Tune mantle shelf and camera clearance
+- [ ] Verify checkpoint and retry
+
+**Review.** Complete pole → climb → mantle. Inspect handhold visibility, clearance, and safe reset.
+
+Pending implementation, evidence, and user review.
+
+#### 9. Canopy gap
+
+- [ ] Author rope catch and swing
+- [ ] Tune the release landing
+- [ ] Add the descending line
+- [ ] Verify early-drop recovery and retry
+
+**Review.** Catch, release, and ride the line. Deliberately release early and recover.
+
+Pending implementation, evidence, and user review.
+
+#### 10. Strong wind and finish
+
+- [ ] Dress the woodland trampoline
+- [ ] Author a strong-wind zone
+- [ ] Signal its direction with foliage
+- [ ] Tune the glide landing
+- [ ] Wire finish, replay, and level select
+
+**Review.** Read the wind before takeoff, bounce into it, steer through the glide, and exit the zone. Only an explicitly authored strong-wind zone may redirect Chibi.
+
+Pending implementation, evidence, and user review.
+
+#### 11. End-to-end verification
+
+- [ ] Complete the valley from Title
+- [ ] Check section retries and developer station starts
+- [ ] Run gameplay and menu regressions
+- [ ] Review desktop and touch layouts
+- [ ] Verify exports and record device coverage
+
+**Review.** Play to the overlook, retry a section, return to the atlas, and enter Rooftop Gym. Check 1280 × 720 desktop and 844 × 390 landscape touch. Record Windows launch, Android export, and physical-device results separately.
+
+Pending implementation, evidence, and user review.
+
+### Other active work
+
+
 - **Chibi facial expressions** · Owner: Codex · Status: previews ready for review. Rendered smiling crescents, a wink, and two free-fall reactions on the current Godot model. Compared a tiny pout and a brave little smile with the earlier determined face.
 
 Add each active target here with its owner, status, and a short description. Check the current project and reread this file before editing. Update your own entry and preserve edits from other agents. When work is verified, move it to the relevant section below with the date and the checks that ran.
+
+## Roaming Atlas
+
+### Atlas art and tracker · 2026-11-27
+
+- Archived the chosen [Roaming Atlas v7 overview](source_art/concept_art/Menus/roaming-atlas-v7.png) and the proposed [western lakeside pan](source_art/concept_art/Menus/roaming-atlas-v7-lakeside-pan.png). The village gate and field connect the skyline to First Steps Valley. West of the village, the creek opens into the lake beside a wooden pier. The two mockups guide the later continuous map painting.
+- Keep the distant flat-roof Mint Street city and Rooftop Gym windsock, cosy pitched-roof cottages at Intro, and woodland creek at First Steps Valley. Use a fixed Berry Journal postcard, cream idle stitching (#FFF0DA), and plum stitching (#9C427E) on selected, hovered, or focused pins.
+- Use stock Terrain3D brushes for the valley. First Puzzle and Environment Style guide the crossing, Inside the Grotto guides the woodland interior, and Underwater guides visibility and lighting. Reserve Intro for replaying the backstory. Special-event content and underwater lake exploration are future targets.
+- Both archived PNGs matched the original SHA-256 hashes. Overview `8f7f5aa99a545d7ffbc3f49e87c90833499827e6cf5c09ce799ffc0a6d8f84ce`, lakeside `32f2a218ae0f1b4f5c080678c494ed7187018d0f727af5410ab1f346a74473b8`. Verified all eleven tracker headings and ran `git diff --check`. Runtime checks begin with the title transition.
+- The lead owns integration and records evidence. GPT-6 Luna Max subagents own scoped implementation work within the active checkpoint.
+- **User-approved.** The shoreline, fishing pier, and river mouth are in the right places. Proceed to the title and transition review.
 
 ## Project structure
 

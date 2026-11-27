@@ -17,6 +17,10 @@
 - Put the active target at the top of `changelog.md` under **In progress** with its owner and status. Track planning, implementation, and verification there.
 - Reread the file before updating it. Keep edits from other agents and update the entry you own.
 - Move verified work to the relevant dated section. Record what changed and what was tested. Mark any open issue with the detail the next agent needs.
+- For multi-checkpoint work, keep a tracker first under **In progress** with the owner, current checkpoint and status, tasks completed in that checkpoint, and checkpoints explicitly approved out of the total. Give each checkpoint its own task checkboxes and player-visible acceptance check.
+- Link each checkpoint to its dated verification record as work lands. Record tests, relevant renderer, resolution, captures, open issues, and the review decision. Distinguish implemented, verified, and user-approved. Keep the overall checklist at the top until the target closes.
+- Stop at every checkpoint for user review. Record requested adjustments under that checkpoint, repeat the affected checks, and advance only after user approval.
+- Close each verified, user-approved checkpoint with a dedicated Git commit and push to the current tracking branch. Review the staged diff, include its changelog entry, preserve unrelated and concurrent work, and confirm the remote contains the commit. Report the commit and push result before advancing.
 
 ## Godot tools and verification
 
