@@ -1,0 +1,54 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://ui/menu/atlas_map_pin.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://ui/menu/art/atlas/pins/ribbon.png" id="2_ribbon"]
+[ext_resource type="Font" path="res://ui/menu/berry_journal_font.tres" id="3_font"]
+
+[ext_resource type="Shader" path="res://ui/menu/atlas_ribbon_text.gdshader" id="4_text_curve"]
+
+[sub_resource type="ShaderMaterial" id="RibbonTextMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("4_text_curve")
+
+[sub_resource type="Shader" id="ShaderCircleMask"]
+code = "shader_type canvas_item;\nvoid fragment() {\n\tvec2 centered_uv = UV * 2.0 - vec2(1.0);\n\tfloat distance_from_center = length(centered_uv);\n\tfloat edge_width = max(fwidth(distance_from_center), 0.001);\n\tCOLOR.a *= 1.0 - smoothstep(1.0 - edge_width, 1.0 + edge_width, distance_from_center);\n}\n"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterialCircleMask"]
+shader = SubResource("ShaderCircleMask")
+
+[sub_resource type="StyleBoxEmpty" id="Empty"]
+
+[node name="AtlasMapPin" type="Button"]
+mouse_default_cursor_shape = 2
+focus_mode = 2
+flat = true
+clip_contents = true
+theme_override_styles/focus = SubResource("Empty")
+theme_override_styles/hover = SubResource("Empty")
+theme_override_styles/pressed = SubResource("Empty")
+script = ExtResource("1_script")
+
+[node name="Portrait" type="TextureRect" parent="."]
+visible = false
+mouse_filter = 2
+texture_filter = 2
+material = SubResource("ShaderMaterialCircleMask")
+expand_mode = 1
+
+[node name="Ribbon" type="TextureRect" parent="."]
+mouse_filter = 2
+texture_filter = 2
+texture = ExtResource("2_ribbon")
+expand_mode = 1
+stretch_mode = 0
+show_behind_parent = true
+
+[node name="TitleLabel" type="Label" parent="Ribbon"]
+material = SubResource("RibbonTextMaterial")
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.34902, 0.129412, 0.235294, 1)
+theme_override_fonts/font = ExtResource("3_font")
+text = ""
+autowrap_mode = 3
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -4,7 +4,7 @@
 
 ### Roaming Atlas and First Steps Valley
 
-**Owner** Codex · **Checkpoint** 3 of 11 · **Status** implementing working atlas · **Current tasks** 0/5 · **User-approved checkpoints** 2/11
+**Owner** Codex · **Checkpoint** 3 of 11 · **Status** user-approved, planning discussion before checkpoint 4 · **Current tasks** 13/13 · **User-approved checkpoints** 3/11
 
 #### 1. Art and tracker
 
@@ -33,15 +33,23 @@ User-approved. [Verification and review decision](changelog/2026-11-27-atlas-art
 
 #### 3. Working atlas
 
-- [ ] Paint one continuous map from the two concepts
-- [ ] Separate destination pins and fixed postcard panel
-- [ ] Implement drag, touch, and controller navigation
-- [ ] Wire Intro, First Steps Valley, and Rooftop Gym availability
-- [ ] Launch Rooftop Gym and update the documented route and flow test
+- [x] Paint one continuous map from the two concepts
+- [x] Separate destination pins and fixed postcard panel
+- [x] Implement drag, touch, and controller navigation
+- [x] Wire Intro, First Steps Valley, and Rooftop Gym availability
+- [x] Launch Rooftop Gym and update the documented route and flow test
+- [x] Animate the drag hint finger along a gentle arc
+- [x] Rename the backstory pin and give postcards italic opening lines and a single action
+- [x] Add the future underwater destination to the western lake
+- [x] Reveal the moving map through all four postcard corners
+- [x] Inset the preview artwork in a scalloped postcard sticker
+- [x] Separate the tagline from the story and anchor the action at bottom right
+- [x] Configure destination content, scene availability, circular PNG art, and curved, text-sized pin ribbons from JSON
+- [x] Apply the approved Lily-Root Hollow postcard and verify both atlas layouts
 
 **Review.** Pan from forest to lake and back. Verify the shoreline joins, pins stay anchored, and selecting a destination updates its postcard. Show a short status and disable launch for pending scenes.
 
-Pending implementation, evidence, and user review.
+[Verification and in-game captures](changelog/2026-11-27-working-atlas.md) · User-approved.
 
 #### 4. Terrain and designer defaults
 
@@ -53,7 +61,7 @@ Pending implementation, evidence, and user review.
 
 **Review.** Walk the bend at runner height. Paint Meadow Grass, Warm Path, Creek Earth, and Mossy Stone in a separate terrain and reopen it to verify independent terrain data.
 
-Pending implementation, evidence, and user review.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-04-terrain-and-designer-defaults.md) · Planned.
 
 #### 5. Water and caustics
 
@@ -65,7 +73,7 @@ Pending implementation, evidence, and user review.
 
 **Review.** Compare the legibility of the bed with the Underwater concept. Check surface effects, the camera transition, moving light on terrain and rocks, and dry banks.
 
-Pending implementation, evidence, and user review.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-05-water-and-caustics.md) · Planned.
 
 #### 6. First dry crossing
 
@@ -77,7 +85,7 @@ Pending implementation, evidence, and user review.
 
 **Review.** Cross dry, deliberately fall in, swim to shore, and retry. Judge the landing silhouettes and spacing from the chase camera.
 
-Pending implementation, evidence, and user review.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-06-first-dry-crossing.md) · Planned.
 
 #### 7. Ambient breeze
 
@@ -88,7 +96,7 @@ Pending implementation, evidence, and user review.
 
 **Review.** Observe Chibi standing still. Repeat identical run and jump inputs and verify that direction, speed, and trajectory match.
 
-Pending implementation, evidence, and user review.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-07-ambient-breeze.md) · Planned.
 
 #### 8. Root ledges
 
@@ -99,7 +107,7 @@ Pending implementation, evidence, and user review.
 
 **Review.** Complete pole → climb → mantle. Inspect handhold visibility, clearance, and safe reset.
 
-Pending implementation, evidence, and user review.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-08-root-ledges.md) · Planned.
 
 #### 9. Canopy gap
 
@@ -110,7 +118,7 @@ Pending implementation, evidence, and user review.
 
 **Review.** Catch, release, and ride the line. Deliberately release early and recover.
 
-Pending implementation, evidence, and user review.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-09-canopy-gap.md) · Planned.
 
 #### 10. Strong wind and finish
 
@@ -122,7 +130,7 @@ Pending implementation, evidence, and user review.
 
 **Review.** Read the wind before takeoff, bounce into it, steer through the glide, and exit the zone. Only an explicitly authored strong-wind zone may redirect Chibi.
 
-Pending implementation, evidence, and user review.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-10-strong-wind-and-finish.md) · Planned.
 
 #### 11. End-to-end verification
 
@@ -134,12 +142,12 @@ Pending implementation, evidence, and user review.
 
 **Review.** Play to the overlook, retry a section, return to the atlas, and enter Rooftop Gym. Check 1280 × 720 desktop and 844 × 390 landscape touch. Record Windows launch, Android export, and physical-device results separately.
 
-Pending implementation, evidence, and user review.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-11-end-to-end-verification.md) · Planned.
 
 ### Other active work
 
 
-- **Chibi facial expressions** · Owner: Codex · Status: previews ready for review. Rendered smiling crescents, a wink, and two free-fall reactions on the current Godot model. Compared a tiny pout and a brave little smile with the earlier determined face.
+- [**Chibi facial expressions**](changelog/chibi-facial-expressions.md) · Owner: Codex · Status: previews ready for review. All twenty refined expressions are together in the Godot portrait grid, including both determination studies and the five revised moods.
 
 Add each active target here with its owner, status, and a short description. Check the current project and reread this file before editing. Update your own entry and preserve edits from other agents. When work is verified, move it to the relevant section below with the date and the checks that ran.
 

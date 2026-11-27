@@ -16,7 +16,8 @@
 
 - Put the active target at the top of `changelog.md` under **In progress** with its owner and status. Track planning, implementation, and verification there.
 - Reread the file before updating it. Keep edits from other agents and update the entry you own.
-- Store the full record for each completed checkpoint or dated work item in its own Markdown file under `changelog/`. Link it directly from the completed checklist item and the short history index in `changelog.md`. Keep the root file focused on active work. In the linked file record changes, tests, outstanding issues, and review decisions; resolve evidence links relative to that file.
+- When adding an active target or checkpoint, create its linked plan in `changelog/` immediately. Give each milestone a separate file, with actionable steps for every tracker checkbox, player intent, dependencies and starting files, acceptance criteria, and evidence to collect. Preserve design decisions, the current blocker or next action, and the review state so another chat can resume directly.
+- Keep the plan and dated changes in that same file. Update it as work lands with the actual paths, tests, renderer or platform, captures, remaining issues, user decision, and approval commit/push. Link to it from the active tracker and keep that link when the work moves into history.
 - For multi-checkpoint work, keep a tracker first under **In progress** with the owner, current checkpoint and status, tasks completed in that checkpoint, and checkpoints explicitly approved out of the total. Give each checkpoint its own task checkboxes and player-visible acceptance check.
 - Link each checkpoint to its dated verification record as work lands. Record tests, relevant renderer, resolution, captures, open issues, and the review decision. Distinguish implemented, verified, and user-approved. Keep the overall checklist at the top until the target closes.
 - Stop at every checkpoint for user review. Record requested adjustments under that checkpoint, repeat the affected checks, and advance only after user approval.
@@ -33,6 +34,11 @@ godot --headless --path . --script res://tests/run_tests.gd
 ```
 
 Run this from the Godot project root using the installed Godot executable if `godot` is unavailable on PATH.
+
+## Editable game content
+
+- Prefer a checked-in configuration file for designer-authored collections such as atlas destinations. Keep presentation and gameplay behavior in their respective scripts. Verify that the same configuration and referenced assets load from an exported pack.
+- Edit Roaming Atlas destinations in [config/roaming_atlas.json](config/roaming_atlas.json). The field reference and pin artwork dimensions are in [config/README.md](config/README.md).
 
 ## Project structure
 
@@ -52,4 +58,4 @@ Run this from the Godot project root using the installed Godot executable if `go
 - Keep woodland models, textures, manifest, shader, and post-import script together under `assets/environment/woodland/`. Regenerate with `tools/export_woodland_assets.py`. The kit has a runtime texture directory also named `source_art`; preserve it when copying or exporting the project.
 - Move Godot resources together with existing `.uid` and `.import` companions. Update explicit loads, formatted asset paths, shader includes, autoloads, generators, exporters, and tests in the same change.
 - `tools/build_parkour_scenes.gd` owns the runner, three particle scenes, and rooftop scene. Use its `-- --rooftop-only` option for course assembly changes. Edit a station's own scene or script for behavior shared by all instances.
-- For moves, verify a clean import, run the gameplay suite and affected standalone checks, and run `tests/test_menu_level_flow.gd`. During the atlas preview checkpoint it exercises Title → Play → Atlas → Back and checks rooftop → pause → Resume by loading the gym directly. When the working selector ships, verify the full route through its Rooftop Gym pin. Exercise dynamically loaded art and shaders in a fresh export, and compare fixed-camera captures for rendering changes.
+- For moves, verify a clean import, run the gameplay suite and affected standalone checks, and run `tests/test_menu_level_flow.gd` through Title → Play → Atlas → Rooftop Gym → Play → pause → Resume. Check atlas Back and focus restoration on desktop and landscape touch. Exercise dynamically loaded art and shaders in a fresh export, and compare fixed-camera captures for rendering changes.

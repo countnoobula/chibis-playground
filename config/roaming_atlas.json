@@ -1,0 +1,61 @@
+{
+  "default_destination": "first_steps",
+  "destinations": [
+    {
+      "id": "lake",
+      "position": [145, 496],
+      "pin": {
+        "image": "res://ui/menu/art/atlas/pins/lake.png",
+        "scale": 0.75
+      },
+      "sticker": "res://ui/menu/art/atlas/postcards/lake-lily-root-hollow.png",
+      "title": "We fear what we cannot see...",
+      "tagline": "...but beneath the surface lies a world of wonder.",
+      "description": "Dive beneath the surface and discover a hidden woodland world.",
+      "enabled": false,
+      "scene": ""
+    },
+    {
+      "id": "intro",
+      "position": [745, 420],
+      "pin": {
+        "image": "res://ui/menu/art/atlas/pins/intro.png",
+        "scale": 0.75
+      },
+      "sticker": "res://ui/menu/art/atlas/postcards/intro.png",
+      "title": "Change can be scary...",
+      "tagline": "...but it doesn't always have to be.",
+      "description": "Revisit the summer Chibi moved to the village.",
+      "enabled": false,
+      "scene": ""
+    },
+    {
+      "id": "rooftop_gym",
+      "position": [920, 97],
+      "pin": {
+        "image": "res://ui/menu/art/atlas/pins/rooftop_gym.png",
+        "scale": 0.65
+      },
+      "sticker": "res://ui/menu/art/atlas/postcards/rooftop_gym.png",
+      "title": "Rooftop Gym",
+      "tagline": "Bet I can make that jump.",
+      "description": "Jump and climb above the Mint Street rooftops.",
+      "enabled": true,
+      "scene": "res://levels/rooftop_gym/rooftop_parkour_gym.tscn"
+    },
+    {
+      "id": "first_steps",
+      "position": [1260, 584],
+      "pin": {
+        "image": "res://ui/menu/art/atlas/pins/first_steps.png",
+        "scale": 0.89
+      },
+      "sticker": "res://ui/menu/art/atlas/postcards/first_steps.png",
+      "title": "First Steps Valley",
+      "tagline": "I wonder how cold the creek is.",
+      "description": "Follow the creek, cross the logs, and find your way through the woods.",
+      "enabled": false,
+      "scene": ""
+    }
+  ]
+}

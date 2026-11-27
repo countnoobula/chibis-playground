@@ -1,5 +1,16 @@
 # Title and transition · 2026-11-27
 
+## Checkpoint plan and handoff
+
+1. Replace Continue/New Game with illustrated Play, Options and Quit controls. Keep desktop ribbon and landscape phone patch layouts, accessible names, safe hit areas, and initial Play focus.
+2. Route the title's Play signal through the main menu. Crossfade to the opening atlas view in about 0.3 seconds, consume the initiating input, and restore title Play focus after Back, Escape or controller Cancel.
+3. Review hover and keyboard/controller focus on every button. Compare fixed views before/after label centering, strawberry clearance and border saturation. Check Options and Quit through their normal controls.
+4. Repeat Play → Atlas → Back with mouse and simulated touch at both review sizes. Exercise held confirm and double tap. Record the renderer, evidence and decision below before building the pannable map.
+
+**Handoff** User-approved and pushed to origin/main in commit `db02f70`. The [working atlas](2026-11-27-working-atlas.md) supersedes the static checkpoint 2 preview.
+
+## Changes and verification
+
 - Enlarged the title focus strawberry by 18% and moved it inward. Verified text clearance on all three ribbons and patches at 1280 × 720 and 844 × 390.
 
 - Raised the title lettering and removed the focus-dependent caption inset. Verified identical button-local label bounds through a full focus cycle and clearance for the strawberry beside every label on desktop and simulated phone. Compared the same Options-focused view [before](../source_art/LayoutReview/title-labels-before.png) and [after](../source_art/LayoutReview/title-labels-after.png).

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cy5raxx865luv"
-path="res://.godot/imported/roaming_atlas_preview.png-3c27d335214d69fff20ee58b98896618.ctex"
+uid="uid://w4mkykguahff"
+path="res://.godot/imported/lake-lily-root-hollow.png-067a5acb0bf6825d27fc4092d330e98c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ui/menu/art/roaming_atlas_preview.png"
-dest_files=["res://.godot/imported/roaming_atlas_preview.png-3c27d335214d69fff20ee58b98896618.ctex"]
+source_file="res://ui/menu/art/atlas/postcards/lake-lily-root-hollow.png"
+dest_files=["res://.godot/imported/lake-lily-root-hollow.png-067a5acb0bf6825d27fc4092d330e98c.ctex"]
 
 [params]
 
