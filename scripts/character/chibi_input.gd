@@ -32,10 +32,21 @@ var _touch_pickup_queued: bool = false
 var _touch_active: bool = false
 var _menu_open: bool = false
 var _held_at_resume: Array[StringName] = []
+var _camera_sensitivity: float = 1.0
+var _invert_y: bool = false
 
 
 func _ready() -> void:
+	add_to_group(&"chibi_input")
 	_update_mouse_mode()
+	var settings := get_node_or_null("/root/GameSettings")
+	if settings != null:
+		set_camera_settings(float(settings.get("sensitivity")), bool(settings.get("invert_y")))
+
+
+func set_camera_settings(sensitivity: float, invert_y: bool) -> void:
+	_camera_sensitivity = clampf(sensitivity, 0.5, 2.0)
+	_invert_y = invert_y
 
 
 func set_touch_mode(enabled: bool) -> void:
@@ -142,7 +153,9 @@ func poll(delta: float) -> void:
 	)
 	if gp_look.length() < 0.16:
 		gp_look = Vector2.ZERO
-	look_delta = _mouse_accum + _touch_look_accum + gp_look * gamepad_look_sensitivity * delta
+	look_delta = (_mouse_accum + _touch_look_accum + gp_look * gamepad_look_sensitivity * delta) * _camera_sensitivity
+	if _invert_y:
+		look_delta.y = -look_delta.y
 	_mouse_accum = Vector2.ZERO
 	_touch_look_accum = Vector2.ZERO
 

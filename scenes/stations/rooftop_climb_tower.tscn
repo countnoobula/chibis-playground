@@ -13,3 +13,4 @@ volume_db = -25.0
 unit_size = 7.0
 max_distance = 21.0
 autoplay = true
+bus = &"Foley"

@@ -11,12 +11,13 @@ config_version=5
 [application]
 
 config/name="Chibi"
-run/main_scene="res://scenes/gym/rooftop_parkour_gym.tscn"
+run/main_scene="res://scenes/menu/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
 [autoload]
 
+GameSettings="*res://scripts/settings/game_settings.gd"
 PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
 
 [display]
@@ -130,14 +131,14 @@ pointing/emulate_mouse_from_touch=false
 
 [physics]
 
-common/physics_interpolation=true
 3d/physics_engine="Jolt Physics"
+common/physics_interpolation=true
 
 [rendering]
 
-anti_aliasing/quality/msaa_3d=1
-lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
-lights_and_shadows/directional_shadow/soft_shadow_filter_quality.mobile=2
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
 textures/vram_compression/import_etc2_astc=true
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality.mobile=2
+anti_aliasing/quality/msaa_3d=1

@@ -172,11 +172,13 @@ func _build_chibi_runner_scene() -> void:
 	var sfx_player := AudioStreamPlayer3D.new()
 	sfx_player.name = "SFXPlayer"
 	sfx_player.max_distance = 25.0
+	sfx_player.bus = &"SFX"
 	root.add_child(sfx_player)
 
 	var voice_player := AudioStreamPlayer3D.new()
 	voice_player.name = "VoicePlayer"
 	voice_player.max_distance = 25.0
+	voice_player.bus = &"Voice"
 	root.add_child(voice_player)
 
 	var juice := Node.new()

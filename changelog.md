@@ -6,6 +6,20 @@
 
 Add each active target here with its owner, status, and a short description. Check the current project and reread this file before editing. Update your own entry and preserve edits from other agents. When work is verified, move it to the relevant section below with the date and the checks that ran.
 
+## Main menu
+
+### 2026-11-27
+
+- Implemented the [mobile Berry Journal](concept_art/Menus/berry-journal-mobile-options.png) with a stitched category index, touch sliders, a touch controls guide, and a fixed Back button. Verified settings, navigation, and persistence at landscape phone sizes (844 × 390 and 736 × 414) with simulated touch on the Mobile renderer. Checked desktop navigation and ran the headless suite (254 passed).
+
+- Replaced the title bar with [scarf ribbons](concept_art/Menus/desktop-scarf-ribbons.png) on desktop and a two-by-two grid of [picnic patches](concept_art/Menus/mobile-picnic-patches.png) on mobile. Each button sits directly on the scenery. The desktop preview flag is `-- --mobile-menu`.
+- Checked keyboard and mouse navigation at 1280 × 720 and simulated finger taps and drags at 844 × 390 in Godot 4.7.2 Forward Mobile (Metal, Apple M1). Verified the berry, disabled Continue, New Game, Options, sliders, Back, and Quit. The headless suite passed 254/254 at fixed 60 FPS. Touch checks used the phone-sized desktop preview.
+- Enabled Options on the title screen using the [approved Berry Journal spread](concept_art/Menus/berry-journal-title-options.png). Master, Music, and Sound Effects sliders, camera sensitivity and Invert Y, and four graphics presets apply immediately and persist across launches. View Controls shows gameplay bindings. Back and Escape restore Options focus on the title.
+- Verified the keyboard and mouse round trip at 1280 × 720 and 900 × 600, audio bus levels, gameplay look input, separate-process persistence, and all four presets from one rooftop viewpoint on Godot 4.7.2 Forward Mobile (Metal, Apple M1). Headless suite passed 254/254 at fixed 60 FPS.
+- Clicking the title strawberry now pulses it to about 110% and rocks it back to rest while all three strokes redraw together over 0.33 seconds. Verified single and repeated clicks, preserved menu focus, and resized hit targets on Godot 4.7.2 Forward Mobile (Metal). The headless suite passed 254/254 at fixed 60 FPS.
+- Made the approved *Scarf in the Sky* title screen the game entry point. New Game opens the rooftop gym, Quit exits, and Continue and Options are disabled. The strawberry wiggles occasionally and replays its three painted accent strokes when clicked.
+- Verified mouse, arrow-key, Enter, and mixed navigation, repeated berry clicks, and both game actions. Compared the title composition at 1280 × 720 and 900 × 600 on Godot 4.7.2 Forward Mobile (Metal, Apple M1). The headless suite passed 254/254 at fixed 60 FPS. An earlier unpaced run missed the rooftop full-flow mantle timing threshold once.
+
 ## Concept art
 
 ### 2026-11-27

@@ -114,6 +114,7 @@ func play_tower_foley(key: String, world_position: Vector3, gain_db: float) -> v
 		player.name = "TowerFoley_" + key
 		player.top_level = true
 		player.stream = _sfx_map[key]
+		player.bus = &"Foley"
 		player.unit_size = 3.5
 		player.max_distance = 13.0
 		add_child(player)
