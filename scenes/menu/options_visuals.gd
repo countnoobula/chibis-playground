@@ -1,5 +1,7 @@
 extends Control
 
+const BERRY_JOURNAL_FONT: Font = preload("res://scenes/menu/berry_journal_font.tres")
+
 const BERRY := Color("#cd2454")
 const BERRY_DARK := Color("#9b2450")
 const RAIL := Color("#f0cbb7")
@@ -10,6 +12,7 @@ const FOCUS := Color("#d72e63")
 var sliders: Dictionary = {}
 var invert_button: Button
 var invert_enabled: bool = false
+var serif_font: Font
 
 
 func _draw() -> void:
@@ -81,7 +84,7 @@ func _draw_invert_toggle() -> void:
 	draw_style_box(_round_style(Color("#e8b5ad"), Color("#aa5369"), 2, 17), track_rect)
 	var knob_x := track_rect.position.x + 18.0 if not invert_enabled else track_rect.end.x - 18.0
 	_draw_thumb(Vector2(knob_x, track_rect.get_center().y), 15.0)
-	var font := ThemeDB.fallback_font
+	var font := serif_font if serif_font != null else BERRY_JOURNAL_FONT
 	var text := "On" if invert_enabled else "Off"
 	var text_x := track_rect.position.x + 57.0 if not invert_enabled else track_rect.position.x + 24.0
 	draw_string(font, Vector2(text_x, track_rect.get_center().y + 7.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 18, Color("#642044"))

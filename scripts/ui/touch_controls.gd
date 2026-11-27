@@ -7,12 +7,12 @@ const Circle := preload("res://scripts/ui/touch_control_circle.gd")
 const DEBUGGER_SCENE := preload("res://addons/godot_state_charts/utilities/state_chart_debugger.tscn")
 const PALETTE := preload("res://scripts/gym/rooftop_palette.gd")
 
-enum Role { NONE, MOVE, LOOK, JUMP, SLIDE, PICKUP, GEAR, RESUME, TOUCH_TOGGLE, INSPECTOR_TOGGLE }
+enum Role { NONE, MOVE, LOOK, JUMP, SLIDE, PICKUP, GEAR }
 
 const STICK_RANGE := 48.0
 const STICK_DEADZONE := 7.0
 const ACTION_ROLES := [Role.JUMP, Role.SLIDE, Role.PICKUP]
-const MENU_ROLES := [Role.RESUME, Role.TOUCH_TOGGLE, Role.INSPECTOR_TOGGLE]
+const Journal := preload("res://scenes/menu/pause_journal.gd")
 
 @export var chibi_input: ChibiInput
 @export var state_chart: StateChart
@@ -25,12 +25,19 @@ var _previously_paused := false
 var _root: Control
 var _touch_root: Control
 var _menu_root: Control
-var _menu_panel: PanelContainer
+var _pause_backdrop: TextureRect
+var _pause_backdrop_scrim: ColorRect
+var _journal: Journal
+var _journal_pointer := preload("res://scripts/ui/menu_touch_pointer.gd").new()
+var _prior_quit_on_back := true
+var _pause_capture_generation := 0
+var _pause_capture_pending := false
+var _pause_capture_root_was_visible := true
+var _recapture_after_focus := false
 var _status_label: Label
 var _state_debugger: Control
 var _stick: Circle
 var _circles: Dictionary[int, Circle] = {}
-var _menu_buttons: Dictionary[int, Button] = {}
 var _owners: Dictionary[int, int] = {}
 var _stick_origin := Vector2.ZERO
 var _bounds := Rect2()
@@ -44,7 +51,7 @@ var _scarf_active := false
 func _ready() -> void:
 	layer = 20
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_mobile = OS.has_feature("mobile")
+	_mobile = OS.has_feature("mobile") or OS.get_cmdline_user_args().has("--mobile-menu")
 	_root = _full_control(self, "HUDRoot")
 	_touch_root = _full_control(_root, "TouchRoot")
 	_stick = _make_circle(_touch_root, "Joystick", "", "stick", PALETTE.MINT)
@@ -66,11 +73,20 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	if menu_open:
 		get_tree().paused = _previously_paused
+		get_tree().quit_on_go_back = _prior_quit_on_back
 
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and menu_open:
+		_handle_menu_back()
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		_reset_touches()
+		if _pause_capture_pending:
+			_cancel_pause_capture()
+			_recapture_after_focus = menu_open
+	if (what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_WM_WINDOW_FOCUS_IN) and _recapture_after_focus and menu_open:
+		_recapture_after_focus = false
+		_start_pause_capture()
 
 
 func _full_control(parent: Node, control_name: String) -> Control:
@@ -112,65 +128,113 @@ func _build_menu() -> void:
 	_menu_root = _full_control(_root, "PauseMenu")
 	_menu_root.mouse_filter = Control.MOUSE_FILTER_STOP
 	_menu_root.hide()
-	var scrim := ColorRect.new()
-	scrim.color = Color(Circle.INK, 0.42)
-	scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_menu_root.add_child(scrim)
-	scrim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_pause_backdrop_scrim = ColorRect.new()
+	_pause_backdrop_scrim.name = "BackdropScrim"
+	_pause_backdrop_scrim.color = Color(Circle.INK, 0.56)
+	_pause_backdrop_scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_menu_root.add_child(_pause_backdrop_scrim)
+	_pause_backdrop_scrim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_pause_backdrop = TextureRect.new()
+	_pause_backdrop.name = "GameplayBackdrop"
+	_pause_backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pause_backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_pause_backdrop.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_pause_backdrop.modulate = Color(0.56, 0.56, 0.56, 1.0)
+	_menu_root.add_child(_pause_backdrop)
+	_pause_backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_menu_root.move_child(_pause_backdrop_scrim, 0)
+	_menu_root.move_child(_pause_backdrop, 1)
 
-	_menu_panel = PanelContainer.new()
-	_menu_panel.name = "Panel"
-	var panel_style := _box_style(Color("fff7ee"), Color("e5d5e4"), 24)
-	panel_style.content_margin_left = 22
-	panel_style.content_margin_right = 22
-	panel_style.content_margin_top = 19
-	panel_style.content_margin_bottom = 22
-	panel_style.shadow_color = Color(Circle.INK, 0.28)
-	panel_style.shadow_size = 12
-	_menu_panel.add_theme_stylebox_override("panel", panel_style)
-	_menu_root.add_child(_menu_panel)
-	var rows := VBoxContainer.new()
-	rows.add_theme_constant_override("separation", 10)
-	_menu_panel.add_child(rows)
 
-	var heading := Label.new()
-	heading.text = "Paused"
-	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	heading.add_theme_font_size_override("font_size", 27)
-	heading.add_theme_color_override("font_color", Circle.INK)
-	rows.add_child(heading)
+func _start_pause_capture() -> void:
+	if not menu_open or _root == null or _pause_backdrop == null:
+		return
+	_cancel_pause_capture()
+	_pause_capture_generation += 1
+	var capture_generation := _pause_capture_generation
+	_pause_backdrop.texture = null
+	_pause_backdrop_scrim.show()
+	if DisplayServer.get_name() == "headless":
+		return
+	_pause_capture_pending = true
+	_pause_capture_root_was_visible = _root.visible
+	_root.hide()
+	_capture_pause_backdrop(capture_generation)
 
-	_add_menu_button(rows, Role.RESUME, "Resume", PALETTE.MINT.lightened(0.35))
-	_add_menu_button(rows, Role.TOUCH_TOGGLE, "Touch Controls", Color("f1eaf5"))
-	_add_menu_button(rows, Role.INSPECTOR_TOGGLE, "State Inspector", Color("f1eaf5"))
+
+func _capture_pause_backdrop(capture_generation: int) -> void:
+	await RenderingServer.frame_post_draw
+	if not is_inside_tree():
+		return
+	if capture_generation != _pause_capture_generation or not _pause_capture_pending:
+		return
+	_pause_capture_pending = false
+	if menu_open:
+		var viewport := get_viewport()
+		var image := viewport.get_texture().get_image()
+		if image != null and not image.is_empty():
+			var snapshot := ImageTexture.create_from_image(_make_bokeh_blurred_snapshot(image))
+			_pause_backdrop.texture = snapshot
+			_pause_backdrop_scrim.hide()
+	_root.visible = _pause_capture_root_was_visible
+
+
+func _make_bokeh_blurred_snapshot(image: Image) -> Image:
+	var original_size := image.get_size()
+	# Bound CPU work to a small image; the full-rect TextureRect scales it to cover.
+	var uniform_scale := minf(0.125, 256.0 / float(maxi(original_size.x, original_size.y)))
+	var reduced_size := Vector2i(
+		maxi(1, roundi(float(original_size.x) * uniform_scale)),
+		maxi(1, roundi(float(original_size.y) * uniform_scale))
+	)
+	var reduced: Image = image.duplicate()
+	reduced.resize(reduced_size.x, reduced_size.y, Image.INTERPOLATE_LANCZOS)
+	var softened := Image.create(reduced_size.x, reduced_size.y, false, Image.FORMAT_RGBA8)
+	for y in range(reduced_size.y):
+		for x in range(reduced_size.x):
+			var total := Color(0.0, 0.0, 0.0, 0.0)
+			var brightest := 0.0
+			for offset_y in range(-1, 2):
+				for offset_x in range(-1, 2):
+					var sample: Color = reduced.get_pixel(
+						clampi(x + offset_x, 0, reduced_size.x - 1),
+						clampi(y + offset_y, 0, reduced_size.y - 1)
+					)
+					var weight := 4.0 if offset_x == 0 and offset_y == 0 else 2.0 if offset_x == 0 or offset_y == 0 else 1.0
+					total += sample * weight
+					brightest = maxf(brightest, maxf(sample.r, maxf(sample.g, sample.b)))
+			var color := total / 16.0
+			var bokeh_glow := maxf(brightest - 0.78, 0.0) * 0.12
+			color.r = clampf(color.r + bokeh_glow, 0.0, 1.0)
+			color.g = clampf(color.g + bokeh_glow * 0.88, 0.0, 1.0)
+			color.b = clampf(color.b + bokeh_glow * 0.96, 0.0, 1.0)
+			color.a = 1.0
+			softened.set_pixel(x, y, color)
+	return softened
+
+
+func _cancel_pause_capture() -> void:
+	if not _pause_capture_pending:
+		return
+	_pause_capture_generation += 1
+	_pause_capture_pending = false
+	if _root != null:
+		_root.visible = _pause_capture_root_was_visible
+
+
+func _prepare_journal() -> void:
+	if _journal == null:
+		_journal = Journal.new()
+		_journal.name = "Journal"
+		_journal.configure(_mobile)
+		_menu_root.add_child(_journal)
+		_journal.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_journal.resume_requested.connect(set_menu_open.bind(false))
+		_journal.toggle_touch_requested.connect(func() -> void: set_touch_visible(not touch_visible))
+		_journal.toggle_inspector_requested.connect(_toggle_state_debugger)
+	else:
+		_journal.configure(_mobile)
 	_refresh_menu_labels()
-
-
-func _add_menu_button(rows: VBoxContainer, role: int, caption: String, fill: Color) -> void:
-	var button := Button.new()
-	button.text = caption
-	button.custom_minimum_size.y = 54
-	button.add_theme_font_size_override("font_size", 19)
-	for property in [&"font_color", &"font_hover_color", &"font_pressed_color", &"font_focus_color"]:
-		button.add_theme_color_override(property, Circle.INK)
-	button.add_theme_stylebox_override("normal", _box_style(fill, Color("d9ccd9"), 14))
-	button.add_theme_stylebox_override("hover", _box_style(fill.lightened(0.20), Color("aa95b6"), 14))
-	button.add_theme_stylebox_override("pressed", _box_style(fill.darkened(0.12), Color("8b72a1"), 14))
-	var focus := _box_style(Color.TRANSPARENT, Color("806a94"), 14)
-	focus.set_border_width_all(2)
-	button.add_theme_stylebox_override("focus", focus)
-	button.pressed.connect(_run_menu_action.bind(role))
-	rows.add_child(button)
-	_menu_buttons[role] = button
-
-
-func _box_style(fill: Color, border: Color, radius: int) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = fill
-	style.border_color = border
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(radius)
-	return style
 
 
 func _layout() -> void:
@@ -196,9 +260,6 @@ func _layout() -> void:
 	var inspector_height := minf(298.0, _bounds.size.y * 0.43)
 	_state_debugger.position = Vector2(corner.x - inspector_width - 16.0, _bounds.position.y + 96.0)
 	_state_debugger.size = Vector2(inspector_width, inspector_height)
-
-	_menu_panel.size = Vector2(minf(320.0, _bounds.size.x - 24.0), 0.0)
-	_menu_panel.position = _bounds.get_center() - _menu_panel.size * 0.5
 
 
 func _place_circle(circle: Circle, center: Vector2, diameter: float) -> void:
@@ -235,9 +296,15 @@ func set_menu_open(open_menu: bool) -> void:
 	if menu_open:
 		_previously_paused = get_tree().paused
 		get_tree().paused = true
-		if not _mobile:
-			_menu_buttons[Role.RESUME].grab_focus()
+		_prior_quit_on_back = get_tree().quit_on_go_back
+		get_tree().quit_on_go_back = false
+		_prepare_journal()
+		_start_pause_capture()
 	else:
+		_cancel_pause_capture()
+		_recapture_after_focus = false
+		_journal.close_guide()
+		get_tree().quit_on_go_back = _prior_quit_on_back
 		get_tree().paused = _previously_paused
 
 
@@ -248,24 +315,16 @@ func _sync_visibility() -> void:
 
 
 func _toggle_state_debugger() -> void:
+	if not OS.get_cmdline_user_args().has("--debug-menu"):
+		return
 	_state_debugger.visible = not _state_debugger.visible
 	_status_label.visible = _state_debugger.visible
 	_refresh_menu_labels()
 
 
 func _refresh_menu_labels() -> void:
-	_menu_buttons[Role.TOUCH_TOGGLE].text = "Touch Controls  ·  %s" % ("On" if touch_visible else "Off")
-	_menu_buttons[Role.INSPECTOR_TOGGLE].text = "State Inspector  ·  %s" % ("On" if _state_debugger.visible else "Off")
-
-
-func _run_menu_action(role: int) -> void:
-	match role:
-		Role.RESUME:
-			set_menu_open(false)
-		Role.TOUCH_TOGGLE:
-			set_touch_visible(not touch_visible)
-		Role.INSPECTOR_TOGGLE:
-			_toggle_state_debugger()
+	if _journal != null:
+		_journal.set_hud_state(touch_visible, _state_debugger.visible)
 
 
 func update_hud(state_name: String, flow_level: float, speed_mps: float, wall_climb: bool = false, scarf_available: bool = false, scarf_active: bool = false) -> void:
@@ -334,9 +393,16 @@ func _set_caption(circle: Circle, caption: String, symbol: String) -> void:
 	circle.queue_redraw()
 
 
+func _handle_menu_back() -> void:
+	if menu_open and _journal.close_guide():
+		return
+	set_menu_open(not menu_open)
+
+
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed(&"ui_cancel"):
-		set_menu_open(not menu_open)
+	var gamepad_pause: bool = event is InputEventJoypadButton and event.button_index == JOY_BUTTON_START and event.pressed
+	if event.is_action_pressed(&"ui_cancel") or gamepad_pause:
+		_handle_menu_back()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"toggle_touch"):
 		set_touch_visible(not touch_visible)
@@ -344,15 +410,15 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed(&"toggle_state_debug"):
 		_toggle_state_debugger()
 		get_viewport().set_input_as_handled()
-	elif event is InputEventScreenTouch:
-		# During mouse preview, the menu's native buttons own the physical click.
-		if menu_open and event.device == InputEvent.DEVICE_ID_EMULATION and not _owners.has(event.index):
+	elif menu_open:
+		if event is InputEventScreenTouch or event is InputEventScreenDrag:
 			get_viewport().set_input_as_handled()
-		elif _handle_touch(event):
-			get_viewport().set_input_as_handled()
-	elif event is InputEventScreenDrag:
-		if _handle_drag(event):
-			get_viewport().set_input_as_handled()
+			if event.device != InputEvent.DEVICE_ID_EMULATION:
+				_journal_pointer.forward(get_viewport(), event)
+	elif event is InputEventScreenTouch and _handle_touch(event):
+		get_viewport().set_input_as_handled()
+	elif event is InputEventScreenDrag and _handle_drag(event):
+		get_viewport().set_input_as_handled()
 
 
 func _handle_touch(event: InputEventScreenTouch) -> bool:
@@ -374,11 +440,6 @@ func _handle_touch(event: InputEventScreenTouch) -> bool:
 
 
 func _role_at(point: Vector2) -> int:
-	if menu_open:
-		for role in MENU_ROLES:
-			if _menu_buttons[role].get_global_rect().has_point(point):
-				return role
-		return Role.NONE
 	if _circles[Role.GEAR].contains_point(point):
 		return Role.GEAR
 	if not touch_visible or not _bounds.has_point(point):
@@ -437,10 +498,6 @@ func _release_role(role: int, point: Vector2, canceled: bool) -> void:
 		Role.GEAR:
 			if not canceled and _circles[role].contains_point(point):
 				set_menu_open(true)
-		_:
-			if menu_open and not canceled and _menu_buttons.has(role) and _menu_buttons[role].get_global_rect().has_point(point):
-				_run_menu_action(role)
-
 
 func _handle_drag(event: InputEventScreenDrag) -> bool:
 	if not _owners.has(event.index):
@@ -465,6 +522,7 @@ func _handle_drag(event: InputEventScreenDrag) -> bool:
 
 
 func _reset_touches() -> void:
+	_journal_pointer.reset(get_viewport())
 	_owners.clear()
 	if _stick != null:
 		_stick.stick_offset = Vector2.ZERO

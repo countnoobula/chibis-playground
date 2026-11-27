@@ -148,6 +148,7 @@ func _test_touch_hud() -> void:
 	_hud_touch(0, stick_origin, true)
 	_hud_drag(0, stick_origin + Vector2(36, 0), Vector2(36, 0))
 	_hud_touch(2, jump_point, true)
+	hud._mobile = true
 	var gear_point := gear.get_global_rect().get_center()
 	_hud_touch(7, gear_point, true)
 	_hud_touch(7, gear_point, false)
@@ -156,22 +157,54 @@ func _test_touch_hud() -> void:
 		"Gear opens the modal pause menu and clears gameplay touches")
 
 	await process_frame
-	var panel := hud.get_node("HUDRoot/PauseMenu/Panel")
-	var rows := panel.get_child(0)
-	var touch_button := rows.get_child(2) as Button
-	var touch_center := touch_button.get_global_rect().get_center()
-	_hud_touch(8, touch_center, true)
-	_hud_touch(8, touch_center, false)
+	var journal := hud.get_node("HUDRoot/PauseMenu/Journal")
+	for tab in ["Gear", "Map", "Journal", "Options"]:
+		await _tap_journal_button(journal, tab + "TabButton")
+	_assert_true(paused and hud.menu_open, "All four journal tabs are accessible while gameplay is paused")
+	await _tap_journal_button(journal, "GraphicsSectionButton")
+	var ultra := journal.find_child("QualityUltraButton", true, false) as Button
+	_assert_true(ultra != null and ultra.is_visible_in_tree(), "Graphics index opens the quality presets")
+	await _tap_journal_button(journal, "CameraSectionButton")
+	await _tap_journal_button(journal, "ViewControlsButton")
+	await _tap_journal_button(journal, "TouchControlsToggle")
 	_assert_true(paused and not hud.touch_visible, "A mobile tap can toggle touch controls while paused")
-	var inspector_button := rows.get_child(3) as Button
-	var inspector_center := inspector_button.get_global_rect().get_center()
-	_hud_touch(8, inspector_center, true)
-	_hud_touch(8, inspector_center, false)
-	_assert_true(paused and inspector_button.text.ends_with("On"), "State Inspector toggles from inside the menu")
-	var resume := rows.get_child(1) as Button
-	var resume_center := resume.get_global_rect().get_center()
-	_hud_touch(8, resume_center, true)
-	_hud_touch(8, resume_center, false)
+	var guide := journal.find_child("ControlsGuide", true, false) as Control
+	var inspector := journal.find_child("StateInspectorToggle", true, false) as Button
+	if OS.get_cmdline_user_args().has("--debug-menu"):
+		_assert_true(inspector != null and inspector.is_visible_in_tree(), "The journal exposes State Inspector in developer mode")
+		await _tap_journal_button(journal, "StateInspectorToggle")
+		_assert_true(hud._state_debugger.visible, "State Inspector still toggles in developer mode")
+	else:
+		_assert_true(inspector == null or not inspector.is_visible_in_tree(),
+			"The player controls guide hides developer tools")
+		hud._toggle_state_debugger()
+		_assert_true(not hud._state_debugger.visible, "The developer shortcut is disabled outside developer mode")
+	var focus := root.gui_get_focus_owner()
+	_assert_true(focus != null and guide.is_ancestor_of(focus), "Opening the guide puts focus inside it")
+	for button_name in ["GearTabButton", "ResumeButton"]:
+		var button := journal.find_child(button_name, true, false) as BaseButton
+		var center := button.get_global_rect().get_center()
+		_hud_touch(8, center, true)
+		_hud_touch(8, center, false)
+	_assert_true(paused and hud.menu_open and guide.is_visible_in_tree(),
+		"The guide blocks taps on journal tabs and Resume")
+	var focus_stays_in_guide := true
+	for step in 6:
+		for down in [true, false]:
+			var tab := InputEventKey.new()
+			tab.keycode = KEY_TAB
+			tab.pressed = down
+			root.push_input(tab, true)
+		focus = root.gui_get_focus_owner()
+		focus_stays_in_guide = focus_stays_in_guide and focus != null and guide.is_ancestor_of(focus)
+	_assert_true(focus_stays_in_guide, "Tab navigation stays inside the guide until it closes")
+	var escape_guide := InputEventAction.new()
+	escape_guide.action = &"ui_cancel"
+	escape_guide.pressed = true
+	root.push_input(escape_guide, true)
+	_assert_true(hud.menu_open and not journal.find_child("ControlsGuide", true, false).visible,
+		"Back closes the controls guide before returning to gameplay")
+	await _tap_journal_button(journal, "ResumeButton")
 	_assert_true(not paused and not hud.menu_open, "A touch can resume the paused scene")
 
 	hud._mobile = true
@@ -183,6 +216,18 @@ func _test_touch_hud() -> void:
 	escape.pressed = true
 	root.push_input(escape, true)
 	_assert_true(paused and hud.menu_open, "Escape opens the same menu on desktop")
+	await process_frame
+	var map_tab := journal.find_child("MapTabButton", true, false) as Button
+	map_tab.grab_focus()
+	for code in [KEY_RIGHT, KEY_ENTER]:
+		for down in [true, false]:
+			var nav := InputEventKey.new()
+			nav.keycode = code
+			nav.pressed = down
+			root.push_input(nav, true)
+	await process_frame
+	_assert_true(journal.find_child("JournalContent", true, false).is_visible_in_tree(),
+		"Arrow and Enter switch pages while the game is paused")
 	Input.action_press("jump")
 	root.push_input(escape, true)
 	controls.poll(1.0 / 60.0)
@@ -197,6 +242,17 @@ func _test_touch_hud() -> void:
 
 	hud.queue_free()
 	controls.queue_free()
+	await process_frame
+
+
+func _tap_journal_button(journal: Node, button_name: String) -> void:
+	var button := journal.find_child(button_name, true, false) as BaseButton
+	if button == null or not button.is_visible_in_tree():
+		_assert_true(false, "Visible journal button: " + button_name)
+		return
+	var center := button.get_global_rect().get_center()
+	_hud_touch(8, center, true)
+	_hud_touch(8, center, false)
 	await process_frame
 
 
@@ -652,6 +708,8 @@ func _test_full_gym_and_physics() -> void:
 
 func _test_contextual_pickup(gym: Node3D, chibi: ParkourController) -> void:
 	var item := gym.get_node("Zone1_FlowAndSlides/StrawberryPickup") as Node3D
+	_assert_true(gym.get("strawberries_total") == 1 and gym.get("strawberries_collected") == 0,
+		"The Journal starts with the rooftop strawberry available")
 	var button := chibi.touch_hud.get_node("HUDRoot/TouchRoot/Pickup") as Control
 	chibi.touch_hud.set_touch_visible(true)
 	var point := button.get_global_rect().get_center()
@@ -694,6 +752,8 @@ func _test_contextual_pickup(gym: Node3D, chibi: ParkourController) -> void:
 	Input.parse_input_event(pickup_key)
 	Input.flush_buffered_events()
 	_assert_true(not is_instance_valid(second_item) and not button.visible, "The desktop pickup key collects a reachable item")
+	_assert_true(gym.get("strawberries_total") == 2 and gym.get("strawberries_collected") == 2,
+		"The Journal counts both the original and newly added strawberry")
 	chibi.touch_hud.set_touch_visible(false)
 	chibi.reset_for_respawn(Vector3(0, 0.1, 6))
 	await _wait_physics_frames(4)

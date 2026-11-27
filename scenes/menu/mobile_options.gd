@@ -6,6 +6,7 @@ const DESIGN_SIZE := Vector2(1686.0, 772.0)
 const BACKGROUND_PATH := "res://scenes/menu/art/mobile_options/background.png"
 const SELECTED_TAB_OVERLAY_PATH := "res://scenes/menu/art/mobile_options/tab_selected_overlay.png"
 const AUDIO_INACTIVE_OVERLAY_PATH := "res://scenes/menu/art/mobile_options/tab_audio_inactive.png"
+const BERRY_JOURNAL_FONT: Font = preload("res://scenes/menu/berry_journal_font.tres")
 const VISUALS_SCRIPT := preload("res://scenes/menu/mobile_options_visuals.gd")
 const HUD_CIRCLE_SCRIPT := preload("res://scripts/ui/touch_control_circle.gd")
 const SFX_PREVIEW_STREAM := preload("res://assets/audio/SFX_Jump.wav")
@@ -44,7 +45,6 @@ var _settings: Node
 var _visuals: Control
 var _selected_tab_overlay: TextureRect
 var _audio_inactive_overlay: TextureRect
-var _serif_font: SystemFont
 var _active_section: int = Section.AUDIO
 var _pages: Array[Control] = []
 var _sliders: Dictionary = {}
@@ -164,10 +164,8 @@ func _create_transparent_texture() -> void:
 
 
 func _create_serif_font() -> void:
-	_serif_font = SystemFont.new()
-	_serif_font.font_names = PackedStringArray(["Georgia", "Times New Roman", "serif"])
 	var mobile_theme := Theme.new()
-	mobile_theme.default_font = _serif_font
+	mobile_theme.default_font = BERRY_JOURNAL_FONT
 	_design_canvas.theme = mobile_theme
 
 
@@ -194,7 +192,7 @@ func _create_visual_layer() -> void:
 	_visuals.position = Vector2.ZERO
 	_visuals.size = DESIGN_SIZE
 	_visuals.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_visuals.set("serif_font", _serif_font)
+	_visuals.set("serif_font", BERRY_JOURNAL_FONT)
 	_design_canvas.add_child(_visuals)
 
 

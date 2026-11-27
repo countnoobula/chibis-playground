@@ -4,6 +4,7 @@ signal back_requested
 
 const DESIGN_SIZE := Vector2(1280.0, 720.0)
 const BACKGROUND_PATH := "res://scenes/menu/art/options_background.png"
+const BERRY_JOURNAL_FONT: Font = preload("res://scenes/menu/berry_journal_font.tres")
 const OPTIONS_VISUALS_SCRIPT := preload("res://scenes/menu/options_visuals.gd")
 const SFX_PREVIEW_STREAM := preload("res://assets/audio/SFX_Jump.wav")
 
@@ -35,6 +36,9 @@ var _transparent_texture: ImageTexture
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var menu_theme := Theme.new()
+	menu_theme.default_font = BERRY_JOURNAL_FONT
+	theme = menu_theme
 	resized.connect(_fit_canvas)
 	_fit_canvas()
 	_load_background()
@@ -89,6 +93,7 @@ func _create_visual_layer() -> void:
 	_visuals.position = Vector2.ZERO
 	_visuals.size = DESIGN_SIZE
 	_visuals.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_visuals.set("serif_font", BERRY_JOURNAL_FONT)
 	_artwork_canvas.add_child(_visuals)
 
 

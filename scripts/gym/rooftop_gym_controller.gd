@@ -12,14 +12,32 @@ extends Node3D
 	Vector3(24.0, 0.35, -16.0), # Zone 5: Dry approach to the basin
 ]
 
+var strawberries_collected := 0
+var strawberries_total := 0
+
 var _player: ParkourController
 var _pending_zone := -1
 
 
 func _ready() -> void:
+	for pickup in get_tree().get_nodes_in_group(&"parkour_pickups"):
+		_register_strawberry(pickup)
+	get_tree().node_added.connect(_register_strawberry)
 	_player = get_node_or_null(player_path) as ParkourController
 	if _player != null:
 		_player.wind_tunnel = get_node_or_null("WindTunnel") as RooftopWindTunnel
+
+
+func _register_strawberry(node: Node) -> void:
+	if node.scene_file_path != "res://scenes/items/strawberry_pickup.tscn" or not is_ancestor_of(node):
+		return
+	if not node.is_connected(&"picked_up", _on_strawberry_picked_up):
+		strawberries_total += 1
+		node.connect(&"picked_up", _on_strawberry_picked_up, CONNECT_ONE_SHOT)
+
+
+func _on_strawberry_picked_up(_picker: PhysicsBody3D) -> void:
+	strawberries_collected += 1
 
 
 func _physics_process(_delta: float) -> void:

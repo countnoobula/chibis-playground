@@ -28,6 +28,9 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rays = [ray_one, ray_two, ray_three]
 	_layout_art()
+	berry_button.accessibility_name = "Strawberry Hollow strawberry"
+	berry_button.accessibility_description = "Click the strawberry to make it wiggle."
+	berry_button.tooltip_text = "Make the strawberry wiggle"
 	berry_button.pressed.connect(_on_berry_pressed)
 	_schedule_wiggle()
 
