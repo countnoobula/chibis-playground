@@ -4,20 +4,67 @@ into the Godot chibi project (in meters, Godot Y-up).
 
 Usage:
     blender --background --python tools/export_parkour_assets.py
+    blender --background --python tools/export_parkour_assets.py -- --source-root PATH --output-root PATH
+
+The default source is the sibling Parkour-Art-Archive/SourceArt when present,
+otherwise the original Unreal project SourceArt directory. Output defaults to
+the Godot project root and is written beneath its assets/ directory.
 """
 
+import argparse
 import json
 import math
 import runpy
 import shutil
+import sys
 from pathlib import Path
 
 import bpy
 from mathutils import Euler, Matrix
 
-PARKOUR_SRC = Path(r"c:\Users\count\Documents\Unreal Projects\Parkour\SourceArt")
 GODOT_ROOT = Path(__file__).resolve().parent.parent
-ASSETS_DIR = GODOT_ROOT / "assets"
+DEFAULT_PARKOUR_SRC = Path(r"c:\Users\count\Documents\Unreal Projects\Parkour\SourceArt")
+ARCHIVE_PARKOUR_SRC = GODOT_ROOT.parent / "Parkour-Art-Archive" / "SourceArt"
+PARKOUR_SRC = ARCHIVE_PARKOUR_SRC if ARCHIVE_PARKOUR_SRC.is_dir() else DEFAULT_PARKOUR_SRC
+OUTPUT_ROOT = GODOT_ROOT
+ASSETS_DIR = OUTPUT_ROOT / "assets"
+
+
+def configure_paths():
+    """Read optional source/output roots passed after Blender's `--` separator."""
+    global PARKOUR_SRC, OUTPUT_ROOT, ASSETS_DIR
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--source-root",
+        type=Path,
+        default=PARKOUR_SRC,
+        help="Parkour SourceArt directory (defaults to the sibling archive when present).",
+    )
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        default=GODOT_ROOT,
+        help="Godot project or temporary output root; assets are written beneath its assets/ directory.",
+    )
+    blender_args = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
+    args = parser.parse_args(blender_args)
+
+    PARKOUR_SRC = args.source_root.expanduser().resolve()
+    OUTPUT_ROOT = args.output_root.expanduser().resolve()
+    ASSETS_DIR = OUTPUT_ROOT / "assets"
+
+    if not PARKOUR_SRC.is_dir():
+        parser.error(f"Source root does not exist or is not a directory: {PARKOUR_SRC}")
+    required_input = PARKOUR_SRC / "ChibiRunner.blend"
+    if not required_input.is_file():
+        parser.error(f"Source root is missing required input: {required_input}")
+    try:
+        ASSETS_DIR.relative_to(PARKOUR_SRC)
+    except ValueError:
+        pass
+    else:
+        parser.error(f"Output assets directory must not be inside SourceArt: {ASSETS_DIR}")
 
 # FBX clips that either do not exist in ChibiRunner.blend or are newer/animated versions
 # (BeamIdle & BeamWalk inside ChibiRunner.blend are static 0-motion placeholders!).
@@ -524,6 +571,7 @@ def copy_audio():
 
 
 if __name__ == "__main__":
+    configure_paths()
     export_chibi_runner()
     export_rooftop_stations()
     copy_audio()

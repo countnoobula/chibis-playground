@@ -1,0 +1,3114 @@
+{
+  "coordinates": "Godot Y-up, meters; bounds are local to the GLB scene.",
+  "unreal_reference": [
+    "UnrealExtract/Metadata/unreal_asset_metadata.json"
+  ],
+  "ground_reference": {
+    "moss_ground": {
+      "repeat_m": 1.9435,
+      "texture_prefix": "T_MossGround01_"
+    },
+    "woodland_path": {
+      "repeat_m": 1.221,
+      "texture_prefix": "T_WoodlandPath_"
+    }
+  },
+  "models": {
+    "clover_bank/bank_arch_tuft.glb": {
+      "source": "CloverBank/SM_BankArchTuft.fbx",
+      "editable_source": "CloverBank/CloverBank.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "SM_BankArchTuft",
+          "color": "#a5bc59",
+          "roughness": 0.72,
+          "normal_strength": 0.32,
+          "specular": 0.35,
+          "detail": "T_BotanicalBladeVeins",
+          "normal": "T_BotanicalBladeVeins_N",
+          "unreal_material": "M_BankSatinGrass",
+          "wind": 0.026,
+          "vertex_tint": 0.42,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.31182,
+        -0.03,
+        -0.31397
+      ],
+      "bounds_max": [
+        0.24708,
+        0.43473,
+        0.28341
+      ],
+      "dimensions": [
+        0.55891,
+        0.46473,
+        0.59738
+      ]
+    },
+    "clover_bank/bank_clover.glb": {
+      "source": "CloverBank/SM_BankClover.fbx",
+      "editable_source": "CloverBank/CloverBank.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "SM_BankClover",
+          "color": "#96b653",
+          "roughness": 0.61,
+          "normal_strength": 0.32,
+          "specular": 0.4,
+          "detail": "T_BotanicalLeafVeins",
+          "normal": "T_BotanicalLeafVeins_N",
+          "unreal_material": "M_BankClover",
+          "wind": 0.023,
+          "vertex_tint": 0.42,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.2427,
+        -0.04,
+        -0.28887
+      ],
+      "bounds_max": [
+        0.24771,
+        0.53059,
+        0.25665
+      ],
+      "dimensions": [
+        0.49041,
+        0.57059,
+        0.54553
+      ]
+    },
+    "clover_bank/bank_satin_grass.glb": {
+      "source": "CloverBank/SM_BankSatinGrass.fbx",
+      "editable_source": "CloverBank/CloverBank.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "SM_BankSatinGrass",
+          "color": "#a5bc59",
+          "roughness": 0.72,
+          "normal_strength": 0.32,
+          "specular": 0.35,
+          "detail": "T_BotanicalBladeVeins",
+          "normal": "T_BotanicalBladeVeins_N",
+          "unreal_material": "M_BankSatinGrass",
+          "wind": 0.026,
+          "vertex_tint": 0.42,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.17755,
+        -0.03,
+        -0.20712
+      ],
+      "bounds_max": [
+        0.30071,
+        0.42204,
+        0.25235
+      ],
+      "dimensions": [
+        0.47826,
+        0.45204,
+        0.45947
+      ]
+    },
+    "valley_flora/crossing_arching_bellflowers.glb": {
+      "source": "ValleyFlora/SM_Crossing_ArchingBellflowers.fbx",
+      "editable_source": "ValleyFlora/ValleyFlora.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "Stem",
+          "color": "#597e3b",
+          "roughness": 0.34,
+          "normal_strength": 0.65,
+          "backlight": "#849748",
+          "unreal_material": "MI_Bellflower_Stem",
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "Lavender",
+          "color": "#a87cdd",
+          "roughness": 0.46,
+          "normal_strength": 0.65,
+          "backlight": "#c097e5",
+          "unreal_material": "MI_Bellflower_FlutedLavender",
+          "albedo": "T_Bellflower_PetalFolds",
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "Lining",
+          "color": "#fbe2ee",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_03": {
+          "source_slot": "Pollen",
+          "color": "#edc651",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_04": {
+          "source_slot": "Leaf",
+          "color": "#487c46",
+          "roughness": 0.71,
+          "normal_strength": 0.65,
+          "backlight": "#76954d",
+          "unreal_material": "MI_CrossingStrawberry_Leaf",
+          "detail": "T_BotanicalLeafVeins",
+          "normal": "T_BotanicalLeafVeins_N",
+          "wind": 0.024,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.6084,
+        -0.01648,
+        -0.16781
+      ],
+      "bounds_max": [
+        0.66423,
+        0.79556,
+        0.2282
+      ],
+      "dimensions": [
+        1.27263,
+        0.81203,
+        0.39601
+      ]
+    },
+    "valley_flora/crossing_dimpled_strawberry.glb": {
+      "source": "ValleyFlora/SM_Crossing_DimpledStrawberry.fbx",
+      "editable_source": "ValleyFlora/ValleyFlora.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "Stalk",
+          "color": "#597e3b",
+          "roughness": 0.34,
+          "normal_strength": 0.65,
+          "backlight": "#849748",
+          "unreal_material": "MI_Bellflower_Stem",
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "Flesh",
+          "color": "#ce2f2a",
+          "roughness": 0.56,
+          "normal_strength": 0.65,
+          "backlight": "#dd3d2c",
+          "unreal_material": "MI_CrossingStrawberry_Flesh",
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "Seed",
+          "color": "#e5b160",
+          "roughness": 0.71,
+          "normal_strength": 0.65,
+          "backlight": "#ecbc73",
+          "unreal_material": "MI_CrossingStrawberry_Seed",
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_03": {
+          "source_slot": "Leaf",
+          "color": "#487c46",
+          "roughness": 0.71,
+          "normal_strength": 0.65,
+          "backlight": "#76954d",
+          "unreal_material": "MI_CrossingStrawberry_Leaf",
+          "detail": "T_BotanicalLeafVeins",
+          "normal": "T_BotanicalLeafVeins_N",
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_04": {
+          "source_slot": "Vein",
+          "color": "#597e3b",
+          "roughness": 0.34,
+          "normal_strength": 0.65,
+          "backlight": "#849748",
+          "unreal_material": "MI_Bellflower_Stem",
+          "wind": 0.024,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.40071,
+        -0.0164,
+        -0.32115
+      ],
+      "bounds_max": [
+        0.39484,
+        0.75386,
+        0.22096
+      ],
+      "dimensions": [
+        0.79555,
+        0.77026,
+        0.54211
+      ]
+    },
+    "valley_flora/mixed_bellflower_cluster.glb": {
+      "source": "ValleyFlora/SM_Valley_MixedBellflowerCluster.fbx",
+      "editable_source": "ValleyFlora/ValleyFlora.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "Stem",
+          "color": "#597e3b",
+          "roughness": 0.34,
+          "normal_strength": 0.65,
+          "backlight": "#849748",
+          "unreal_material": "MI_Bellflower_Stem",
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "Lavender",
+          "color": "#a87cdd",
+          "roughness": 0.46,
+          "normal_strength": 0.65,
+          "backlight": "#c097e5",
+          "unreal_material": "MI_Bellflower_Lavender",
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "Lining",
+          "color": "#fbe2ee",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_03": {
+          "source_slot": "Pollen",
+          "color": "#edc651",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_04": {
+          "source_slot": "MI_Forest_Clover",
+          "color": "#a2d76f",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "wind": 0.024,
+          "two_sided": true
+        },
+        "Woodland_05": {
+          "source_slot": "MI_Forest_BlossomWhite",
+          "color": "#fdfaf1",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "wind": 0.024,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.66314,
+        -0.02439,
+        -0.52202
+      ],
+      "bounds_max": [
+        0.64287,
+        0.89102,
+        1.16768
+      ],
+      "dimensions": [
+        1.30601,
+        0.91542,
+        1.6897
+      ]
+    },
+    "valley_flora/valley_bellflowers.glb": {
+      "source": "ValleyFlora/SM_ValleyBellflowers.fbx",
+      "editable_source": "ValleyFlora/ValleyFlora.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyFlora",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyFlora_BC",
+          "normal": "T_ValleyFlora_N",
+          "roughness_map": "T_ValleyFlora_R",
+          "wind": 0.024,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.33531,
+        -0.00116,
+        -0.27885
+      ],
+      "bounds_max": [
+        0.44956,
+        0.94592,
+        0.25325
+      ],
+      "dimensions": [
+        0.78487,
+        0.94709,
+        0.5321
+      ]
+    },
+    "valley_flora/valley_leaf_shrub.glb": {
+      "source": "ValleyFlora/SM_ValleyLeafShrub.fbx",
+      "editable_source": "ValleyFlora/ValleyFlora.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyFlora",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyFlora_BC",
+          "normal": "T_ValleyFlora_N",
+          "roughness_map": "T_ValleyFlora_R",
+          "wind": 0.024,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.79134,
+        -0.01165,
+        -0.7551
+      ],
+      "bounds_max": [
+        0.83336,
+        0.98154,
+        0.66511
+      ],
+      "dimensions": [
+        1.6247,
+        0.99319,
+        1.42021
+      ]
+    },
+    "valley_flora/valley_strawberry.glb": {
+      "source": "ValleyFlora/SM_ValleyStrawberry.fbx",
+      "editable_source": "ValleyFlora/ValleyFlora.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyFlora",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyFlora_BC",
+          "normal": "T_ValleyFlora_N",
+          "roughness_map": "T_ValleyFlora_R",
+          "wind": 0.024,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.55571,
+        -0.00271,
+        -0.43441
+      ],
+      "bounds_max": [
+        0.57863,
+        0.71818,
+        0.45007
+      ],
+      "dimensions": [
+        1.13434,
+        0.72089,
+        0.88448
+      ]
+    },
+    "valley_understory/birch_trail_plush_moss.glb": {
+      "source": "ValleyUnderstory/SM_BirchTrail_PlushMoss.fbx",
+      "editable_source": "ValleyUnderstory/Valley_Understory.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MossBase",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_BirchPlush_Color",
+          "normal": "T_BirchPlush_N"
+        },
+        "Woodland_01": {
+          "source_slot": "UnderNap",
+          "color": "#526632",
+          "roughness": 0.88,
+          "normal_strength": 0.65,
+          "detail": "T_BirchPlush_Nap",
+          "two_sided": true,
+          "cutout": 0.49
+        },
+        "Woodland_02": {
+          "source_slot": "TipNap",
+          "color": "#719344",
+          "roughness": 0.88,
+          "normal_strength": 0.65,
+          "detail": "T_BirchPlush_Nap",
+          "two_sided": true,
+          "cutout": 0.57
+        }
+      },
+      "bounds_min": [
+        -0.42108,
+        -0.018,
+        -0.31717
+      ],
+      "bounds_max": [
+        0.46885,
+        0.23901,
+        0.36251
+      ],
+      "dimensions": [
+        0.88993,
+        0.25701,
+        0.67967
+      ]
+    },
+    "valley_understory/crossing_rounded_blossoms.glb": {
+      "source": "ValleyUnderstory/SM_Crossing_RoundedBlossoms.fbx",
+      "editable_source": "ValleyUnderstory/Valley_Understory.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "Stem",
+          "color": "#7b943d",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "Ivory",
+          "color": "#f8ecd1",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "Gold",
+          "color": "#e8bd4a",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.1786,
+        -0.015,
+        -0.22178
+      ],
+      "bounds_max": [
+        0.13312,
+        0.34107,
+        0.10222
+      ],
+      "dimensions": [
+        0.31172,
+        0.35607,
+        0.324
+      ]
+    },
+    "valley_understory/painted_clover.glb": {
+      "source": "ValleyUnderstory/SM_Painted_Clover.fbx",
+      "editable_source": "ValleyUnderstory/Valley_Understory.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "Clover",
+          "color": "#8caf54",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "detail": "T_BotanicalLeafVeins",
+          "normal": "T_BotanicalLeafVeins_N",
+          "wind": 0.018,
+          "vertex_tint": 0.36,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.29519,
+        -0.0212,
+        -0.26037
+      ],
+      "bounds_max": [
+        0.31005,
+        0.28121,
+        0.19878
+      ],
+      "dimensions": [
+        0.60524,
+        0.30241,
+        0.45915
+      ]
+    },
+    "valley_understory/painted_mixed_blooms.glb": {
+      "source": "ValleyUnderstory/SM_Painted_MixedBlooms.fbx",
+      "editable_source": "ValleyUnderstory/Valley_Understory.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "Stalk",
+          "color": "#81983e",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "vertex_tint": 0.0,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "Violet",
+          "color": "#bc97dc",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "vertex_tint": 0.0,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "Lining",
+          "color": "#efe2e9",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "vertex_tint": 0.0,
+          "two_sided": true
+        },
+        "Woodland_03": {
+          "source_slot": "Gold",
+          "color": "#e8bd4a",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "vertex_tint": 0.0,
+          "two_sided": true
+        },
+        "Woodland_04": {
+          "source_slot": "Leaf",
+          "color": "#8daa50",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "detail": "T_BotanicalLeafVeins",
+          "normal": "T_BotanicalLeafVeins_N",
+          "wind": 0.018,
+          "vertex_tint": 0.36,
+          "two_sided": true
+        },
+        "Woodland_05": {
+          "source_slot": "Clover",
+          "color": "#8caf54",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "detail": "T_BotanicalLeafVeins",
+          "normal": "T_BotanicalLeafVeins_N",
+          "wind": 0.018,
+          "vertex_tint": 0.36,
+          "two_sided": true
+        },
+        "Woodland_06": {
+          "source_slot": "Ivory",
+          "color": "#f8ecd1",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "vertex_tint": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.43133,
+        -0.0308,
+        -0.36875
+      ],
+      "bounds_max": [
+        0.41806,
+        0.89102,
+        1.11725
+      ],
+      "dimensions": [
+        0.84939,
+        0.92182,
+        1.486
+      ]
+    },
+    "valley_understory/painted_pebbles.glb": {
+      "source": "ValleyUnderstory/SM_Painted_Pebbles.fbx",
+      "editable_source": "ValleyUnderstory/Valley_Understory.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "Buff",
+          "color": "#be9d72",
+          "roughness": 0.5,
+          "normal_strength": 0.65
+        },
+        "Woodland_01": {
+          "source_slot": "Honey",
+          "color": "#bc9056",
+          "roughness": 0.5,
+          "normal_strength": 0.65
+        },
+        "Woodland_02": {
+          "source_slot": "Moss",
+          "color": "#78884b",
+          "roughness": 0.5,
+          "normal_strength": 0.65
+        }
+      },
+      "bounds_min": [
+        -0.50763,
+        -0.08309,
+        -0.33592
+      ],
+      "bounds_max": [
+        0.52638,
+        0.36828,
+        0.49941
+      ],
+      "dimensions": [
+        1.03401,
+        0.45137,
+        0.83533
+      ]
+    },
+    "valley_understory/painted_shrub.glb": {
+      "source": "ValleyUnderstory/SM_Painted_Shrub.fbx",
+      "editable_source": "ValleyUnderstory/Valley_Understory.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "Stalk",
+          "color": "#81983e",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "Leaf",
+          "color": "#8daa50",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "detail": "T_BotanicalLeafVeins",
+          "normal": "T_BotanicalLeafVeins_N",
+          "wind": 0.018,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "Clover",
+          "color": "#8caf54",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "detail": "T_BotanicalLeafVeins",
+          "normal": "T_BotanicalLeafVeins_N",
+          "wind": 0.018,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.62485,
+        -0.016,
+        -0.62463
+      ],
+      "bounds_max": [
+        0.68458,
+        0.91744,
+        0.67108
+      ],
+      "dimensions": [
+        1.30943,
+        0.93344,
+        1.29571
+      ]
+    },
+    "valley_understory/painted_violets.glb": {
+      "source": "ValleyUnderstory/SM_Painted_Violets.fbx",
+      "editable_source": "ValleyUnderstory/Valley_Understory.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "Grass",
+          "color": "#96aa54",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "detail": "T_BotanicalBladeVeins",
+          "normal": "T_BotanicalBladeVeins_N",
+          "wind": 0.018,
+          "vertex_tint": 0.36,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "Stalk",
+          "color": "#81983e",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "vertex_tint": 0.0,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "Violet",
+          "color": "#bc97dc",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "vertex_tint": 0.0,
+          "two_sided": true
+        },
+        "Woodland_03": {
+          "source_slot": "Gold",
+          "color": "#e8bd4a",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "vertex_tint": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.2098,
+        -0.0153,
+        -0.19996
+      ],
+      "bounds_max": [
+        0.28144,
+        0.28309,
+        0.262
+      ],
+      "dimensions": [
+        0.49124,
+        0.29839,
+        0.46196
+      ]
+    },
+    "valley_understory/painted_woodland_blooms.glb": {
+      "source": "ValleyUnderstory/SM_Painted_WoodlandBlooms.fbx",
+      "editable_source": "ValleyUnderstory/Valley_Understory.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "Stalk",
+          "color": "#81983e",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "vertex_tint": 0.0,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "Ivory",
+          "color": "#f8ecd1",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "vertex_tint": 0.0,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "Gold",
+          "color": "#e8bd4a",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.018,
+          "vertex_tint": 0.0,
+          "two_sided": true
+        },
+        "Woodland_03": {
+          "source_slot": "Clover",
+          "color": "#8caf54",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "detail": "T_BotanicalLeafVeins",
+          "normal": "T_BotanicalLeafVeins_N",
+          "wind": 0.018,
+          "vertex_tint": 0.36,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.28634,
+        -0.0156,
+        -0.30995
+      ],
+      "bounds_max": [
+        0.32048,
+        0.3206,
+        0.21889
+      ],
+      "dimensions": [
+        0.60682,
+        0.3362,
+        0.52883
+      ]
+    },
+    "valley_understory/moss_pillow.glb": {
+      "source": "ValleyUnderstory/SM_Valley_MossPillow.fbx",
+      "editable_source": "ValleyUnderstory/Valley_Understory.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_CushionMoss",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_CushionMoss_BaseColor",
+          "normal": "T_CushionMoss_NormalGL",
+          "surface": "T_CushionMoss_ORM"
+        },
+        "Woodland_01": {
+          "source_slot": "M_WoodlandBotanical",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_WoodlandBotanical_BaseColor",
+          "normal": "T_WoodlandBotanical_NormalGL",
+          "surface": "T_WoodlandBotanical_ORM",
+          "wind": 0.014,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.44657,
+        -0.02,
+        -0.37505
+      ],
+      "bounds_max": [
+        0.43488,
+        0.18364,
+        0.30307
+      ],
+      "dimensions": [
+        0.88146,
+        0.20364,
+        0.67812
+      ]
+    },
+    "valley_understory/violet_tussock.glb": {
+      "source": "ValleyUnderstory/SM_Valley_VioletTussock.fbx",
+      "editable_source": "ValleyUnderstory/Valley_Understory.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_CushionMoss",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_CushionMoss_BaseColor",
+          "normal": "T_CushionMoss_NormalGL",
+          "surface": "T_CushionMoss_ORM"
+        },
+        "Woodland_01": {
+          "source_slot": "M_WoodlandBotanical",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_WoodlandBotanical_BaseColor",
+          "normal": "T_WoodlandBotanical_NormalGL",
+          "surface": "T_WoodlandBotanical_ORM",
+          "wind": 0.014,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.3262,
+        -0.02,
+        -0.2968
+      ],
+      "bounds_max": [
+        0.30975,
+        0.2777,
+        0.31106
+      ],
+      "dimensions": [
+        0.63595,
+        0.2977,
+        0.60787
+      ]
+    },
+    "valley_understory/woodland_blossoms.glb": {
+      "source": "ValleyUnderstory/SM_Valley_WoodlandBlossoms.fbx",
+      "editable_source": "ValleyUnderstory/Valley_Understory.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_CushionMoss",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_CushionMoss_BaseColor",
+          "normal": "T_CushionMoss_NormalGL",
+          "surface": "T_CushionMoss_ORM"
+        },
+        "Woodland_01": {
+          "source_slot": "M_WoodlandBotanical",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_WoodlandBotanical_BaseColor",
+          "normal": "T_WoodlandBotanical_NormalGL",
+          "surface": "T_WoodlandBotanical_ORM",
+          "wind": 0.014,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.34044,
+        -0.02,
+        -0.26246
+      ],
+      "bounds_max": [
+        0.42473,
+        0.30899,
+        0.36755
+      ],
+      "dimensions": [
+        0.76517,
+        0.32899,
+        0.63001
+      ]
+    },
+    "valley_cliffs/creek_boulder_low_wedge.glb": {
+      "source": "ValleyCliffs/SM_Valley_CreekBoulder_LowWedge.fbx",
+      "editable_source": "ValleyCliffs/ValleyCliffs.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyCreekstone",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyCreekstone_BaseColor",
+          "normal": "T_ValleyCreekstone_NormalGL",
+          "roughness_map": "T_ValleyCreekstone_Roughness"
+        },
+        "Woodland_01": {
+          "source_slot": "M_ValleyBoulderMoss",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyBoulderMoss_BaseColor",
+          "normal": "T_ValleyBoulderMoss_NormalGL",
+          "surface": "T_ValleyBoulderMoss_Surface",
+          "height_map": "T_ValleyBoulderMoss_Height",
+          "height_scale": 1.6
+        },
+        "Woodland_02": {
+          "source_slot": "M_ValleyMossTips",
+          "color": "#a2c276",
+          "roughness": 0.91,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.63023,
+        -0.0835,
+        -0.39405
+      ],
+      "bounds_max": [
+        0.80401,
+        0.54888,
+        0.4095
+      ],
+      "dimensions": [
+        1.43424,
+        0.63238,
+        0.80356
+      ]
+    },
+    "valley_cliffs/creek_boulder_offset_bluff.glb": {
+      "source": "ValleyCliffs/SM_Valley_CreekBoulder_OffsetBluff.fbx",
+      "editable_source": "ValleyCliffs/ValleyCliffs.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyCreekstone",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyCreekstone_BaseColor",
+          "normal": "T_ValleyCreekstone_NormalGL",
+          "roughness_map": "T_ValleyCreekstone_Roughness"
+        },
+        "Woodland_01": {
+          "source_slot": "M_ValleyBoulderMoss",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyBoulderMoss_BaseColor",
+          "normal": "T_ValleyBoulderMoss_NormalGL",
+          "surface": "T_ValleyBoulderMoss_Surface",
+          "height_map": "T_ValleyBoulderMoss_Height",
+          "height_scale": 1.6
+        },
+        "Woodland_02": {
+          "source_slot": "M_ValleyMossTips",
+          "color": "#a2c276",
+          "roughness": 0.91,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.56105,
+        -0.12496,
+        -0.54907
+      ],
+      "bounds_max": [
+        0.38668,
+        0.73731,
+        0.38911
+      ],
+      "dimensions": [
+        0.94773,
+        0.86227,
+        0.93817
+      ]
+    },
+    "valley_cliffs/creek_boulder_stepped_flank.glb": {
+      "source": "ValleyCliffs/SM_Valley_CreekBoulder_SteppedFlank.fbx",
+      "editable_source": "ValleyCliffs/ValleyCliffs.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyCreekstone",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyCreekstone_BaseColor",
+          "normal": "T_ValleyCreekstone_NormalGL",
+          "roughness_map": "T_ValleyCreekstone_Roughness"
+        },
+        "Woodland_01": {
+          "source_slot": "M_ValleyBoulderMoss",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyBoulderMoss_BaseColor",
+          "normal": "T_ValleyBoulderMoss_NormalGL",
+          "surface": "T_ValleyBoulderMoss_Surface",
+          "height_map": "T_ValleyBoulderMoss_Height",
+          "height_scale": 1.6
+        },
+        "Woodland_02": {
+          "source_slot": "M_ValleyMossTips",
+          "color": "#a2c276",
+          "roughness": 0.91,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.50955,
+        -0.10484,
+        -0.41335
+      ],
+      "bounds_max": [
+        0.73989,
+        0.56306,
+        0.39948
+      ],
+      "dimensions": [
+        1.24944,
+        0.6679,
+        0.81282
+      ]
+    },
+    "valley_cliffs/creeping_moss_boulder.glb": {
+      "source": "ValleyCliffs/SM_Valley_CreepingMossBoulder.fbx",
+      "editable_source": "ValleyCliffs/ValleyCliffs.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyCreekstone",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyCreekstone_BaseColor",
+          "normal": "T_ValleyCreekstone_NormalGL",
+          "roughness_map": "T_ValleyCreekstone_Roughness"
+        },
+        "Woodland_01": {
+          "source_slot": "M_ValleyBoulderMoss",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyBoulderMoss_BaseColor",
+          "normal": "T_ValleyBoulderMoss_NormalGL",
+          "surface": "T_ValleyBoulderMoss_Surface",
+          "height_map": "T_ValleyBoulderMoss_Height",
+          "height_scale": 1.6
+        },
+        "Woodland_02": {
+          "source_slot": "M_ValleyMossTips",
+          "color": "#a2c276",
+          "roughness": 0.91,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.51905,
+        -0.10533,
+        -0.44926
+      ],
+      "bounds_max": [
+        0.69056,
+        0.61924,
+        0.45655
+      ],
+      "dimensions": [
+        1.20961,
+        0.72457,
+        0.90582
+      ]
+    },
+    "valley_cliffs/moss_cliff_shelf.glb": {
+      "source": "ValleyCliffs/SM_Valley_MossCliffShelf.fbx",
+      "editable_source": "ValleyCliffs/ValleyCliffs.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyCreekstone",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyCreekstone_BaseColor",
+          "normal": "T_ValleyCreekstone_NormalGL",
+          "roughness_map": "T_ValleyCreekstone_Roughness"
+        },
+        "Woodland_01": {
+          "source_slot": "M_ValleyMoss",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyBoulderMoss_BaseColor",
+          "normal": "T_ValleyBoulderMoss_NormalGL",
+          "surface": "T_ValleyBoulderMoss_Surface",
+          "height_map": "T_ValleyBoulderMoss_Height",
+          "height_scale": 1.6
+        },
+        "Woodland_02": {
+          "source_slot": "M_ValleyMossTips",
+          "color": "#a2c276",
+          "roughness": 0.91,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -2.25121,
+        -0.25685,
+        -1.03866
+      ],
+      "bounds_max": [
+        2.47888,
+        1.51901,
+        1.09628
+      ],
+      "dimensions": [
+        4.73009,
+        1.77586,
+        2.13494
+      ]
+    },
+    "valley_cliffs/moss_creek_boulder.glb": {
+      "source": "ValleyCliffs/SM_Valley_MossCreekBoulder.fbx",
+      "editable_source": "ValleyCliffs/ValleyCliffs.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyCreekstone",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyCreekstone_BaseColor",
+          "normal": "T_ValleyCreekstone_NormalGL",
+          "roughness_map": "T_ValleyCreekstone_Roughness"
+        },
+        "Woodland_01": {
+          "source_slot": "M_ValleyMoss",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyBoulderMoss_BaseColor",
+          "normal": "T_ValleyBoulderMoss_NormalGL",
+          "surface": "T_ValleyBoulderMoss_Surface",
+          "height_map": "T_ValleyBoulderMoss_Height",
+          "height_scale": 1.6
+        },
+        "Woodland_02": {
+          "source_slot": "M_ValleyMossTips",
+          "color": "#a2c276",
+          "roughness": 0.91,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.50931,
+        -0.10533,
+        -0.44718
+      ],
+      "bounds_max": [
+        0.57894,
+        0.61348,
+        0.39843
+      ],
+      "dimensions": [
+        1.08825,
+        0.71881,
+        0.84561
+      ]
+    },
+    "valley_cliffs/moss_promontory.glb": {
+      "source": "ValleyCliffs/SM_Valley_MossPromontory.fbx",
+      "editable_source": "ValleyCliffs/ValleyCliffs.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyCreekstone",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyCreekstone_BaseColor",
+          "normal": "T_ValleyCreekstone_NormalGL",
+          "roughness_map": "T_ValleyCreekstone_Roughness"
+        },
+        "Woodland_01": {
+          "source_slot": "M_ValleyMoss",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyBoulderMoss_BaseColor",
+          "normal": "T_ValleyBoulderMoss_NormalGL",
+          "surface": "T_ValleyBoulderMoss_Surface",
+          "height_map": "T_ValleyBoulderMoss_Height",
+          "height_scale": 1.6
+        },
+        "Woodland_02": {
+          "source_slot": "M_ValleyMossTips",
+          "color": "#a2c276",
+          "roughness": 0.91,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -1.44484,
+        -0.19636,
+        -1.23446
+      ],
+      "bounds_max": [
+        1.48158,
+        1.1284,
+        1.16396
+      ],
+      "dimensions": [
+        2.92642,
+        1.32476,
+        2.39842
+      ]
+    },
+    "valley_lotus/lotus_bloom.glb": {
+      "source": "ValleyLotus/SM_Valley_LotusBloom.fbx",
+      "editable_source": "ValleyLotus/Valley_LotusBloom.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_LotusBloom_Petals",
+          "color": "#ffffff",
+          "roughness": 0.42,
+          "normal_strength": 0.65,
+          "vertex_tint": 1.0,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "M_LotusBloom_Seedpod",
+          "color": "#ffffff",
+          "roughness": 0.55,
+          "normal_strength": 0.65,
+          "vertex_tint": 1.0,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "M_LotusBloom_Pollen",
+          "color": "#ffffff",
+          "roughness": 0.53,
+          "normal_strength": 0.65,
+          "vertex_tint": 1.0,
+          "two_sided": true
+        },
+        "Woodland_03": {
+          "source_slot": "M_LotusBloom_Stem",
+          "color": "#ffffff",
+          "roughness": 0.53,
+          "normal_strength": 0.65,
+          "vertex_tint": 1.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.16252,
+        -0.21,
+        -0.15764
+      ],
+      "bounds_max": [
+        0.1619,
+        0.32135,
+        0.1657
+      ],
+      "dimensions": [
+        0.32442,
+        0.53135,
+        0.32333
+      ]
+    },
+    "valley_lotus/lotus_step.glb": {
+      "source": "ValleyLotus/SM_Valley_LotusStep.fbx",
+      "editable_source": "ValleyLotus/Valley_LotusStep.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "Leaf",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_LotusLeaf_Color",
+          "normal": "T_LotusLeaf_Normal",
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "Petiole",
+          "color": "#788d46",
+          "roughness": 0.5,
+          "normal_strength": 0.65
+        }
+      },
+      "bounds_min": [
+        -0.5749,
+        -0.9,
+        -0.50822
+      ],
+      "bounds_max": [
+        0.58621,
+        1.09726,
+        0.57959
+      ],
+      "dimensions": [
+        1.16112,
+        1.99726,
+        1.08781
+      ]
+    },
+    "valley_mushrooms/amber_step.glb": {
+      "source": "ValleyMushrooms/SM_Valley_AmberStep.fbx",
+      "editable_source": "ValleyMushrooms/Valley_AmberStep.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_AmberStep_Cap",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_AmberStep_BaseColor",
+          "normal": "T_AmberStep_NormalGL",
+          "surface": "T_AmberStep_ORM"
+        },
+        "Woodland_01": {
+          "source_slot": "M_AmberStep_StemGill",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_AmberStep_BaseColor",
+          "normal": "T_AmberStep_NormalGL",
+          "surface": "T_AmberStep_ORM"
+        }
+      },
+      "bounds_min": [
+        -0.6483,
+        -1.2,
+        -0.62538
+      ],
+      "bounds_max": [
+        0.63673,
+        0.99918,
+        0.64516
+      ],
+      "dimensions": [
+        1.28503,
+        2.19918,
+        1.27053
+      ]
+    },
+    "valley_root/moss_root_arch.glb": {
+      "source": "ValleyRoot/SM_Valley_MossRootArch.fbx",
+      "editable_source": "ValleyRoot/ValleyRoot.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyRootBark",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyRootBark_BaseColor",
+          "normal": "T_ValleyRootBark_NormalGL",
+          "roughness_map": "T_ValleyRootBark_Roughness"
+        },
+        "Woodland_01": {
+          "source_slot": "M_ValleyMoss",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyMoss_BaseColor",
+          "normal": "T_ValleyMoss_NormalGL",
+          "roughness_map": "T_ValleyMoss_Roughness"
+        },
+        "Woodland_02": {
+          "source_slot": "M_ValleyMossTips",
+          "color": "#84954d",
+          "roughness": 0.91,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -5.2854,
+        -0.7642,
+        -1.0394
+      ],
+      "bounds_max": [
+        5.2796,
+        4.18,
+        0.9268
+      ],
+      "dimensions": [
+        10.565,
+        4.9442,
+        1.9662
+      ]
+    },
+    "valley_root/root_walk_shell.glb": {
+      "source": "ValleyRoot/SM_Valley_RootWalkShell.fbx",
+      "editable_source": "ValleyRoot/ValleyRoot.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#e7e7e7",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        }
+      },
+      "bounds_min": [
+        -5.28216,
+        -0.75745,
+        -0.9735
+      ],
+      "bounds_max": [
+        5.2796,
+        4.14306,
+        0.89957
+      ],
+      "dimensions": [
+        10.56176,
+        4.90051,
+        1.87307
+      ],
+      "role": "collision reference"
+    },
+    "valley_trees/elder_trunk.glb": {
+      "source": "ValleyTrees/SM_Valley_ElderTrunk.fbx",
+      "editable_source": "ValleyTrees/Valley_ElderTree.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ElderBark",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ElderBark_BaseColor",
+          "normal": "T_ElderBark_NormalGL",
+          "surface": "T_ElderBark_ORM"
+        }
+      },
+      "bounds_min": [
+        -5.20416,
+        -0.8,
+        -4.31897
+      ],
+      "bounds_max": [
+        5.03125,
+        16.5,
+        4.52647
+      ],
+      "dimensions": [
+        10.23541,
+        17.3,
+        8.84544
+      ]
+    },
+    "valley_trees/hazel_bough.glb": {
+      "source": "ValleyTrees/SM_Valley_HazelBough.fbx",
+      "editable_source": "ValleyTrees/Valley_ElderTree.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ElderBark",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_ElderBark_BaseColor",
+          "normal": "T_ElderBark_NormalGL",
+          "surface": "T_ElderBark_ORM"
+        },
+        "Woodland_01": {
+          "source_slot": "M_HazelLeaf",
+          "color": "#ffffff",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_HazelLeaf_BaseColor",
+          "normal": "T_HazelLeaf_NormalGL",
+          "surface": "T_HazelLeaf_ORM",
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -5.02271,
+        -0.33092,
+        -10.82051
+      ],
+      "bounds_max": [
+        4.69816,
+        2.68892,
+        0.26216
+      ],
+      "dimensions": [
+        9.72087,
+        3.01984,
+        11.08267
+      ]
+    },
+    "forest/autumn_leaf_bridge.glb": {
+      "source": "FBX/Forest/SM_Forest_AutumnLeafBridge.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_AutumnLeaf",
+          "color": "#edbf61",
+          "roughness": 0.65,
+          "normal_strength": 0.65
+        }
+      },
+      "bounds_min": [
+        -0.93021,
+        -0.10364,
+        -2.59015
+      ],
+      "bounds_max": [
+        0.93021,
+        0.61625,
+        3.23111
+      ],
+      "dimensions": [
+        1.86042,
+        0.71989,
+        5.82126
+      ]
+    },
+    "forest/birch_branch.glb": {
+      "source": "FBX/Forest/SM_Forest_BirchBranch.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_Birch",
+          "color": "#f1ece5",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N",
+          "triplanar": true
+        }
+      },
+      "bounds_min": [
+        -0.23949,
+        -0.23379,
+        -2.78196
+      ],
+      "bounds_max": [
+        0.50481,
+        0.2862,
+        2.31825
+      ],
+      "dimensions": [
+        0.7443,
+        0.51999,
+        5.10021
+      ]
+    },
+    "forest/dew_drop.glb": {
+      "source": "FBX/Forest/SM_Forest_DewDrop.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_Forest_DewDrop",
+          "color": "#e1f8ff",
+          "roughness": 0.04,
+          "normal_strength": 0.65,
+          "transparent": true
+        }
+      },
+      "bounds_min": [
+        -0.13556,
+        -0.19701,
+        -0.13542
+      ],
+      "bounds_max": [
+        0.13491,
+        0.19701,
+        0.13542
+      ],
+      "dimensions": [
+        0.27047,
+        0.39402,
+        0.27083
+      ]
+    },
+    "forest/flower_cluster.glb": {
+      "source": "FBX/Forest/SM_Forest_FlowerCluster.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_Clover",
+          "color": "#a2d76f",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_BlossomWhite",
+          "color": "#fdfaf1",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "MI_Forest_LavenderFlower",
+          "color": "#d7b8f6",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.66314,
+        -0.02439,
+        -0.52202
+      ],
+      "bounds_max": [
+        0.64287,
+        0.97024,
+        0.84693
+      ],
+      "dimensions": [
+        1.30601,
+        0.99464,
+        1.36895
+      ]
+    },
+    "forest/giant_trunk.glb": {
+      "source": "FBX/Forest/SM_Forest_GiantTrunk.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#906c50",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N",
+          "triplanar": true
+        }
+      },
+      "bounds_min": [
+        -4.23684,
+        -0.6,
+        -4.23685
+      ],
+      "bounds_max": [
+        4.23684,
+        18.5,
+        4.23684
+      ],
+      "dimensions": [
+        8.47369,
+        19.1,
+        8.47369
+      ]
+    },
+    "forest/moss_mound.glb": {
+      "source": "FBX/Forest/SM_Forest_MossMound.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_MossBank",
+          "color": "#b5ce69",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_MossCarpet_D",
+          "normal": "T_Forest_MossCarpet_N",
+          "triplanar": true
+        }
+      },
+      "bounds_min": [
+        -2.36097,
+        -0.27174,
+        -2.07051
+      ],
+      "bounds_max": [
+        2.04344,
+        1.45754,
+        1.92444
+      ],
+      "dimensions": [
+        4.40441,
+        1.72929,
+        3.99495
+      ]
+    },
+    "forest/mushroom_cap_large.glb": {
+      "source": "FBX/Forest/SM_Forest_MushroomCap_Large.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_MushroomBounce",
+          "color": "#efb161",
+          "roughness": 0.18,
+          "normal_strength": 0.65
+        }
+      },
+      "bounds_min": [
+        -1.10375,
+        -0.2347,
+        -1.12214
+      ],
+      "bounds_max": [
+        1.10375,
+        1.1983,
+        1.07348
+      ],
+      "dimensions": [
+        2.2075,
+        1.433,
+        2.19562
+      ]
+    },
+    "forest/mushroom_cap_step.glb": {
+      "source": "FBX/Forest/SM_Forest_MushroomCap_Step.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_MushroomStep",
+          "color": "#e5aa61",
+          "roughness": 0.18,
+          "normal_strength": 0.65
+        }
+      },
+      "bounds_min": [
+        -0.56905,
+        -0.23556,
+        -0.57822
+      ],
+      "bounds_max": [
+        0.56905,
+        0.93869,
+        0.55503
+      ],
+      "dimensions": [
+        1.1381,
+        1.17425,
+        1.13325
+      ]
+    },
+    "forest/river_pebble.glb": {
+      "source": "FBX/Forest/SM_Forest_RiverPebble.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RiverPebble",
+          "color": "#b8b1bf",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_CreekPebbles_D",
+          "normal": "T_Forest_CreekPebbles_N",
+          "triplanar": true
+        }
+      },
+      "bounds_min": [
+        -0.63277,
+        -0.26242,
+        -0.48
+      ],
+      "bounds_max": [
+        0.64723,
+        0.26544,
+        0.48
+      ],
+      "dimensions": [
+        1.28,
+        0.52786,
+        0.96
+      ]
+    },
+    "forest/root_arch.glb": {
+      "source": "FBX/Forest/SM_Forest_RootArch.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#906c50",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N",
+          "triplanar": true
+        }
+      },
+      "bounds_min": [
+        -5.03859,
+        -0.5254,
+        -0.87185
+      ],
+      "bounds_max": [
+        5.04333,
+        4.4784,
+        0.81806
+      ],
+      "dimensions": [
+        10.08192,
+        5.0038,
+        1.68991
+      ]
+    },
+    "forest/strawberry_plant.glb": {
+      "source": "FBX/Forest/SM_Forest_StrawberryPlant.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#90cb61",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_BerryRed",
+          "color": "#ef6961",
+          "roughness": 0.18,
+          "normal_strength": 0.65
+        },
+        "Woodland_02": {
+          "source_slot": "M_Forest_DewDrop",
+          "color": "#e1f8ff",
+          "roughness": 0.04,
+          "normal_strength": 0.65,
+          "transparent": true
+        },
+        "Woodland_03": {
+          "source_slot": "MI_Forest_BlossomWhite",
+          "color": "#fdfaf1",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -1.01864,
+        -0.03333,
+        -0.01828
+      ],
+      "bounds_max": [
+        1.29114,
+        3.01423,
+        3.86616
+      ],
+      "dimensions": [
+        2.30978,
+        3.04756,
+        3.88444
+      ]
+    },
+    "forest/twisted_root_wall.glb": {
+      "source": "FBX/Forest/SM_Forest_TwistedRootWall.fbx",
+      "editable_source": "ForestKit.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#906c50",
+          "roughness": 0.65,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N",
+          "triplanar": true
+        }
+      },
+      "bounds_min": [
+        -1.0714,
+        -0.18976,
+        -2.75164
+      ],
+      "bounds_max": [
+        1.0714,
+        3.24968,
+        2.75164
+      ],
+      "dimensions": [
+        2.1428,
+        3.43945,
+        5.50328
+      ]
+    },
+    "forest/canopy_bough_a.glb": {
+      "source": "FBX/ForestFoliage/SM_Forest_CanopyBough_A.fbx",
+      "editable_source": "ForestFoliage_V3.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#a68161",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#a2ce6f",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -4.51621,
+        -0.44344,
+        -9.5433
+      ],
+      "bounds_max": [
+        4.69288,
+        2.82269,
+        0.18374
+      ],
+      "dimensions": [
+        9.20909,
+        3.26614,
+        9.72704
+      ]
+    },
+    "forest/canopy_bough_b.glb": {
+      "source": "FBX/ForestFoliage/SM_Forest_CanopyBough_B.fbx",
+      "editable_source": "ForestFoliage_V3.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#a68161",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#a2ce6f",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -2.70174,
+        -1.57466,
+        -8.90763
+      ],
+      "bounds_max": [
+        3.77609,
+        2.90831,
+        0.20002
+      ],
+      "dimensions": [
+        6.47784,
+        4.48297,
+        9.10765
+      ]
+    },
+    "forest/canopy_crown.glb": {
+      "source": "FBX/ForestFoliage/SM_Forest_CanopyCrown.fbx",
+      "editable_source": "ForestFoliage_V3.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#a68161",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#a2ce6f",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -8.16723,
+        -1.4433,
+        -8.12617
+      ],
+      "bounds_max": [
+        7.68305,
+        5.92184,
+        8.26746
+      ],
+      "dimensions": [
+        15.85028,
+        7.36514,
+        16.39363
+      ]
+    },
+    "forest/clover_patch.glb": {
+      "source": "FBX/ForestFoliage/SM_Forest_CloverPatch.fbx",
+      "editable_source": "ForestFoliage_V3.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_Clover",
+          "color": "#90c576",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.37911,
+        -0.02232,
+        -0.32624
+      ],
+      "bounds_max": [
+        0.24406,
+        0.25737,
+        0.33647
+      ],
+      "dimensions": [
+        0.62317,
+        0.27969,
+        0.6627
+      ]
+    },
+    "forest/moss_tuft.glb": {
+      "source": "FBX/ForestFoliage/SM_Forest_MossTuft.fbx",
+      "editable_source": "ForestFoliage_V3.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#a2ce6f",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_BlossomCenter",
+          "color": "#ffe776",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.18741,
+        -0.02,
+        -0.2059
+      ],
+      "bounds_max": [
+        0.28043,
+        0.25534,
+        0.21533
+      ],
+      "dimensions": [
+        0.46784,
+        0.27534,
+        0.42123
+      ]
+    },
+    "forest/wildflower_sprout.glb": {
+      "source": "FBX/ForestFoliage/SM_Forest_WildflowerSprout.fbx",
+      "editable_source": "ForestFoliage_V3.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_Clover",
+          "color": "#90c576",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_BlossomWhite",
+          "color": "#fdfcf6",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "MI_Forest_LavenderFlower",
+          "color": "#e2c5f8",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_03": {
+          "source_slot": "MI_Forest_BlossomCenter",
+          "color": "#ffe776",
+          "roughness": 0.72,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.35362,
+        -0.02219,
+        -0.3713
+      ],
+      "bounds_max": [
+        0.39074,
+        0.29702,
+        0.30988
+      ],
+      "dimensions": [
+        0.74436,
+        0.31921,
+        0.68118
+      ]
+    },
+    "forest/bellflower_arch.glb": {
+      "source": "FBX/ForestV2/SM_Forest_BellflowerArch.fbx",
+      "editable_source": "ForestKit_V2.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_Clover",
+          "color": "#a2d76f",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_LavenderFlower",
+          "color": "#dac2f8",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_02": {
+          "source_slot": "MI_Forest_BlossomWhite",
+          "color": "#fdfaf3",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_03": {
+          "source_slot": "MI_Forest_BlossomCenter",
+          "color": "#fdea76",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.67814,
+        -0.09143,
+        -0.04384
+      ],
+      "bounds_max": [
+        0.75662,
+        1.54488,
+        1.59539
+      ],
+      "dimensions": [
+        1.43477,
+        1.63631,
+        1.63923
+      ]
+    },
+    "forest/floating_petals.glb": {
+      "source": "FBX/ForestV2/SM_Forest_FloatingPetals.fbx",
+      "editable_source": "ForestKit_V2.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_PinkPetal",
+          "color": "#fad7ef",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -0.8099,
+        -0.0152,
+        -0.70013
+      ],
+      "bounds_max": [
+        0.70079,
+        0.03923,
+        0.45104
+      ],
+      "dimensions": [
+        1.51069,
+        0.05443,
+        1.15117
+      ]
+    },
+    "forest/hero_tree_trunk.glb": {
+      "source": "FBX/ForestV2/SM_Forest_HeroTreeTrunk.fbx",
+      "editable_source": "ForestKit_V2.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#997355",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        }
+      },
+      "bounds_min": [
+        -5.54586,
+        -0.8,
+        -5.51256
+      ],
+      "bounds_max": [
+        5.54586,
+        16.5,
+        5.51256
+      ],
+      "dimensions": [
+        11.09173,
+        17.3,
+        11.02512
+      ]
+    },
+    "forest/moss_boulder.glb": {
+      "source": "FBX/ForestV2/SM_Forest_MossBoulder.fbx",
+      "editable_source": "ForestKit_V2.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_MossBoulder",
+          "color": "#adaaa6",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_CreekPebbles_D",
+          "normal": "T_Forest_CreekPebbles_N"
+        }
+      },
+      "bounds_min": [
+        -1.58714,
+        -0.12332,
+        -1.26563
+      ],
+      "bounds_max": [
+        1.38923,
+        1.38093,
+        1.13067
+      ],
+      "dimensions": [
+        2.97637,
+        1.50425,
+        2.3963
+      ]
+    },
+    "forest/moss_terrain.glb": {
+      "source": "FBX/ForestV2/SM_Forest_MossTerrain.fbx",
+      "editable_source": "ForestKit_V2.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_MossBank",
+          "color": "#b5ce69",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_MossCarpet_D",
+          "normal": "T_Forest_MossCarpet_N"
+        }
+      },
+      "bounds_min": [
+        -3.1,
+        -0.4,
+        -3.1
+      ],
+      "bounds_max": [
+        3.1,
+        1.18991,
+        3.1
+      ],
+      "dimensions": [
+        6.2,
+        1.58991,
+        6.2
+      ]
+    },
+    "forest/mushroom_bounce_v2.glb": {
+      "source": "FBX/ForestV2/SM_Forest_MushroomBounce_V2.fbx",
+      "editable_source": "ForestKit_V2.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_MushroomBounce",
+          "color": "#efb161",
+          "roughness": 0.14,
+          "normal_strength": 0.65
+        },
+        "Woodland_01": {
+          "source_slot": "M_Forest_DewDrop",
+          "color": "#e1f8ff",
+          "roughness": 0.03,
+          "normal_strength": 0.65,
+          "transparent": true
+        }
+      },
+      "bounds_min": [
+        -1.18433,
+        -1.20702,
+        -1.2095
+      ],
+      "bounds_max": [
+        1.18433,
+        1.26,
+        1.1505
+      ],
+      "dimensions": [
+        2.36866,
+        2.46702,
+        2.36
+      ]
+    },
+    "forest/mushroom_step_v2.glb": {
+      "source": "FBX/ForestV2/SM_Forest_MushroomStep_V2.fbx",
+      "editable_source": "ForestKit_V2.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_MushroomStep",
+          "color": "#e7ad61",
+          "roughness": 0.14,
+          "normal_strength": 0.65
+        },
+        "Woodland_01": {
+          "source_slot": "M_Forest_DewDrop",
+          "color": "#e1f8ff",
+          "roughness": 0.03,
+          "normal_strength": 0.65,
+          "transparent": true
+        }
+      },
+      "bounds_min": [
+        -0.64235,
+        -1.20262,
+        -0.656
+      ],
+      "bounds_max": [
+        0.64235,
+        1.0,
+        0.624
+      ],
+      "dimensions": [
+        1.28469,
+        2.20262,
+        1.28
+      ]
+    },
+    "forest/root_arch_v2.glb": {
+      "source": "FBX/ForestV2/SM_Forest_RootArch_V2.fbx",
+      "editable_source": "ForestKit_V2.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#997355",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_MossBank",
+          "color": "#b5ce69",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_MossCarpet_D",
+          "normal": "T_Forest_MossCarpet_N"
+        },
+        "Woodland_02": {
+          "source_slot": "MI_Forest_SlothVine",
+          "color": "#90bf69",
+          "roughness": 0.68,
+          "normal_strength": 0.65
+        },
+        "Woodland_03": {
+          "source_slot": "MI_Forest_BlossomWhite",
+          "color": "#fdfaf3",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        },
+        "Woodland_04": {
+          "source_slot": "MI_Forest_BlossomCenter",
+          "color": "#fdea76",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -5.28541,
+        -0.76416,
+        -1.03939
+      ],
+      "bounds_max": [
+        5.27964,
+        4.18,
+        0.9268
+      ],
+      "dimensions": [
+        10.56504,
+        4.94415,
+        1.96619
+      ]
+    },
+    "forest/strawberry_plant_v2.glb": {
+      "source": "FBX/ForestV2/SM_Forest_StrawberryPlant_V2.fbx",
+      "editable_source": "ForestKit_V2.blend",
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#90cb61",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_BerryRed",
+          "color": "#ef6961",
+          "roughness": 0.14,
+          "normal_strength": 0.65
+        },
+        "Woodland_02": {
+          "source_slot": "M_Forest_DewDrop",
+          "color": "#e1f8ff",
+          "roughness": 0.03,
+          "normal_strength": 0.65,
+          "transparent": true
+        },
+        "Woodland_03": {
+          "source_slot": "MI_Forest_BlossomWhite",
+          "color": "#fdfaf3",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        },
+        "Woodland_04": {
+          "source_slot": "MI_Forest_BlossomCenter",
+          "color": "#fdea76",
+          "roughness": 0.68,
+          "normal_strength": 0.65,
+          "wind": 0.016,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -1.24137,
+        -0.12674,
+        -0.11698
+      ],
+      "bounds_max": [
+        1.25782,
+        2.66517,
+        3.54518
+      ],
+      "dimensions": [
+        2.4992,
+        2.79191,
+        3.66216
+      ]
+    },
+    "unreal_extract/first_steps_river_gravel.glb": {
+      "source": "UnrealExtract/Meshes/SM_FirstSteps_RiverGravel.glb",
+      "editable_source": null,
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "M_ValleyCreekGravel",
+          "color": "#ffffff",
+          "roughness": 0.88,
+          "normal_strength": 0.65,
+          "albedo": "T_ValleyPebbles_D",
+          "normal": "T_ValleyPebbles_N"
+        }
+      },
+      "bounds_min": [
+        -26.24192,
+        -1.03154,
+        6.14305
+      ],
+      "bounds_max": [
+        26.04237,
+        -0.102,
+        14.8194
+      ],
+      "dimensions": [
+        52.28429,
+        0.92954,
+        8.67635
+      ]
+    },
+    "unreal_extract/moss_terrain_solid.glb": {
+      "source": "UnrealExtract/Meshes/SM_Forest_MossTerrain_Solid.glb",
+      "editable_source": null,
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_MossBank",
+          "color": "#e7e7e7",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_MossCarpet_D",
+          "normal": "T_Forest_MossCarpet_N"
+        }
+      },
+      "bounds_min": [
+        -3.1,
+        -0.22,
+        -3.1
+      ],
+      "bounds_max": [
+        3.1,
+        1.18991,
+        3.1
+      ],
+      "dimensions": [
+        6.2,
+        1.40991,
+        6.2
+      ]
+    },
+    "unreal_extract/first_steps_tree_01.glb": {
+      "source": "UnrealExtract/Meshes/SM_FirstSteps_Tree_01.glb",
+      "editable_source": null,
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#906c50",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#a2ce6f",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -19.66556,
+        -2.47593,
+        -20.41981
+      ],
+      "bounds_max": [
+        20.64575,
+        48.34759,
+        20.50095
+      ],
+      "dimensions": [
+        40.31131,
+        50.82352,
+        40.92076
+      ]
+    },
+    "unreal_extract/first_steps_tree_02.glb": {
+      "source": "UnrealExtract/Meshes/SM_FirstSteps_Tree_02.glb",
+      "editable_source": null,
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#906c50",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#a2ce6f",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -23.18124,
+        -2.6266,
+        -22.74754
+      ],
+      "bounds_max": [
+        22.29818,
+        55.82805,
+        23.41947
+      ],
+      "dimensions": [
+        45.47942,
+        58.45465,
+        46.16701
+      ]
+    },
+    "unreal_extract/first_steps_tree_03.glb": {
+      "source": "UnrealExtract/Meshes/SM_FirstSteps_Tree_03.glb",
+      "editable_source": null,
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#906c50",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#a2ce6f",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -21.40041,
+        -2.4222,
+        -20.65181
+      ],
+      "bounds_max": [
+        21.12451,
+        48.5515,
+        21.56956
+      ],
+      "dimensions": [
+        42.52492,
+        50.9737,
+        42.22137
+      ]
+    },
+    "unreal_extract/first_steps_tree_04.glb": {
+      "source": "UnrealExtract/Meshes/SM_FirstSteps_Tree_04.glb",
+      "editable_source": null,
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#906c50",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#a2ce6f",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -20.83123,
+        -2.32207,
+        -21.36752
+      ],
+      "bounds_max": [
+        21.1918,
+        45.75541,
+        20.50691
+      ],
+      "dimensions": [
+        42.02302,
+        48.07748,
+        41.87443
+      ]
+    },
+    "unreal_extract/first_steps_tree_05.glb": {
+      "source": "UnrealExtract/Meshes/SM_FirstSteps_Tree_05.glb",
+      "editable_source": null,
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#906c50",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#a2ce6f",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -25.5429,
+        -2.78055,
+        -25.34258
+      ],
+      "bounds_max": [
+        24.4561,
+        57.12414,
+        25.01587
+      ],
+      "dimensions": [
+        49.99899,
+        59.90469,
+        50.35845
+      ]
+    },
+    "unreal_extract/first_steps_tree_06.glb": {
+      "source": "UnrealExtract/Meshes/SM_FirstSteps_Tree_06.glb",
+      "editable_source": null,
+      "materials": {
+        "Woodland_00": {
+          "source_slot": "MI_Forest_RootBark",
+          "color": "#906c50",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "albedo": "T_Forest_BarkGrooves_D",
+          "normal": "T_Forest_BarkGrooves_N"
+        },
+        "Woodland_01": {
+          "source_slot": "MI_Forest_StrawberryLeaf",
+          "color": "#a2ce6f",
+          "roughness": 0.5,
+          "normal_strength": 0.65,
+          "wind": 0.0,
+          "two_sided": true
+        }
+      },
+      "bounds_min": [
+        -23.64928,
+        -2.9383,
+        -23.53461
+      ],
+      "bounds_max": [
+        24.47102,
+        54.53196,
+        24.24221
+      ],
+      "dimensions": [
+        48.1203,
+        57.47026,
+        47.77681
+      ]
+    }
+  },
+  "textures": {
+    "T_AmberStep_BaseColor": {
+      "path": "textures/valley_mushrooms/T_AmberStep_BaseColor.png",
+      "source": "ValleyMushrooms/T_AmberStep_BaseColor.png"
+    },
+    "T_AmberStep_NormalGL": {
+      "path": "textures/valley_mushrooms/T_AmberStep_NormalGL.png",
+      "source": "ValleyMushrooms/T_AmberStep_NormalGL.png",
+      "normal_y": "opengl"
+    },
+    "T_AmberStep_ORM": {
+      "path": "textures/valley_mushrooms/T_AmberStep_ORM.png",
+      "source": "ValleyMushrooms/T_AmberStep_ORM.png"
+    },
+    "T_Bellflower_PetalFolds": {
+      "path": "textures/valley_flora/T_Bellflower_PetalFolds.png",
+      "source": "ValleyFlora/T_Bellflower_PetalFolds.png"
+    },
+    "T_BirchPlush_Color": {
+      "path": "textures/valley_understory/T_BirchPlush_Color.png",
+      "source": "ValleyUnderstory/T_BirchPlush_Color.png"
+    },
+    "T_BirchPlush_N": {
+      "path": "textures/valley_understory/T_BirchPlush_N.png",
+      "source": "ValleyUnderstory/T_BirchPlush_N.png",
+      "normal_y": "directx"
+    },
+    "T_BirchPlush_Nap": {
+      "path": "textures/valley_understory/T_BirchPlush_Nap.png",
+      "source": "ValleyUnderstory/T_BirchPlush_Nap.png"
+    },
+    "T_BotanicalBladeVeins": {
+      "path": "textures/clover_bank/T_BotanicalBladeVeins.png",
+      "source": "CloverBank/T_BotanicalBladeVeins.png"
+    },
+    "T_BotanicalBladeVeins_N": {
+      "path": "textures/clover_bank/T_BotanicalBladeVeins_N.png",
+      "source": "CloverBank/T_BotanicalBladeVeins_N.png",
+      "normal_y": "directx"
+    },
+    "T_BotanicalLeafVeins": {
+      "path": "textures/clover_bank/T_BotanicalLeafVeins.png",
+      "source": "CloverBank/T_BotanicalLeafVeins.png"
+    },
+    "T_BotanicalLeafVeins_N": {
+      "path": "textures/clover_bank/T_BotanicalLeafVeins_N.png",
+      "source": "CloverBank/T_BotanicalLeafVeins_N.png",
+      "normal_y": "directx"
+    },
+    "T_CushionMoss_BaseColor": {
+      "path": "textures/valley_understory/T_CushionMoss_BaseColor.png",
+      "source": "ValleyUnderstory/T_CushionMoss_BaseColor.png"
+    },
+    "T_CushionMoss_NormalGL": {
+      "path": "textures/valley_understory/T_CushionMoss_NormalGL.png",
+      "source": "ValleyUnderstory/T_CushionMoss_NormalGL.png",
+      "normal_y": "opengl"
+    },
+    "T_CushionMoss_ORM": {
+      "path": "textures/valley_understory/T_CushionMoss_ORM.png",
+      "source": "ValleyUnderstory/T_CushionMoss_ORM.png"
+    },
+    "T_ElderBark_BaseColor": {
+      "path": "textures/valley_trees/T_ElderBark_BaseColor.png",
+      "source": "ValleyTrees/T_ElderBark_BaseColor.png"
+    },
+    "T_ElderBark_NormalGL": {
+      "path": "textures/valley_trees/T_ElderBark_NormalGL.png",
+      "source": "ValleyTrees/T_ElderBark_NormalGL.png",
+      "normal_y": "opengl"
+    },
+    "T_ElderBark_ORM": {
+      "path": "textures/valley_trees/T_ElderBark_ORM.png",
+      "source": "ValleyTrees/T_ElderBark_ORM.png"
+    },
+    "T_Forest_BarkGrooves_D": {
+      "path": "textures/source_art/T_Forest_BarkGrooves_D.png",
+      "source": "Textures/T_Forest_BarkGrooves_D.png"
+    },
+    "T_Forest_BarkGrooves_N": {
+      "path": "textures/source_art/T_Forest_BarkGrooves_N.png",
+      "source": "Textures/T_Forest_BarkGrooves_N.png",
+      "normal_y": "directx"
+    },
+    "T_Forest_CreekPebbles_D": {
+      "path": "textures/source_art/T_Forest_CreekPebbles_D.png",
+      "source": "Textures/T_Forest_CreekPebbles_D.png"
+    },
+    "T_Forest_CreekPebbles_N": {
+      "path": "textures/source_art/T_Forest_CreekPebbles_N.png",
+      "source": "Textures/T_Forest_CreekPebbles_N.png",
+      "normal_y": "directx"
+    },
+    "T_Forest_MossCarpet_D": {
+      "path": "textures/source_art/T_Forest_MossCarpet_D.png",
+      "source": "Textures/T_Forest_MossCarpet_D.png"
+    },
+    "T_Forest_MossCarpet_N": {
+      "path": "textures/source_art/T_Forest_MossCarpet_N.png",
+      "source": "Textures/T_Forest_MossCarpet_N.png",
+      "normal_y": "directx"
+    },
+    "T_HazelLeaf_BaseColor": {
+      "path": "textures/valley_trees/T_HazelLeaf_BaseColor.png",
+      "source": "ValleyTrees/T_HazelLeaf_BaseColor.png"
+    },
+    "T_HazelLeaf_NormalGL": {
+      "path": "textures/valley_trees/T_HazelLeaf_NormalGL.png",
+      "source": "ValleyTrees/T_HazelLeaf_NormalGL.png",
+      "normal_y": "opengl"
+    },
+    "T_HazelLeaf_ORM": {
+      "path": "textures/valley_trees/T_HazelLeaf_ORM.png",
+      "source": "ValleyTrees/T_HazelLeaf_ORM.png"
+    },
+    "T_LotusLeaf_Color": {
+      "path": "textures/valley_lotus/T_LotusLeaf_Color.png",
+      "source": "ValleyLotus/T_LotusLeaf_Color.png"
+    },
+    "T_LotusLeaf_Normal": {
+      "path": "textures/valley_lotus/T_LotusLeaf_Normal.png",
+      "source": "ValleyLotus/T_LotusLeaf_Normal.png",
+      "normal_y": "directx"
+    },
+    "T_MossGround01_Color": {
+      "path": "textures/valley_ground/T_MossGround01_Color.png",
+      "source": "ValleyGround/T_MossGround01_Color.png"
+    },
+    "T_MossGround01_Height": {
+      "path": "textures/valley_ground/T_MossGround01_Height.png",
+      "source": "ValleyGround/T_MossGround01_Height.png"
+    },
+    "T_MossGround01_Normal": {
+      "path": "textures/valley_ground/T_MossGround01_Normal.png",
+      "source": "ValleyGround/T_MossGround01_Normal.png",
+      "normal_y": "directx"
+    },
+    "T_MossGround01_ORM": {
+      "path": "textures/valley_ground/T_MossGround01_ORM.png",
+      "source": "ValleyGround/T_MossGround01_ORM.png"
+    },
+    "T_ValleyBoulderMoss_BaseColor": {
+      "path": "textures/valley_cliffs/T_ValleyBoulderMoss_BaseColor.png",
+      "source": "ValleyCliffs/Textures/T_ValleyBoulderMoss_BaseColor.png"
+    },
+    "T_ValleyBoulderMoss_NormalGL": {
+      "path": "textures/valley_cliffs/T_ValleyBoulderMoss_NormalGL.png",
+      "source": "ValleyCliffs/Textures/T_ValleyBoulderMoss_NormalGL.png",
+      "normal_y": "opengl"
+    },
+    "T_ValleyBoulderMoss_Surface": {
+      "path": "textures/valley_cliffs/T_ValleyBoulderMoss_Surface.png",
+      "source": "ValleyCliffs/Textures/T_ValleyBoulderMoss_Surface.png"
+    },
+    "T_ValleyCliff_D": {
+      "path": "textures/valley_ground/T_ValleyCliff_D.png",
+      "source": "ValleyGround/T_ValleyCliff_D.png"
+    },
+    "T_ValleyCliff_N": {
+      "path": "textures/valley_ground/T_ValleyCliff_N.png",
+      "source": "ValleyGround/T_ValleyCliff_N.png",
+      "normal_y": "directx"
+    },
+    "T_ValleyCreekstone_BaseColor": {
+      "path": "textures/valley_cliffs/T_ValleyCreekstone_BaseColor.png",
+      "source": "ValleyCliffs/Textures/T_ValleyCreekstone_BaseColor.png"
+    },
+    "T_ValleyCreekstone_NormalGL": {
+      "path": "textures/valley_cliffs/T_ValleyCreekstone_NormalGL.png",
+      "source": "ValleyCliffs/Textures/T_ValleyCreekstone_NormalGL.png",
+      "normal_y": "opengl"
+    },
+    "T_ValleyCreekstone_Roughness": {
+      "path": "textures/valley_cliffs/T_ValleyCreekstone_Roughness.png",
+      "source": "ValleyCliffs/Textures/T_ValleyCreekstone_Roughness.png"
+    },
+    "T_ValleyEarth_D": {
+      "path": "textures/valley_ground/T_ValleyEarth_D.png",
+      "source": "ValleyGround/T_ValleyEarth_D.png"
+    },
+    "T_ValleyEarth_N": {
+      "path": "textures/valley_ground/T_ValleyEarth_N.png",
+      "source": "ValleyGround/T_ValleyEarth_N.png",
+      "normal_y": "directx"
+    },
+    "T_ValleyFlora_BC": {
+      "path": "textures/valley_flora/T_ValleyFlora_BC.png",
+      "source": "ValleyFlora/T_ValleyFlora_BC.png"
+    },
+    "T_ValleyFlora_N": {
+      "path": "textures/valley_flora/T_ValleyFlora_N.png",
+      "source": "ValleyFlora/T_ValleyFlora_N.png",
+      "normal_y": "opengl"
+    },
+    "T_ValleyFlora_R": {
+      "path": "textures/valley_flora/T_ValleyFlora_R.png",
+      "source": "ValleyFlora/T_ValleyFlora_R.png"
+    },
+    "T_ValleyMoss_BaseColor": {
+      "path": "textures/valley_cliffs/T_ValleyMoss_BaseColor.png",
+      "source": "ValleyCliffs/Textures/T_ValleyMoss_BaseColor.png"
+    },
+    "T_ValleyMoss_D": {
+      "path": "textures/valley_ground/T_ValleyMoss_D.png",
+      "source": "ValleyGround/T_ValleyMoss_D.png"
+    },
+    "T_ValleyMoss_N": {
+      "path": "textures/valley_ground/T_ValleyMoss_N.png",
+      "source": "ValleyGround/T_ValleyMoss_N.png",
+      "normal_y": "directx"
+    },
+    "T_ValleyMoss_NormalGL": {
+      "path": "textures/valley_cliffs/T_ValleyMoss_NormalGL.png",
+      "source": "ValleyCliffs/Textures/T_ValleyMoss_NormalGL.png",
+      "normal_y": "opengl"
+    },
+    "T_ValleyMoss_Roughness": {
+      "path": "textures/valley_cliffs/T_ValleyMoss_Roughness.png",
+      "source": "ValleyCliffs/Textures/T_ValleyMoss_Roughness.png"
+    },
+    "T_ValleyPebbles_D": {
+      "path": "textures/valley_ground/T_ValleyPebbles_D.png",
+      "source": "ValleyGround/T_ValleyPebbles_D.png"
+    },
+    "T_ValleyPebbles_N": {
+      "path": "textures/valley_ground/T_ValleyPebbles_N.png",
+      "source": "ValleyGround/T_ValleyPebbles_N.png",
+      "normal_y": "directx"
+    },
+    "T_ValleyRootBark_BaseColor": {
+      "path": "textures/valley_root/T_ValleyRootBark_BaseColor.png",
+      "source": "ValleyRoot/Textures/T_ValleyRootBark_BaseColor.png"
+    },
+    "T_ValleyRootBark_NormalGL": {
+      "path": "textures/valley_root/T_ValleyRootBark_NormalGL.png",
+      "source": "ValleyRoot/Textures/T_ValleyRootBark_NormalGL.png",
+      "normal_y": "opengl"
+    },
+    "T_ValleyRootBark_Roughness": {
+      "path": "textures/valley_root/T_ValleyRootBark_Roughness.png",
+      "source": "ValleyRoot/Textures/T_ValleyRootBark_Roughness.png"
+    },
+    "T_WoodlandBotanical_BaseColor": {
+      "path": "textures/valley_understory/T_WoodlandBotanical_BaseColor.png",
+      "source": "ValleyUnderstory/T_WoodlandBotanical_BaseColor.png"
+    },
+    "T_WoodlandBotanical_NormalGL": {
+      "path": "textures/valley_understory/T_WoodlandBotanical_NormalGL.png",
+      "source": "ValleyUnderstory/T_WoodlandBotanical_NormalGL.png",
+      "normal_y": "opengl"
+    },
+    "T_WoodlandBotanical_ORM": {
+      "path": "textures/valley_understory/T_WoodlandBotanical_ORM.png",
+      "source": "ValleyUnderstory/T_WoodlandBotanical_ORM.png"
+    },
+    "T_WoodlandPath_Color": {
+      "path": "textures/valley_ground/T_WoodlandPath_Color.png",
+      "source": "ValleyGround/T_WoodlandPath_Color.png"
+    },
+    "T_WoodlandPath_Normal": {
+      "path": "textures/valley_ground/T_WoodlandPath_Normal.png",
+      "source": "ValleyGround/T_WoodlandPath_Normal.png",
+      "normal_y": "directx"
+    },
+    "T_WoodlandPath_Surface": {
+      "path": "textures/valley_ground/T_WoodlandPath_Surface.png",
+      "source": "ValleyGround/T_WoodlandPath_Surface.png"
+    },
+    "T_ValleyBoulderMoss_Height": {
+      "path": "textures/valley_cliffs/T_ValleyBoulderMoss_Height.png",
+      "source": "ValleyCliffs/Textures/T_ValleyBoulderMoss_Surface.png",
+      "channel": "blue"
+    }
+  }
+}
