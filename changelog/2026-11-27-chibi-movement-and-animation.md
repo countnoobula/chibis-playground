@@ -1,0 +1,12 @@
+# Chibi movement and animation · 2026-11-27
+
+- Wall runs start from a running jump close to the wall with steering along it. Casual hops and ledge drops stay in normal air movement, and a wall kick can transfer to the opposite wall. Verified the rooftop corridor with the Mobile renderer at 60 physics ticks per second and passed all 330 headless checks.
+- Releasing A or D when dropping from a shimmy gives Chibi 0.18 seconds of gentler sideways braking. Directional input can steer her as soon as she lets go.
+- C, Ctrl, and touch Drop release Chibi while she shimmies or rounds a ledge corner. She carries her sideways motion into the fall and drops without sideways drift from a resting hang.
+- Rebuilt the scarf canopy as a deeper continuous arch with a real thickened shell, a cream binding, a shaded underside, and a subtle weave. The canopy spreads across first, then fills out with air. The crown and edges respond more strongly to descent, banking, and tunnel wind while the four corners stay anchored in Chibi's hands.
+- Chibi carries her speed from scarf glide into the first running step. The gait starts at touchdown with the leading reachable boot, a short landing compression, and a support that releases at toe-off. Near-stationary landings keep a soft two-foot settle.
+- The canopy gathers while all four corners are still in Chibi’s hands. The throwing hand starts to swing back first as the fabric transfers to the collar, and the loose end trails into the running stride. Partial openings use a smaller gather. Jump can take Chibi into a fresh hop before the wrap finishes.
+- The tunnel catches Chibi’s scarf as it opens. The canopy billows downwind and its hems flutter with the gust while all four corners stay in her hands. Chibi can steer across or against the airflow, and she keeps coasting as the load fades at the edge. The assisted carry earns no Flow.
+- Deepened the headwind brace with bent knees and a stronger reach into the palm. At the gust peak her shoulders rock back, the supporting shoe stays planted, and the free boot trails downwind before the stride recovers.
+- Chibi braces into the headwind with her right palm forward. At the gust peak she gives ground, keeps one shoe planted, and trails her free ankle downwind. Both scarf tails flutter with the gust.
+- Tailwinds add up to 12% of current running speed. Flow scores the runner’s own effort. Slides stay low after button release, turn into the airflow, and carry momentum into a jump or through an exit. Sideways steering can take Chibi out of the lane.

@@ -2,10 +2,16 @@ extends Control
 
 const DESIGN_SIZE := Vector2(1280, 720)
 const MOBILE_CROP_TOP_FRACTION := 0.10
+const TRANSITION_DURATION := 0.30
+const ATLAS_PREVIEW_SCENE := preload("res://ui/menu/atlas_preview.tscn")
 
 var _pointer := preload("res://ui/hud/menu_touch_pointer.gd").new()
+var _atlas_preview: Control
+var _transitioning := false
 
 @onready var artwork_canvas: Control = $ArtworkCanvas
+@onready var title_art: Control = $ArtworkCanvas/TitleArt
+@onready var title_controls: Control = $ArtworkCanvas/TitleControls
 
 
 func _ready() -> void:
@@ -14,7 +20,8 @@ func _ready() -> void:
 		get_window().title = "Strawberry Hollow · Mobile preview"
 	resized.connect(_fit_canvas)
 	_fit_canvas()
-	$ArtworkCanvas/TitleControls.options_requested.connect(_open_options)
+	title_controls.connect("play_requested", _open_atlas)
+	title_controls.connect("options_requested", _open_options)
 
 
 func _fit_canvas() -> void:
@@ -34,16 +41,20 @@ func _fit_canvas() -> void:
 		fit_scale = minf(size.x / DESIGN_SIZE.x, size.y / DESIGN_SIZE.y)
 		artwork_canvas.position = (size - DESIGN_SIZE * fit_scale) * 0.5
 	artwork_canvas.scale = Vector2.ONE * fit_scale
-	$ArtworkCanvas/TitleControls.call("fit_to_visible_area")
+	title_controls.call("fit_to_visible_area")
+	if is_instance_valid(_atlas_preview):
+		_atlas_preview.call("fit_to_visible_area")
 
 
 func _open_options() -> void:
-	var mobile: bool = $ArtworkCanvas/TitleControls.mobile_layout
+	if _transitioning or is_instance_valid(_atlas_preview):
+		return
+	var mobile := bool(title_controls.get("mobile_layout"))
 	var scene: PackedScene = preload("res://ui/menu/mobile_options.tscn") if mobile else preload("res://ui/menu/options.tscn")
 	var options := scene.instantiate()
 	var parent: Control = self if mobile else artwork_canvas
-	$ArtworkCanvas/TitleArt.hide()
-	$ArtworkCanvas/TitleControls.hide()
+	title_art.hide()
+	title_controls.hide()
 	options.back_requested.connect(_close_options.bind(options))
 	parent.add_child(options)
 
@@ -51,9 +62,56 @@ func _open_options() -> void:
 func _close_options(options: Control) -> void:
 	options.hide()
 	options.queue_free()
-	$ArtworkCanvas/TitleArt.show()
-	$ArtworkCanvas/TitleControls.show()
-	$ArtworkCanvas/TitleControls/OptionsButton.grab_focus.call_deferred()
+	title_art.show()
+	title_controls.show()
+	title_controls.get_node("OptionsButton").grab_focus.call_deferred()
+
+
+func _open_atlas() -> void:
+	if _transitioning or is_instance_valid(_atlas_preview):
+		return
+	_transitioning = true
+	_atlas_preview = ATLAS_PREVIEW_SCENE.instantiate() as Control
+	_atlas_preview.modulate.a = 0.0
+	_atlas_preview.connect("back_requested", _return_to_title)
+	add_child(_atlas_preview)
+	_atlas_preview.call("fit_to_visible_area")
+	var tween := create_tween().set_parallel(true)
+	tween.tween_property(title_art, "modulate:a", 0.0, TRANSITION_DURATION)
+	tween.tween_property(title_controls, "modulate:a", 0.0, TRANSITION_DURATION)
+	tween.tween_property(_atlas_preview, "modulate:a", 1.0, TRANSITION_DURATION)
+	await tween.finished
+	if not is_instance_valid(_atlas_preview):
+		return
+	title_art.hide()
+	title_controls.hide()
+	title_art.modulate.a = 1.0
+	title_controls.modulate.a = 1.0
+	_atlas_preview.modulate.a = 1.0
+	_transitioning = false
+	_atlas_preview.call("focus_back")
+
+
+func _return_to_title() -> void:
+	if _transitioning or not is_instance_valid(_atlas_preview):
+		return
+	_transitioning = true
+	title_art.show()
+	title_controls.show()
+	title_art.modulate.a = 0.0
+	title_controls.modulate.a = 0.0
+	var preview := _atlas_preview
+	var tween := create_tween().set_parallel(true)
+	tween.tween_property(title_art, "modulate:a", 1.0, TRANSITION_DURATION)
+	tween.tween_property(title_controls, "modulate:a", 1.0, TRANSITION_DURATION)
+	tween.tween_property(preview, "modulate:a", 0.0, TRANSITION_DURATION)
+	await tween.finished
+	if is_instance_valid(preview):
+		preview.hide()
+		preview.queue_free()
+	_atlas_preview = null
+	_transitioning = false
+	title_controls.get_node("PlayButton").grab_focus.call_deferred()
 
 
 func _notification(what: int) -> void:
@@ -63,3 +121,15 @@ func _notification(what: int) -> void:
 
 func _input(event: InputEvent) -> void:
 	_pointer.forward(get_viewport(), event)
+	if _transitioning or (event.is_echo() and event.is_action(&"ui_accept")):
+		get_viewport().set_input_as_handled()
+		return
+	# Keep the title's confirm/back bindings local. In gameplay B is slide/roll.
+	if event is InputEventJoypadButton and event.button_index in [JOY_BUTTON_A, JOY_BUTTON_B]:
+		var action := &"ui_accept" if event.button_index == JOY_BUTTON_A else &"ui_cancel"
+		if not event.is_action(action):
+			var menu_event := InputEventAction.new()
+			menu_event.action = action
+			menu_event.pressed = event.pressed
+			get_viewport().set_input_as_handled()
+			get_viewport().push_input(menu_event, true)

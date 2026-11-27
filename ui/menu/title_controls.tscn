@@ -9,10 +9,7 @@ offset_bottom = 720.0
 mouse_filter = 2
 script = ExtResource("1")
 
-[node name="ContinueButton" type="TextureButton" parent="."]
-layout_mode = 0
-
-[node name="NewGameButton" type="TextureButton" parent="."]
+[node name="PlayButton" type="TextureButton" parent="."]
 layout_mode = 0
 
 [node name="OptionsButton" type="TextureButton" parent="."]

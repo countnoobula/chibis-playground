@@ -1,53 +1,42 @@
 extends Control
 
+signal play_requested
 signal options_requested
 
 enum MenuAction {
-	CONTINUE,
-	NEW_GAME,
+	PLAY,
 	OPTIONS,
 	QUIT,
 }
 
-const ACTION_NAMES: Array[String] = ["continue", "new_game", "options", "quit"]
-const ACTION_LABELS: Array[String] = ["Continue", "New Game", "Options", "Quit"]
-const ENABLED_ACTIONS: Array[int] = [MenuAction.NEW_GAME, MenuAction.OPTIONS, MenuAction.QUIT]
-const ROOFTOP_SCENE := "res://levels/rooftop_gym/rooftop_parkour_gym.tscn"
+const JOURNAL_FONT := preload("res://ui/menu/berry_journal_font.tres")
+const ACTION_LABELS: Array[String] = ["Play", "Options", "Quit"]
+const ENABLED_ACTIONS: Array[int] = [MenuAction.PLAY, MenuAction.OPTIONS, MenuAction.QUIT]
 const MOBILE_LAYOUT_ARGUMENT := "--mobile-menu"
 
 const DESKTOP_POSITIONS: Array[Vector2] = [
 	Vector2(28.0, 622.0),
-	Vector2(206.0, 622.0),
-	Vector2(400.0, 622.0),
-	Vector2(562.0, 622.0),
+	Vector2(232.0, 622.0),
+	Vector2(436.0, 622.0),
 ]
-const DESKTOP_SIZES: Array[Vector2] = [
-	Vector2(170.0, 72.0),
-	Vector2(186.0, 72.0),
-	Vector2(154.0, 72.0),
-	Vector2(144.0, 72.0),
-]
+const DESKTOP_BUTTON_SIZE := Vector2(186.0, 72.0)
 const MOBILE_POSITIONS: Array[Vector2] = [
 	Vector2(36.0, 452.0),
 	Vector2(338.0, 452.0),
-	Vector2(36.0, 576.0),
-	Vector2(338.0, 576.0),
+	Vector2(187.0, 576.0),
 ]
 const MOBILE_BUTTON_SIZE := Vector2(290.0, 112.0)
 
-const DISABLED_MODULATE := Color.WHITE
-const FOCUSED_MODULATE := Color(1.0, 0.96, 0.88, 1.0)
+const IDLE_RIM := preload("res://ui/menu/title_idle_rim.gdshader")
 const FOCUS_SCALE := Vector2(1.055, 1.055)
 const FOCUS_LIFT := 7.0
 const MOBILE_FOCUS_SCALE := Vector2(1.08, 1.08)
 const MOBILE_FOCUS_LIFT := 8.0
-const MOBILE_FOCUS_HIGHLIGHT_SCALE := Vector2(1.16, 1.16)
-const MOBILE_FOCUS_HIGHLIGHT_COLOR := Color("#ffe48c")
 const MOBILE_BOTTOM_MARGIN := 28.0
 const MOBILE_SAFE_MARGIN := Vector2(24.0, MOBILE_BOTTOM_MARGIN)
 
 var _buttons: Array[TextureButton] = []
-var _focus_highlights: Array[TextureRect] = []
+var _idle_material := ShaderMaterial.new()
 var _base_positions: Array[Vector2] = []
 var _mobile_offset := Vector2.ZERO
 var mobile_layout := false
@@ -57,13 +46,12 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	mobile_layout = OS.has_feature("mobile") or OS.get_cmdline_user_args().has(MOBILE_LAYOUT_ARGUMENT)
 	_buttons = [
-		$ContinueButton as TextureButton,
-		$NewGameButton as TextureButton,
+		$PlayButton as TextureButton,
 		$OptionsButton as TextureButton,
 		$QuitButton as TextureButton,
 	]
 	_base_positions.resize(MenuAction.size())
-	_focus_highlights.resize(MenuAction.size())
+	_idle_material.shader = IDLE_RIM
 
 	for action in MenuAction.size():
 		var button := _buttons[action]
@@ -76,33 +64,48 @@ func _ready() -> void:
 		button.disabled = not enabled
 		button.gui_input.connect(_on_button_gui_input.bind(action))
 		button.mouse_entered.connect(_focus_button.bind(action))
-		button.focus_entered.connect(_on_button_focus_entered.bind(action))
+		button.focus_entered.connect(_set_button_focus.bind(action, true))
+		button.focus_exited.connect(_set_button_focus.bind(action, false))
 		button.pressed.connect(_activate_action.bind(action))
 		button.accessibility_name = ACTION_LABELS[action]
 		button.tooltip_text = ACTION_LABELS[action]
-		if action == MenuAction.CONTINUE:
-			button.accessibility_description = "Continue is not available yet."
-		_load_button_texture(button, action)
+		_dress_button(button, action)
 
 	_layout_buttons()
-	_create_focus_highlights()
 	_configure_focus_neighbors()
-	_buttons[MenuAction.NEW_GAME].grab_focus()
+	_buttons[MenuAction.PLAY].grab_focus()
 	_update_button_visuals()
 
 
-func _load_button_texture(button: TextureButton, action: int) -> void:
-	var family := "patch" if mobile_layout else "ribbon"
-	var texture_path := "res://ui/menu/art/buttons/%s_%s.png" % [family, ACTION_NAMES[action]]
-	var texture := load(texture_path) as Texture2D
-	if texture == null:
-		push_error("Missing title menu button texture: %s" % texture_path)
-		return
-	button.texture_normal = texture
-	button.texture_hover = texture
-	button.texture_pressed = texture
-	button.texture_focused = texture
-	button.texture_disabled = texture
+func _dress_button(button: TextureButton, action: int) -> void:
+	button.texture_normal = preload("res://ui/menu/art/buttons/patch_base.png") if mobile_layout else preload("res://ui/menu/art/buttons/ribbon_base.png")
+	var caption := Label.new()
+	caption.name = "Caption"
+	caption.text = ACTION_LABELS[action]
+	caption.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var optical_lift := 6.0 if mobile_layout else 4.0
+	caption.offset_top = -optical_lift
+	caption.offset_bottom = -optical_lift
+	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	caption.add_theme_font_override("font", JOURNAL_FONT)
+	caption.add_theme_font_size_override("font_size", 37 if mobile_layout else 26)
+	caption.add_theme_color_override("font_color", Color("#591c35"))
+	button.add_child(caption)
+
+	var berry := TextureRect.new()
+	berry.name = "FocusBerry"
+	berry.texture = preload("res://ui/menu/art/title_berry.png")
+	berry.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	berry.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	berry.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	button.add_child(berry)
+	berry.anchor_left = 0.79
+	berry.anchor_right = 0.92
+	berry.anchor_top = 0.23
+	berry.anchor_bottom = 0.73
+	berry.hide()
 
 
 func _layout_buttons() -> void:
@@ -110,7 +113,7 @@ func _layout_buttons() -> void:
 	for action in MenuAction.size():
 		var button := _buttons[action]
 		var target_position := MOBILE_POSITIONS[action] if mobile_layout else DESKTOP_POSITIONS[action]
-		var target_size := MOBILE_BUTTON_SIZE if mobile_layout else DESKTOP_SIZES[action]
+		var target_size := MOBILE_BUTTON_SIZE if mobile_layout else DESKTOP_BUTTON_SIZE
 		if mobile_layout:
 			target_position += _mobile_offset
 		button.position = target_position
@@ -130,10 +133,16 @@ func _mobile_buttons_offset() -> Vector2:
 		(viewport_bounds.position - canvas.position) / canvas.scale,
 		viewport_bounds.size / canvas.scale
 	)
-	var button_left := MOBILE_POSITIONS[MenuAction.CONTINUE].x
-	var button_right := MOBILE_POSITIONS[MenuAction.QUIT].x + MOBILE_BUTTON_SIZE.x
-	var button_top := MOBILE_POSITIONS[MenuAction.NEW_GAME].y
-	var button_bottom := MOBILE_POSITIONS[MenuAction.QUIT].y + MOBILE_BUTTON_SIZE.y
+	var button_left := MOBILE_POSITIONS[0].x
+	var button_right := MOBILE_POSITIONS[0].x + MOBILE_BUTTON_SIZE.x
+	var button_top := MOBILE_POSITIONS[0].y
+	var button_bottom := MOBILE_POSITIONS[0].y + MOBILE_BUTTON_SIZE.y
+	for action in range(1, MOBILE_POSITIONS.size()):
+		var button_position: Vector2 = MOBILE_POSITIONS[action]
+		button_left = minf(button_left, button_position.x)
+		button_right = maxf(button_right, button_position.x + MOBILE_BUTTON_SIZE.x)
+		button_top = minf(button_top, button_position.y)
+		button_bottom = maxf(button_bottom, button_position.y + MOBILE_BUTTON_SIZE.y)
 	var min_x_shift := local_safe_bounds.position.x + MOBILE_SAFE_MARGIN.x - button_left
 	var max_x_shift := local_safe_bounds.end.x - MOBILE_SAFE_MARGIN.x - button_right
 	var min_y_shift := local_safe_bounds.position.y + MOBILE_SAFE_MARGIN.y - button_top
@@ -164,27 +173,6 @@ func fit_to_visible_area() -> void:
 	_update_button_visuals()
 
 
-func _create_focus_highlights() -> void:
-	for action in MenuAction.size():
-		var button := _buttons[action]
-		var highlight := TextureRect.new()
-		highlight.name = "FocusHighlight_%s" % ACTION_NAMES[action]
-		highlight.position = button.position
-		highlight.size = button.size
-		highlight.pivot_offset = button.size * 0.5
-		highlight.texture = button.texture_normal
-		highlight.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		highlight.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		highlight.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-		highlight.modulate = MOBILE_FOCUS_HIGHLIGHT_COLOR
-		highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		highlight.focus_mode = Control.FOCUS_NONE
-		highlight.visible = false
-		add_child(highlight)
-		move_child(highlight, button.get_index())
-		_focus_highlights[action] = highlight
-
-
 func _configure_focus_neighbors() -> void:
 	for index in ENABLED_ACTIONS.size():
 		var action := ENABLED_ACTIONS[index]
@@ -199,12 +187,18 @@ func _configure_focus_neighbors() -> void:
 	if not mobile_layout:
 		return
 
-	_buttons[MenuAction.NEW_GAME].focus_neighbor_top = _buttons[MenuAction.NEW_GAME].get_path_to(_buttons[MenuAction.OPTIONS])
-	_buttons[MenuAction.NEW_GAME].focus_neighbor_bottom = _buttons[MenuAction.NEW_GAME].get_path_to(_buttons[MenuAction.QUIT])
-	_buttons[MenuAction.OPTIONS].focus_neighbor_top = _buttons[MenuAction.OPTIONS].get_path_to(_buttons[MenuAction.NEW_GAME])
+	_buttons[MenuAction.PLAY].focus_neighbor_left = _buttons[MenuAction.PLAY].get_path_to(_buttons[MenuAction.PLAY])
+	_buttons[MenuAction.PLAY].focus_neighbor_right = _buttons[MenuAction.PLAY].get_path_to(_buttons[MenuAction.OPTIONS])
+	_buttons[MenuAction.PLAY].focus_neighbor_top = _buttons[MenuAction.PLAY].get_path_to(_buttons[MenuAction.PLAY])
+	_buttons[MenuAction.PLAY].focus_neighbor_bottom = _buttons[MenuAction.PLAY].get_path_to(_buttons[MenuAction.QUIT])
+	_buttons[MenuAction.OPTIONS].focus_neighbor_left = _buttons[MenuAction.OPTIONS].get_path_to(_buttons[MenuAction.PLAY])
+	_buttons[MenuAction.OPTIONS].focus_neighbor_right = _buttons[MenuAction.OPTIONS].get_path_to(_buttons[MenuAction.OPTIONS])
+	_buttons[MenuAction.OPTIONS].focus_neighbor_top = _buttons[MenuAction.OPTIONS].get_path_to(_buttons[MenuAction.OPTIONS])
 	_buttons[MenuAction.OPTIONS].focus_neighbor_bottom = _buttons[MenuAction.OPTIONS].get_path_to(_buttons[MenuAction.QUIT])
-	_buttons[MenuAction.QUIT].focus_neighbor_top = _buttons[MenuAction.QUIT].get_path_to(_buttons[MenuAction.NEW_GAME])
-	_buttons[MenuAction.QUIT].focus_neighbor_bottom = _buttons[MenuAction.QUIT].get_path_to(_buttons[MenuAction.OPTIONS])
+	_buttons[MenuAction.QUIT].focus_neighbor_top = _buttons[MenuAction.QUIT].get_path_to(_buttons[MenuAction.PLAY])
+	_buttons[MenuAction.QUIT].focus_neighbor_left = _buttons[MenuAction.QUIT].get_path_to(_buttons[MenuAction.PLAY])
+	_buttons[MenuAction.QUIT].focus_neighbor_right = _buttons[MenuAction.QUIT].get_path_to(_buttons[MenuAction.OPTIONS])
+	_buttons[MenuAction.QUIT].focus_neighbor_bottom = _buttons[MenuAction.QUIT].get_path_to(_buttons[MenuAction.QUIT])
 
 
 func _on_button_gui_input(event: InputEvent, action: int) -> void:
@@ -217,41 +211,21 @@ func _focus_button(action: int) -> void:
 		_buttons[action].grab_focus()
 
 
-func _on_button_focus_entered(_action: int) -> void:
-	_update_button_visuals()
-
-
-func _focused_action() -> int:
-	for action in ENABLED_ACTIONS:
-		if _buttons[action].has_focus():
-			return action
-	return -1
-
-
 func _update_button_visuals() -> void:
-	var focused_action := _focused_action()
 	for action in MenuAction.size():
-		var button := _buttons[action]
-		button.position = _base_positions[action]
-		button.scale = Vector2.ONE
-		button.z_index = 0
-		button.modulate = DISABLED_MODULATE if button.disabled else Color.WHITE
-		var highlight := _focus_highlights[action]
-		highlight.position = button.position
-		highlight.scale = Vector2.ONE
-		highlight.visible = false
-		if action == focused_action:
-			button.z_index = 1
-			if mobile_layout:
-				button.position.y -= MOBILE_FOCUS_LIFT
-				button.scale = MOBILE_FOCUS_SCALE
-				highlight.position = button.position
-				highlight.scale = MOBILE_FOCUS_HIGHLIGHT_SCALE
-				highlight.visible = true
-			else:
-				button.position.y -= FOCUS_LIFT
-				button.scale = FOCUS_SCALE
-			button.modulate = FOCUSED_MODULATE
+		_set_button_focus(action, _buttons[action].has_focus())
+
+
+func _set_button_focus(action: int, focused: bool) -> void:
+	var button := _buttons[action]
+	button.position = _base_positions[action]
+	button.scale = Vector2.ONE
+	button.z_index = int(focused)
+	button.material = null if focused else _idle_material
+	button.get_node("FocusBerry").visible = focused
+	if focused:
+		button.position.y -= MOBILE_FOCUS_LIFT if mobile_layout else FOCUS_LIFT
+		button.scale = MOBILE_FOCUS_SCALE if mobile_layout else FOCUS_SCALE
 
 
 func _activate_action(action: int) -> void:
@@ -259,8 +233,8 @@ func _activate_action(action: int) -> void:
 		return
 	_focus_button(action)
 	match action:
-		MenuAction.NEW_GAME:
-			get_tree().change_scene_to_file(ROOFTOP_SCENE)
+		MenuAction.PLAY:
+			play_requested.emit()
 		MenuAction.OPTIONS:
 			options_requested.emit()
 		MenuAction.QUIT:
