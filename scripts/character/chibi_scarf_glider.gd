@@ -10,6 +10,7 @@ const WEAVE_TEXTURE: Texture2D = preload("res://assets/characters/chibi_scarf_we
 const LAYOUT: ChibiScarfLayout = preload("res://assets/characters/chibi_scarf_layout.tres")
 const SHADER: Shader = preload("res://shaders/character/scarf_glider.gdshader")
 const COLLAPSE_CENTER := Vector3(0.0, 0.56, -0.09)
+const THROW_HAND_RELEASE_START := 0.36
 
 var _visual_root: Node3D
 var _runner_mesh: MeshInstance3D
@@ -23,12 +24,17 @@ var _body_scarf_color := Color.WHITE
 var _source_pin_points := PackedVector3Array()
 var _hand_pin_offsets := PackedVector3Array()
 var _hand_bones := PackedInt32Array([-1, -1])
+var _scarf_roots := PackedInt32Array([-1, -1])
+var _scarf_follow_bones := PackedInt32Array([-1, -1])
+var _pin_release := Vector2.ZERO
 var _toss_side_model_x := Vector3.LEFT
 var _collapse_center := COLLAPSE_CENTER
 var _layout_valid := false
 var _deployment := 0.0
 var _gust_phase := 0.0
 var _opacity := 0.0
+var _flight_wind_load := 0.0
+var _flight_wind_velocity := Vector3.ZERO
 
 
 func attach_to(visual_root: Node3D, skeleton: Skeleton3D, body_mesh: MeshInstance3D) -> bool:
@@ -39,6 +45,10 @@ func attach_to(visual_root: Node3D, skeleton: Skeleton3D, body_mesh: MeshInstanc
 	_runner_mesh = body_mesh
 	_hand_bones[0] = skeleton.find_bone("hand_l")
 	_hand_bones[1] = skeleton.find_bone("hand_r")
+	_scarf_roots[0] = skeleton.find_bone("scarf_01")
+	_scarf_roots[1] = skeleton.find_bone("scarf_b_01")
+	_scarf_follow_bones[0] = skeleton.find_bone("scarf_02")
+	_scarf_follow_bones[1] = skeleton.find_bone("scarf_b_02")
 	if _hand_bones[0] < 0 or _hand_bones[1] < 0 or not _load_layout():
 		return false
 	var hand_r_in_model := visual_root.global_transform.affine_inverse() \
@@ -77,19 +87,41 @@ func attach_to(visual_root: Node3D, skeleton: Skeleton3D, body_mesh: MeshInstanc
 	return true
 
 
+## The wrist IK and its two cloth corners share this release curve.
+static func touchdown_hand_release(progress: float, side: int) -> float:
+	if side == 1:
+		return smoothstep(THROW_HAND_RELEASE_START, 0.88, progress)
+	return smoothstep(0.49, 1.0, progress)
+
+
 func update_pose(
 	phase: StringName,
 	progress: float,
 	stow_open: float,
 	bank: float,
 	delta: float,
-	local_velocity: Vector3 = Vector3.ZERO
+	local_velocity: Vector3 = Vector3.ZERO,
+	wind_load: float = 0.0,
+	wind_velocity_world: Vector3 = Vector3.ZERO,
+	touchdown: bool = false
 ) -> void:
-	if not _layout_valid or _canopy_material == null or (phase == &"stowed" and _deployment == 0.0):
+	if not _layout_valid or _canopy_material == null:
+		return
+	if phase == &"stowed" and _deployment == 0.0:
+		_pin_release = Vector2.ZERO
+		_flight_wind_load = 0.0
+		_flight_wind_velocity = Vector3.ZERO
 		return
 	_gust_phase += maxf(delta, 0.0) * 0.74
 	var eased_progress := clampf(progress, 0.0, 1.0)
 	var eased_stow_open := smoothstep(0.0, 1.0, clampf(stow_open, 0.0, 1.0))
+	var touchdown_wrap := phase == &"stow" and touchdown
+	_pin_release = Vector2.ZERO
+	if touchdown_wrap:
+		_pin_release = Vector2(
+			touchdown_hand_release(eased_progress, 0),
+			touchdown_hand_release(eased_progress, 1)
+		)
 	var cloth_tension := 0.0
 	var airflow_fade := 0.0
 	var deployment_catch := 0.0
@@ -104,8 +136,9 @@ func update_pose(
 			cloth_tension = 1.0
 			airflow_fade = 1.0
 		&"stow", &"cancel":
+			var fold_end := 0.92 if touchdown_wrap else 1.0
 			_deployment = eased_stow_open * (
-				1.0 - smoothstep(0.0, 1.0, eased_progress)
+				1.0 - smoothstep(0.0, fold_end, eased_progress)
 			)
 			if phase == &"cancel":
 				var spill := 1.0 - smoothstep(0.0, 0.65, eased_progress)
@@ -119,7 +152,9 @@ func update_pose(
 			_deployment = 0.0
 	_deployment = clampf(_deployment, 0.0, 1.0)
 	var toss_handoff := 0.0
-	if phase == &"stow":
+	if touchdown_wrap:
+		toss_handoff = eased_stow_open * smoothstep(0.16, 0.58, eased_progress)
+	elif phase == &"stow":
 		# Only a near-full dry stow gathers the last visible fold toward the right collar.
 		# Hand_r's authored rest offset supplies the local X sign despite the model's 180° turn.
 		toss_handoff = smoothstep(0.86, 1.0, eased_stow_open) \
@@ -130,10 +165,37 @@ func update_pose(
 	var toss_center_canopy := _canopy_mesh.global_transform.affine_inverse() * toss_center_world
 	_collapse_center = COLLAPSE_CENTER.lerp(toss_center_canopy, toss_handoff)
 	var planar_speed := Vector2(local_velocity.x, local_velocity.z).length()
-	var planar_airflow := clampf(planar_speed / 4.4, 0.0, 1.0) * airflow_fade
+	var wind_visual_active := phase in [&"deploy", &"glide"]
+	if wind_visual_active:
+		_flight_wind_load = clampf(wind_load, 0.0, 1.0)
+		_flight_wind_velocity = wind_velocity_world
+	elif not touchdown_wrap:
+		_flight_wind_load = 0.0
+		_flight_wind_velocity = Vector3.ZERO
+	var effective_wind_load := _flight_wind_load
+	if touchdown_wrap:
+		effective_wind_load *= 1.0 - smoothstep(0.0, 0.44, eased_progress)
+	effective_wind_load *= smoothstep(0.02, 0.22, _deployment)
+	var wind_direction_canopy := Vector3.ZERO
+	if effective_wind_load > 0.001 and _flight_wind_velocity.length_squared() > 0.0001:
+		wind_direction_canopy = (
+			_canopy_mesh.global_transform.basis.orthonormalized().inverse()
+			* _flight_wind_velocity.normalized()
+		).normalized()
+	var planar_airflow := maxf(
+		clampf(planar_speed / 4.4, 0.0, 1.0),
+		effective_wind_load
+	) * airflow_fade
 	var descent_airflow := clampf(maxf(-local_velocity.y, 0.0) / 5.8, 0.0, 1.0) * airflow_fade
-	var airflow_side := clampf(local_velocity.x / 4.4, -1.0, 1.0) * airflow_fade
+	var movement_side := clampf(local_velocity.x / 4.4, -1.0, 1.0)
+	var airflow_side := lerpf(movement_side, wind_direction_canopy.x, effective_wind_load) * airflow_fade
 	_opacity = smoothstep(0.025, 0.22, _deployment)
+	if touchdown_wrap:
+		# Start the material handoff as the released corners approach the collar.
+		var transfer := smoothstep(0.14, 0.93, (_pin_release.x + _pin_release.y) * 0.5)
+		_opacity = smoothstep(0.025, 0.22, eased_stow_open) * (1.0 - transfer)
+		if _deployment <= 0.025:
+			_opacity *= smoothstep(0.0, 0.025, _deployment)
 	_canopy_root.visible = _deployment > 0.001
 	_canopy_material.set_shader_parameter("deploy_amount", _deployment)
 	_canopy_material.set_shader_parameter("collapse_center", _collapse_center)
@@ -143,6 +205,8 @@ func update_pose(
 	_canopy_material.set_shader_parameter("planar_airflow", planar_airflow)
 	_canopy_material.set_shader_parameter("descent_airflow", descent_airflow)
 	_canopy_material.set_shader_parameter("airflow_side", airflow_side)
+	_canopy_material.set_shader_parameter("wind_load", effective_wind_load)
+	_canopy_material.set_shader_parameter("wind_direction", wind_direction_canopy)
 	_canopy_material.set_shader_parameter("cloth_tension", cloth_tension)
 	_canopy_material.set_shader_parameter("deployment_catch", deployment_catch)
 	_set_body_scarf_alpha(1.0 - _opacity)
@@ -154,9 +218,7 @@ func update_hand_pins() -> void:
 	var skeleton_to_canopy := _canopy_mesh.global_transform.affine_inverse() * _skeleton.global_transform
 	var deltas := PackedVector3Array()
 	for i in 4:
-		var hand_index := 0 if i < 2 else 1
-		var pose := _skeleton.get_bone_global_pose(_hand_bones[hand_index])
-		var target_canopy := skeleton_to_canopy * pose * _hand_pin_offsets[i]
+		var target_canopy := skeleton_to_canopy * _corner_target_in_skeleton(i)
 		var collapsed_source := _collapse_center.lerp(_source_pin_points[i], _deployment)
 		deltas.append(target_canopy - collapsed_source)
 	_canopy_material.set_shader_parameter("scarf_pin_delta", deltas)
@@ -169,10 +231,21 @@ func get_corner_targets() -> PackedVector3Array:
 	if not _layout_valid or _skeleton == null:
 		return targets
 	for i in 4:
-		var hand_index := 0 if i < 2 else 1
-		var pose := _skeleton.get_bone_global_pose(_hand_bones[hand_index])
-		targets.append(_skeleton.global_transform * pose * _hand_pin_offsets[i])
+		targets.append(_skeleton.global_transform * _corner_target_in_skeleton(i))
 	return targets
+
+
+func _corner_target_in_skeleton(index: int) -> Vector3:
+	var side := 0 if index < 2 else 1
+	var hand := _skeleton.get_bone_global_pose(_hand_bones[side]) * _hand_pin_offsets[index]
+	var release := _pin_release[side]
+	if release <= 0.0 or _scarf_roots[side] < 0:
+		return hand
+	var collar := _skeleton.get_bone_global_pose(_scarf_roots[side]).origin
+	if _scarf_follow_bones[side] >= 0:
+		var tail := _skeleton.get_bone_global_pose(_scarf_follow_bones[side]).origin
+		collar = collar.lerp(tail, 0.12 if index % 2 == 0 else 0.28)
+	return hand.lerp(collar, release)
 
 
 func _load_layout() -> bool:

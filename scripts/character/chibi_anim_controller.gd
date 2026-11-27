@@ -14,6 +14,7 @@ const RIGHT_STRIKE_PHASE := 0.5
 # toe-off blends so a contact can span two rendered poses at 30 FPS.
 const GROUND_CONTACT_DURATION := 0.15
 const RUNNING_LANDING_DURATION := 0.14
+const SCARF_RUNNING_LANDING_DURATION := 0.24
 const SWIM_GAIT_BLEND_TIME := 0.26
 const SWIM_IDLE_CADENCE := 0.32
 const SWIM_GLIDE_CADENCE := 0.16
@@ -78,6 +79,7 @@ var _ground_phase_previous: float = 0.0
 var _ground_phase: float = 0.0
 var _running_landing_elapsed: float = RUNNING_LANDING_DURATION
 var _running_landing_strength: float = 0.0
+var _running_landing_duration: float = RUNNING_LANDING_DURATION
 var _skeleton: Skeleton3D
 var _pelvis_bone: int = -1
 var _spine_bone: int = -1
@@ -307,6 +309,12 @@ func get_ground_phase() -> float:
 	return fposmod(_ground_phase, 1.0)
 
 
+func align_ground_strike(side: int) -> void:
+	## Enter the stride at the shoe chosen on contact, with no interpolation from the old gait.
+	_ground_phase = LEFT_STRIKE_PHASE if side == 0 else RIGHT_STRIKE_PHASE
+	_ground_phase_previous = _ground_phase
+
+
 func get_interpolated_ground_phase() -> float:
 	var phase_delta := fposmod(_ground_phase - _ground_phase_previous, 1.0)
 	var fraction := clampf(Engine.get_physics_interpolation_fraction(), 0.0, 1.0)
@@ -324,17 +332,26 @@ func get_ground_gait_weight() -> float:
 	return clampf(_ground_weight, 0.0, 1.0)
 
 
-func begin_running_landing(impact_speed: float) -> void:
+func begin_running_landing(
+	impact_speed: float, duration: float = RUNNING_LANDING_DURATION
+) -> void:
 	## Enter locomotion immediately and blend a brief compression over its advancing gait.
 	_running_landing_elapsed = 0.0
 	_running_landing_strength = clampf(impact_speed / 8.0, 0.45, 1.0)
+	_running_landing_duration = maxf(duration, 0.001)
 	play_state("LocomotionGait", 0.08)
 
 
+func end_running_landing() -> void:
+	## A buffered or immediate jump should release the landing compression on takeoff.
+	_running_landing_elapsed = _running_landing_duration
+	_running_landing_strength = 0.0
+
+
 func get_running_landing_weight() -> float:
-	if _running_landing_elapsed >= RUNNING_LANDING_DURATION:
+	if _running_landing_elapsed >= _running_landing_duration:
 		return 0.0
-	var t := clampf(_running_landing_elapsed / RUNNING_LANDING_DURATION, 0.0, 1.0)
+	var t := clampf(_running_landing_elapsed / _running_landing_duration, 0.0, 1.0)
 	return _running_landing_strength * (1.0 - smoothstep(0.0, 1.0, t))
 
 
@@ -452,8 +469,10 @@ func set_balance_walk_phase(phase: float, starting: bool) -> void:
 
 
 func _process(delta: float) -> void:
-	if _running_landing_elapsed < RUNNING_LANDING_DURATION:
-		_running_landing_elapsed = minf(_running_landing_elapsed + delta, RUNNING_LANDING_DURATION)
+	if _running_landing_elapsed < _running_landing_duration:
+		_running_landing_elapsed = minf(
+			_running_landing_elapsed + delta, _running_landing_duration
+		)
 	if anim_tree != null:
 		# TimeSeek is downstream from a one-second normalized blend space, so this
 		# render sample interpolates the same physics phase exposed to the foot solver.
@@ -479,6 +498,7 @@ func reset_for_respawn() -> void:
 	_ground_phase = 0.0
 	_running_landing_elapsed = RUNNING_LANDING_DURATION
 	_running_landing_strength = 0.0
+	_running_landing_duration = RUNNING_LANDING_DURATION
 	_phase_state = ""
 	current_state = "LocomotionGait"
 	_apply_ground_gait()

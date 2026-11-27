@@ -1,0 +1,123 @@
+[gd_scene load_steps=13 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Material_porcelain"]
+albedo_color = Color(0.960784, 0.929412, 0.898039, 1)
+roughness = 0.82
+metallic_specular = 0.25
+
+[sub_resource type="StandardMaterial3D" id="Material_mint"]
+albedo_color = Color(0.611765, 0.811765, 0.756863, 1)
+roughness = 0.73
+metallic_specular = 0.25
+
+[sub_resource type="StandardMaterial3D" id="Material_peach"]
+albedo_color = Color(0.929412, 0.752941, 0.596078, 1)
+roughness = 0.73
+metallic_specular = 0.25
+
+[sub_resource type="BoxShape3D" id="Shape_perch"]
+size = Vector3(2.6, 2.35, 2.3)
+
+[sub_resource type="BoxMesh" id="Mesh_perch"]
+material = SubResource("Material_porcelain")
+size = Vector3(2.6, 2.25, 2.3)
+
+[sub_resource type="BoxMesh" id="Mesh_cap"]
+material = SubResource("Material_mint")
+size = Vector3(2.6, 0.1, 2.3)
+
+[sub_resource type="BoxMesh" id="Mesh_lip"]
+material = SubResource("Material_peach")
+size = Vector3(0.16, 0.015, 1.88)
+
+[sub_resource type="BoxMesh" id="Mesh_arrow_shaft"]
+material = SubResource("Material_porcelain")
+size = Vector3(0.65, 0.012, 0.075)
+
+[sub_resource type="BoxMesh" id="Mesh_arrow_arm"]
+material = SubResource("Material_porcelain")
+size = Vector3(0.34, 0.012, 0.075)
+
+[sub_resource type="ConvexPolygonShape3D" id="Shape_ramp"]
+points = PackedVector3Array(-1.8, 1.175, 1.15, -1.8, 1.175, -1.15, -1.8, -1.175, 1.15, 1.8, -1.175, -1.15, 1.8, -1.175, 1.15, -1.8, -1.175, -1.15)
+
+[sub_resource type="PrismMesh" id="Mesh_ramp"]
+material = SubResource("Material_porcelain")
+left_to_right = 0.0
+size = Vector3(3.6, 2.35, 2.3)
+
+[sub_resource type="BoxMesh" id="Mesh_ramp_trim"]
+material = SubResource("Material_mint")
+size = Vector3(4.25, 0.010, 0.135)
+
+[node name="WindLaunchPerch" type="Node3D"]
+
+[node name="Platform" type="StaticBody3D" parent="."]
+position = Vector3(1.3, 1.175, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platform"]
+shape = SubResource("Shape_perch")
+
+[node name="Body" type="MeshInstance3D" parent="Platform"]
+position = Vector3(0, -0.05, 0)
+mesh = SubResource("Mesh_perch")
+
+[node name="RouteCap" type="MeshInstance3D" parent="Platform"]
+position = Vector3(0, 1.125, 0)
+mesh = SubResource("Mesh_cap")
+
+[node name="StepOffStripe" type="MeshInstance3D" parent="Platform"]
+position = Vector3(-1.17, 1.177, 0)
+cast_shadow = 0
+mesh = SubResource("Mesh_lip")
+
+[node name="LaunchArrow" type="Node3D" parent="Platform"]
+position = Vector3(-0.30, 1.179, 0)
+
+[node name="Shaft" type="MeshInstance3D" parent="Platform/LaunchArrow"]
+cast_shadow = 0
+mesh = SubResource("Mesh_arrow_shaft")
+
+[node name="ArmLeft" type="MeshInstance3D" parent="Platform/LaunchArrow"]
+position = Vector3(-0.26, 0, -0.105)
+rotation = Vector3(0, 0.65, 0)
+cast_shadow = 0
+mesh = SubResource("Mesh_arrow_arm")
+
+[node name="ArmRight" type="MeshInstance3D" parent="Platform/LaunchArrow"]
+position = Vector3(-0.26, 0, 0.105)
+rotation = Vector3(0, -0.65, 0)
+cast_shadow = 0
+mesh = SubResource("Mesh_arrow_arm")
+
+[node name="ApproachRamp" type="StaticBody3D" parent="."]
+position = Vector3(4.4, 1.175, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ApproachRamp"]
+shape = SubResource("Shape_ramp")
+
+[node name="Body" type="MeshInstance3D" parent="ApproachRamp"]
+mesh = SubResource("Mesh_ramp")
+
+[node name="LeftTrim" type="MeshInstance3D" parent="ApproachRamp"]
+position = Vector3(0, 0.007, -1.04)
+rotation = Vector3(0, 0, -0.578398)
+cast_shadow = 0
+mesh = SubResource("Mesh_ramp_trim")
+
+[node name="RightTrim" type="MeshInstance3D" parent="ApproachRamp"]
+position = Vector3(0, 0.007, 1.04)
+rotation = Vector3(0, 0, -0.578398)
+cast_shadow = 0
+mesh = SubResource("Mesh_ramp_trim")
+
+[node name="LaunchSign" type="Label3D" parent="."]
+position = Vector3(2.05, 2.98, 0.88)
+visibility_range_end = 18.0
+billboard = 1
+modulate = Color(0.309804, 0.27451, 0.341176, 1)
+outline_modulate = Color(0.960784, 0.929412, 0.898039, 1)
+text = "Scarf glide\nStep off, then press Jump"
+font_size = 40
+outline_size = 6
+pixel_size = 0.0035

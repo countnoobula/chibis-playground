@@ -24,9 +24,13 @@ const POOL_SCRIPT := preload("res://scripts/stations/chibi_pool.gd")
 const DROP_COURSE_SCRIPT := preload("res://scripts/stations/drop_well_tunnel.gd")
 const DROP_COURSE_SCENE := preload("res://scenes/stations/drop_well_tunnel.tscn")
 const CLIMB_TOWER_SCENE := preload("res://scenes/stations/rooftop_climb_tower.tscn")
+const WIND_TUNNEL_SCENE := preload("res://scenes/stations/rooftop_wind_tunnel.tscn")
+const WIND_LAUNCH_PERCH_SCENE := preload("res://scenes/stations/rooftop_wind_launch_perch.tscn")
 const TOWER_METER_SCRIPT := preload("res://scripts/gym/tower_fall_meter.gd")
 const ROOFTOP_POOL_POSITION := Vector3(24.0, 0.0, -22.0)
 const CLIMB_TOWER_POSITION := Vector3(38.5, 0.0, -28.2)
+const WIND_TUNNEL_POSITION := Vector3(16.0, 0.0, 15.0)
+const WIND_LAUNCH_PERCH_POSITION := Vector3(18.9, 0.0, 19.45)
 
 
 func _init() -> void:
@@ -654,6 +658,15 @@ func _build_rooftop_gym_scene() -> void:
 	tower.name = "ClimbTower"
 	tower.position = CLIMB_TOWER_POSITION
 	root.add_child(tower)
+
+	var wind_tunnel := WIND_TUNNEL_SCENE.instantiate() as Node3D
+	wind_tunnel.name = "WindTunnel"
+	wind_tunnel.position = WIND_TUNNEL_POSITION
+	root.add_child(wind_tunnel)
+
+	var wind_launch := WIND_LAUNCH_PERCH_SCENE.instantiate() as Node3D
+	wind_launch.position = WIND_LAUNCH_PERCH_POSITION
+	root.add_child(wind_launch)
 
 	# 3D Zone Signposts for instant orientation
 	_add_zone_sign(root, "Zone 1: Flow, Vaults & Slides", Vector3(2.5, 3.2, 1.5))

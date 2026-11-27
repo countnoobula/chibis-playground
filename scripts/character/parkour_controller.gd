@@ -14,6 +14,18 @@ const WallClimbGeometry := preload("res://scripts/climbing/wall_climb_geometry.g
 const PickupItem := preload("res://scripts/items/pickup_item.gd")
 const BALANCE_WALK_SPEED := 1.70
 const BALANCE_TURN_SPEED := 10.5
+const WIND_PEAK_SPEED := RooftopWindTunnel.PEAK_SPEED
+const WIND_MAX_BACKSTEP_SPEED := 0.8
+const WIND_TAILWIND_BONUS_RATIO := 0.12
+const WIND_IDLE_CARRY_SPEED := 1.45
+const WIND_SLIDE_CARRY_SPEED := 2.4
+const WIND_SLIDE_MIN_SPEED := 3.5
+const WIND_SLIDE_TURN_DURATION := 0.68
+const WIND_SLIDE_SPEED_LIMIT := 8.2
+const WIND_SCARF_GLIDE_MAX_CARRY_SPEED := 3.0
+const WIND_SCARF_GLIDE_CARRY_ACCEL := 15.0
+const WIND_SCARF_GLIDE_RELEASE_ACCEL := 4.5
+const SCARF_RUNNING_LANDING_MIN_SPEED := 1.0
 
 @export var config: ParkourConfig
 @export var state_chart: StateChart
@@ -31,6 +43,20 @@ var current_anim_label: String = "Idle"
 var flow_level: float = 0.0
 var external_walk_speed_cap: float = 99.0 # Used by ChibiPool wading slowdown
 var resolved_planar_speed: float = 0.0
+# Read-only by convention: the active tunnel sample and pose response shared with
+# ChibiPoseModifier. The gym assigns the tunnel reference after creating the player.
+var wind_tunnel: RooftopWindTunnel
+var wind_velocity: Vector3 = Vector3.ZERO
+var wind_brace_weight: float = 0.0
+var wind_recoil_weight: float = 0.0
+var wind_reset_serial: int = 0
+var scarf_wind_load: float = 0.0
+var scarf_wind_velocity: Vector3 = Vector3.ZERO
+var _wind_tunnel_inside: bool = false
+var _wind_tunnel_slide_latched: bool = false
+var _wind_slide_elapsed: float = 0.0
+var _scarf_wind_carry_velocity: Vector3 = Vector3.ZERO
+var _scarf_wind_flow_attribution_velocity: Vector3 = Vector3.ZERO
 var ground_pivot_weight: float = 0.0
 var ground_pivot_side: int = 0
 var _ground_pivot_elapsed: float = GROUND_PIVOT_DURATION
@@ -40,6 +66,9 @@ var scarf_glide_phase: StringName = &"stowed"
 var scarf_glide_progress: float = 0.0
 var scarf_glide_stow_open: float = 0.0
 var scarf_glide_bank: float = 0.0
+## True while an opened scarf is wrapping from a dry grounded touchdown.
+## It remains latched through an immediate hop so the hand/cloth timeline can finish.
+var scarf_glide_touchdown: bool = false
 var _scarf_glide_used_this_airtime: bool = false
 var _scarf_glide_clearance := BoxShape3D.new()
 var _scarf_glide_cancel_action_frame: int = -1
@@ -227,12 +256,23 @@ func add_flow_boost(amount: float) -> void:
 func transition_to(new_state: String) -> void:
 	if current_state == new_state:
 		return
+	if current_state == "Locomotion" and new_state != "Locomotion":
+		# Keep the velocity already imparted by the gust, but do not carry its
+		# Flow bookkeeping into an unrelated movement state.
+		_scarf_wind_flow_attribution_velocity = Vector3.ZERO
+		_scarf_wind_carry_velocity = Vector3.ZERO
+	elif current_state != "Locomotion" and new_state == "Locomotion":
+		_scarf_wind_carry_velocity = Vector3.ZERO
+		_scarf_wind_flow_attribution_velocity = Vector3.ZERO
 	if new_state == "PoolSwim":
 		_clear_scarf_glide_phase()
 	elif new_state != "Locomotion":
 		_stow_scarf_glide()
+		scarf_glide_touchdown = false
 	# Cleanup previous state visuals/collision
 	if current_state == "Slide":
+		_wind_tunnel_slide_latched = false
+		_wind_slide_elapsed = 0.0
 		_set_capsule_slide(false)
 		if pose_mod != null:
 			pose_mod.slide_dive_active = false
@@ -264,6 +304,17 @@ func transition_to(new_state: String) -> void:
 
 
 func reset_for_respawn(spawn_position: Vector3) -> void:
+	wind_reset_serial += 1
+	wind_velocity = Vector3.ZERO
+	wind_brace_weight = 0.0
+	wind_recoil_weight = 0.0
+	scarf_wind_load = 0.0
+	scarf_wind_velocity = Vector3.ZERO
+	_scarf_wind_carry_velocity = Vector3.ZERO
+	_scarf_wind_flow_attribution_velocity = Vector3.ZERO
+	_wind_tunnel_inside = false
+	_wind_tunnel_slide_latched = false
+	_wind_slide_elapsed = 0.0
 	_swim_controller.reset_for_respawn()
 	_swim_recovery_time = 0.0
 	if pose_mod != null:
@@ -299,6 +350,7 @@ func reset_for_respawn(spawn_position: Vector3) -> void:
 	scarf_glide_progress = 0.0
 	scarf_glide_stow_open = 0.0
 	scarf_glide_bank = 0.0
+	scarf_glide_touchdown = false
 	_scarf_glide_used_this_airtime = false
 	_scarf_glide_cancel_action_frame = -1
 	roll_buffer_timer = 0.0
@@ -345,6 +397,7 @@ func _physics_process(delta: float) -> void:
 	if camera_ctrl != null and chibi_input != null:
 		camera_ctrl.apply_look(chibi_input.look_delta)
 	_swim_controller.prepare_physics()
+	_sample_wind_tunnel()
 
 	_tick_cooldowns(delta)
 	_handle_global_actions()
@@ -387,8 +440,29 @@ func _physics_process(delta: float) -> void:
 			if is_wall_climbing():
 				_update_wall_climb(delta)
 
+	var attribution_decel := 0.0
+	if not _is_scarf_wind_glide_active():
+		attribution_decel = maxf(config.air_decel, 0.0)
+		if is_on_floor():
+			attribution_decel = maxf(config.ground_decel, 0.0)
+	elif not _wind_tunnel_inside:
+		# Outside the field the carry becomes normal glide momentum. Let the usual
+		# steering/coast rates dissolve its Flow attribution instead of braking it.
+		var opening := _scarf_glide_open_amount()
+		attribution_decel = config.scarf_glide_coast_decel * maxf(opening, 0.10)
+		if chibi_input != null and chibi_input.move_vec.length_squared() > 0.0001:
+			attribution_decel = config.scarf_glide_steer_accel * opening
+	if attribution_decel > 0.0:
+		_scarf_wind_carry_velocity = _scarf_wind_carry_velocity.move_toward(
+			Vector3.ZERO, attribution_decel * delta
+		)
+		_scarf_wind_flow_attribution_velocity = _scarf_wind_flow_attribution_velocity.move_toward(
+			Vector3.ZERO, attribution_decel * delta
+		)
+
 	_swim_controller.finish_physics(delta)
 	_update_swim_recovery(delta)
+	_sample_wind_tunnel()
 	_sync_pose_modifier(delta)
 
 	var planar_speed := resolved_planar_speed if current_state == "Locomotion" else Vector2(velocity.x, velocity.z).length()
@@ -423,6 +497,137 @@ func _tick_cooldowns(delta: float) -> void:
 	land_anim_timer = maxf(0.0, land_anim_timer - delta)
 
 
+func _sample_wind_tunnel() -> void:
+	var sample_position := get_capsule_center()
+	var inside := is_instance_valid(wind_tunnel) and wind_tunnel.contains_point(sample_position)
+	_wind_tunnel_inside = inside
+	if inside:
+		wind_velocity = wind_tunnel.flow_velocity_at(sample_position)
+		wind_velocity.y = 0.0
+		if current_state == "Slide" and not _wind_tunnel_slide_latched:
+			_wind_tunnel_slide_latched = true
+			_wind_slide_elapsed = 0.0
+	else:
+		wind_velocity = Vector3.ZERO
+		if _wind_tunnel_slide_latched:
+			_wind_tunnel_slide_latched = false
+			_wind_slide_elapsed = 0.0
+			if current_state == "Slide":
+				_try_end_slide()
+	_update_scarf_wind_readouts()
+	_update_wind_pose_weights()
+
+
+func _is_scarf_wind_glide_active() -> bool:
+	return current_state == "Locomotion" and not is_on_floor() \
+		and scarf_glide_phase in [&"deploy", &"glide"]
+
+
+func _update_scarf_wind_readouts() -> void:
+	scarf_wind_load = 0.0
+	scarf_wind_velocity = Vector3.ZERO
+	if not _is_scarf_wind_glide_active():
+		return
+	var opening := _scarf_glide_open_amount()
+	if opening <= 0.0:
+		return
+	scarf_wind_load = _wind_gust_weight() * opening
+	scarf_wind_velocity = wind_velocity * opening
+
+
+func _wind_flow_direction() -> Vector3:
+	if not is_instance_valid(wind_tunnel):
+		return Vector3.ZERO
+	var direction := wind_tunnel.get_flow_direction()
+	direction.y = 0.0
+	return direction.normalized() if direction.length_squared() > 1e-5 else Vector3.ZERO
+
+
+func _wind_gust_weight() -> float:
+	if not _wind_tunnel_inside:
+		return 0.0
+	# Lull flow remains gameplay-relevant: it braces and slows an upwind walk,
+	# while the peak still brings a full push to the specified 0.8 m/s backstep.
+	return clampf(wind_velocity.length() / WIND_PEAK_SPEED, 0.0, 1.0)
+
+
+func _update_wind_pose_weights() -> void:
+	wind_brace_weight = 0.0
+	wind_recoil_weight = 0.0
+	if not _wind_tunnel_inside or current_state != "Locomotion" or not is_on_floor() \
+		or chibi_input == null:
+		return
+	var gust_weight := _wind_gust_weight()
+	if gust_weight <= 0.001:
+		return
+	var flow_direction := _wind_flow_direction()
+	if flow_direction.is_zero_approx():
+		return
+	var move_in := chibi_input.move_vec
+	var camera_forward := camera_ctrl.get_forward_xz() if camera_ctrl != null else -global_transform.basis.z
+	var camera_right := camera_ctrl.get_right_xz() if camera_ctrl != null else global_transform.basis.x
+	var wish := camera_right * move_in.x - camera_forward * move_in.y
+	var input_strength := minf(wish.length(), 1.0)
+	if input_strength <= 0.01:
+		return
+	var move_direction := wish.normalized()
+	var headwind_alignment := clampf(-move_direction.dot(flow_direction), 0.0, 1.0)
+	if headwind_alignment <= 0.001:
+		return
+	wind_brace_weight = gust_weight * headwind_alignment * input_strength
+	var requested_speed := minf(
+		lerpf(config.base_run_speed, config.max_flow_speed, flow_level),
+		external_walk_speed_cap
+	) * input_strength
+	var actual_planar := Vector3(get_real_velocity().x, 0.0, get_real_velocity().z)
+	var actual_progress := actual_planar.dot(move_direction)
+	var progress_loss := clampf(
+		(requested_speed - actual_progress) / maxf(requested_speed + WIND_MAX_BACKSTEP_SPEED, 0.01),
+		0.0,
+		1.0
+	)
+	wind_recoil_weight = wind_brace_weight * progress_loss
+
+
+func _wind_tailwind_bonus(max_speed: float, heading_alignment: float, input_strength: float) -> float:
+	return max_speed * WIND_TAILWIND_BONUS_RATIO * _wind_gust_weight() \
+		* clampf(heading_alignment, 0.0, 1.0) * clampf(input_strength, 0.0, 1.0)
+
+
+func _wind_adjusted_flow_speed(actual_planar_speed: float, actual_velocity: Vector3, wish: Vector3) -> float:
+	var player_velocity := actual_velocity - _scarf_wind_flow_attribution_velocity
+	var player_planar_speed := Vector2(player_velocity.x, player_velocity.z).length()
+	if not _wind_tunnel_inside or not is_on_floor():
+		return player_planar_speed
+	var gust_weight := _wind_gust_weight()
+	if gust_weight <= 0.001:
+		return player_planar_speed
+	var flow_direction := _wind_flow_direction()
+	if flow_direction.is_zero_approx():
+		return player_planar_speed
+	var planar_velocity := Vector3(player_velocity.x, 0.0, player_velocity.z)
+	var input_strength := minf(wish.length(), 1.0)
+	var assistance_speed := 0.0
+	if input_strength <= 0.01:
+		assistance_speed = minf(
+			WIND_IDLE_CARRY_SPEED * gust_weight,
+			maxf(planar_velocity.dot(flow_direction), 0.0)
+		)
+	else:
+		var alignment := wish.normalized().dot(flow_direction)
+		var max_speed := minf(
+			lerpf(config.base_run_speed, config.max_flow_speed, flow_level),
+			external_walk_speed_cap
+		)
+		if alignment > 0.0:
+			assistance_speed = _wind_tailwind_bonus(max_speed, alignment, input_strength)
+		elif alignment < 0.0:
+			var headwind_push := (max_speed + WIND_MAX_BACKSTEP_SPEED) * gust_weight \
+				* -alignment * input_strength
+			assistance_speed = minf(maxf(planar_velocity.dot(flow_direction), 0.0), headwind_push)
+	return maxf(0.0, player_planar_speed - assistance_speed)
+
+
 func _handle_global_actions() -> void:
 	if chibi_input == null:
 		return
@@ -434,7 +639,7 @@ func _handle_global_actions() -> void:
 		request_jump()
 	if chibi_input.slide_just_pressed:
 		request_slide_or_roll()
-	if chibi_input.slide_just_released and current_state == "Slide":
+	if chibi_input.slide_just_released and current_state == "Slide" and not _wind_tunnel_slide_latched:
 		_try_end_slide()
 
 
@@ -527,6 +732,8 @@ func _execute_ground_jump() -> void:
 	_air_wall_approach = -global_basis.z
 	jump_buffer_timer = 0.0
 	coyote_timer = 0.0
+	if anim_ctrl != null:
+		anim_ctrl.end_running_landing()
 	velocity.y = config.jump_velocity
 	_clear_ground_pivot()
 	add_flow_boost(0.05)
@@ -623,6 +830,7 @@ func _clear_scarf_glide_phase(preserve_stow_open: bool = false, reset_used: bool
 	scarf_glide_phase = &"stowed"
 	scarf_glide_progress = 0.0
 	scarf_glide_bank = 0.0
+	scarf_glide_touchdown = false
 	if reset_used:
 		_scarf_glide_used_this_airtime = false
 
@@ -647,6 +855,7 @@ func _advance_scarf_glide(delta: float) -> void:
 			if scarf_glide_progress >= 1.0:
 				scarf_glide_phase = &"stowed"
 				scarf_glide_progress = 0.0
+				scarf_glide_touchdown = false
 		&"cancel":
 			scarf_glide_progress = minf(
 				scarf_glide_progress + delta / maxf(config.scarf_glide_cancel_duration, 0.001), 1.0
@@ -689,13 +898,25 @@ func _update_locomotion(delta: float) -> void:
 	var max_speed := minf(lerpf(config.base_run_speed, config.max_flow_speed, flow_level), external_walk_speed_cap)
 	var prior_horizontal := Vector3(velocity.x, 0.0, velocity.z)
 	var horiz := prior_horizontal
+	var scarf_glide_control_velocity := Vector3.ZERO
+	var scarf_wind_carry_requested := Vector3.ZERO
+	var scarf_wind_carry_direction := Vector3.ZERO
 	var glide_open := _scarf_glide_open_amount()
 	if on_floor:
-		horiz = _steer_ground(horiz, wish, max_speed, delta)
+		_scarf_wind_carry_velocity = Vector3.ZERO
+		if _wind_tunnel_inside and _wind_gust_weight() > 0.001:
+			horiz = _steer_ground_with_wind(horiz, wish, max_speed, delta)
+		else:
+			horiz = _steer_ground(horiz, wish, max_speed, delta)
 		if glide_open > 0.0:
 			_update_scarf_bank(0.0, delta, 0.0)
 	else:
 		if glide_open > 0.0:
+			var inside_wind_field := _wind_tunnel_inside
+			if inside_wind_field:
+				# Separate the previous wind contribution before the normal
+				# camera-relative control step, preserving full steer authority.
+				horiz -= _scarf_wind_carry_velocity
 			var terminal_speed := maxf(config.scarf_glide_terminal_speed, 0.01)
 			var fall_ratio := clampf(maxf(-velocity.y, 0.0) / terminal_speed, 0.0, config.scarf_glide_max_drag_ratio)
 			velocity.y -= config.gravity * delta
@@ -707,7 +928,25 @@ func _update_locomotion(delta: float) -> void:
 			else:
 				horiz = horiz.move_toward(Vector3.ZERO, config.scarf_glide_coast_decel * maxf(glide_open, 0.10) * delta)
 			_update_scarf_bank(move_in.x, delta, glide_open)
+
+			if inside_wind_field:
+				var wind_target := _wind_flow_direction() * WIND_SCARF_GLIDE_MAX_CARRY_SPEED \
+					* _wind_gust_weight() * glide_open
+				var carry_accel := WIND_SCARF_GLIDE_CARRY_ACCEL
+				if wind_target.length_squared() < _scarf_wind_carry_velocity.length_squared():
+					carry_accel = WIND_SCARF_GLIDE_RELEASE_ACCEL
+				_scarf_wind_carry_velocity = _scarf_wind_carry_velocity.move_toward(
+					wind_target, carry_accel * delta
+				).limit_length(WIND_SCARF_GLIDE_MAX_CARRY_SPEED)
+				_scarf_wind_flow_attribution_velocity = _scarf_wind_carry_velocity
+				scarf_glide_control_velocity = horiz
+				scarf_wind_carry_requested = _scarf_wind_carry_velocity
+				scarf_wind_carry_direction = _wind_flow_direction()
+				horiz += _scarf_wind_carry_velocity
 		else:
+			# Cancelling/stowing stops assistance at once but leaves the horizontal
+			# momentum already imparted to ordinary air movement.
+			_scarf_wind_carry_velocity = Vector3.ZERO
 			velocity.y -= config.gravity * delta
 			if has_move_input:
 				var target_v := wish * max_speed
@@ -734,10 +973,25 @@ func _update_locomotion(delta: float) -> void:
 
 	var now_falling := not is_on_floor()
 	var actual_velocity := get_real_velocity()
+	if scarf_wind_carry_requested.length_squared() > 1e-6 \
+		and not scarf_wind_carry_direction.is_zero_approx():
+		# A wall may cancel some or all of the requested drift. Store only the
+		# part present in the resolved movement, so next frame cannot subtract an
+		# unrealized carry and create an opposite impulse.
+		var actual_planar_velocity := Vector3(actual_velocity.x, 0.0, actual_velocity.z)
+		var requested_carry_speed := scarf_wind_carry_requested.dot(scarf_wind_carry_direction)
+		var realized_carry_speed := maxf(
+			(actual_planar_velocity - scarf_glide_control_velocity).dot(scarf_wind_carry_direction),
+			0.0
+		)
+		realized_carry_speed = minf(realized_carry_speed, requested_carry_speed)
+		_scarf_wind_carry_velocity = scarf_wind_carry_direction * realized_carry_speed
+		_scarf_wind_flow_attribution_velocity = _scarf_wind_carry_velocity
 	var scarf_glide_was_used := _scarf_glide_used_this_airtime
 	resolved_planar_speed = Vector2(actual_velocity.x, actual_velocity.z).length()
 	var planar_speed := resolved_planar_speed
 	var ground_speed := planar_speed
+	var ground_motion := Vector3.ZERO
 	if not now_falling:
 		if on_floor and wish.length_squared() > 0.18 and _try_mount_wall(wish, false, true):
 			return
@@ -750,7 +1004,7 @@ func _update_locomotion(delta: float) -> void:
 		_clear_ground_pivot()
 	else:
 		var relative_ground_velocity := actual_velocity - get_platform_velocity()
-		var ground_motion := Vector3(relative_ground_velocity.x, 0.0, relative_ground_velocity.z)
+		ground_motion = Vector3(relative_ground_velocity.x, 0.0, relative_ground_velocity.z)
 		ground_speed = ground_motion.length()
 		_update_ground_heading(prior_horizontal, ground_motion, wish, delta)
 
@@ -761,8 +1015,11 @@ func _update_locomotion(delta: float) -> void:
 	else:
 		coyote_timer = config.coyote_time_duration
 		air_time = 0.0
-		if was_falling:
+		var dry_scarf_touchdown := false
+		if was_falling and scarf_glide_phase in [&"deploy", &"glide"]:
 			_stow_scarf_glide()
+			dry_scarf_touchdown = get_active_water() == null
+			scarf_glide_touchdown = dry_scarf_touchdown
 		_scarf_glide_used_this_airtime = false
 		_air_anim_timer = 0.0
 		bounce_anim_timer = 0.0
@@ -777,22 +1034,34 @@ func _update_locomotion(delta: float) -> void:
 				or (landing_fall_speed < config.roll_min_fall_speed and roll_buffer_timer > 0.0)
 			)
 			suppress_auto_roll = false
+			var scarf_run_landing := dry_scarf_touchdown and ground_speed >= SCARF_RUNNING_LANDING_MIN_SPEED
+			var landed_with_impact := landing_fall_speed <= -MIN_SOFT_LAND_IMPACT_SPEED
 			if do_roll:
 				_start_land_roll()
 				peak_fall_speed = 0.0
 				was_falling = false
 				return
-			elif jump_buffer_timer <= 0.0 and landing_fall_speed <= -MIN_SOFT_LAND_IMPACT_SPEED:
+			elif jump_buffer_timer <= 0.0 and (landed_with_impact or scarf_run_landing):
 				land_anim_timer = config.soft_land_anim_duration
-				if ground_speed < 2.2:
+				var seeded_scarf_strike := false
+				if ground_speed < 2.2 and not scarf_run_landing:
 					_play_action("LandSoft", land_anim_timer, 0.06)
 				elif anim_ctrl != null:
-					anim_ctrl.begin_running_landing(-landing_fall_speed)
-				if juice:
-					if ground_speed < 2.2:
+					if scarf_run_landing and pose_mod != null:
+						var strike_side := pose_mod.begin_scarf_landing_contact(ground_motion)
+						if strike_side >= 0:
+							anim_ctrl.align_ground_strike(strike_side)
+							seeded_scarf_strike = true
+					var landing_duration := ChibiAnimController.SCARF_RUNNING_LANDING_DURATION \
+						if scarf_run_landing else ChibiAnimController.RUNNING_LANDING_DURATION
+					anim_ctrl.begin_running_landing(-landing_fall_speed, landing_duration)
+				if juice and landed_with_impact:
+					if ground_speed < 2.2 and not scarf_run_landing:
 						juice.trigger_squash(1.15, 0.85)
 					juice.spawn_dust(global_position)
-					juice.play_sfx("Land")
+					# A scarf strike uses the planted shoe's contact sound.
+					if not seeded_scarf_strike:
+						juice.play_sfx("Land")
 		peak_fall_speed = 0.0
 
 	was_falling = now_falling
@@ -824,9 +1093,10 @@ func _update_locomotion(delta: float) -> void:
 			jump_buffer_timer = maxf(0.0, jump_buffer_timer - delta)
 
 	# Flow build / decay
-	if planar_speed > 3.0:
+	var flow_scoring_speed := _wind_adjusted_flow_speed(planar_speed, actual_velocity, wish)
+	if flow_scoring_speed > 3.0:
 		flow_level = clampf(flow_level + config.flow_build_rate * delta, 0.0, 1.0)
-	elif planar_speed < 1.2 and not now_falling:
+	elif flow_scoring_speed < 1.2 and not now_falling:
 		flow_level = clampf(flow_level - config.flow_decay_rate * delta, 0.0, 1.0)
 
 	# Drive animations
@@ -864,6 +1134,47 @@ func _steer_ground(horizontal: Vector3, wish: Vector3, max_speed: float, delta: 
 	return (horizontal + direction * input_strength * config.ground_accel * delta).limit_length(speed_limit)
 
 
+func _steer_ground_with_wind(horizontal: Vector3, wish: Vector3, max_speed: float, delta: float) -> Vector3:
+	var flow_direction := _wind_flow_direction()
+	var gust_weight := _wind_gust_weight()
+	if flow_direction.is_zero_approx() or gust_weight <= 0.001:
+		return _steer_ground(horizontal, wish, max_speed, delta)
+	var input_strength := minf(wish.length(), 1.0)
+	if input_strength <= 0.01:
+		var carry_target := flow_direction * WIND_IDLE_CARRY_SPEED * gust_weight
+		return _steer_ground_toward_velocity(horizontal, carry_target, gust_weight, delta)
+
+	var input_direction := wish.normalized()
+	var wind_alignment := input_direction.dot(flow_direction)
+	var headwind_alignment := maxf(-wind_alignment, 0.0)
+	var tailwind_bonus := _wind_tailwind_bonus(max_speed, wind_alignment, input_strength)
+	var desired_velocity := input_direction * max_speed * input_strength
+	if tailwind_bonus > 0.0:
+		desired_velocity += input_direction * tailwind_bonus
+	# At the gust peak, a full upwind push settles just 0.8 m/s downwind. The
+	# directional term leaves lateral steering intact and keeps the player's facing on input.
+	desired_velocity += flow_direction * (max_speed + WIND_MAX_BACKSTEP_SPEED) \
+		* gust_weight * headwind_alignment * input_strength
+	return _steer_ground_toward_velocity(horizontal, desired_velocity, input_strength, delta)
+
+
+func _steer_ground_toward_velocity(
+	horizontal: Vector3, target_velocity: Vector3, acceleration_scale: float, delta: float
+) -> Vector3:
+	var target_speed := target_velocity.length()
+	if target_speed <= 0.001:
+		return horizontal.move_toward(Vector3.ZERO, config.ground_decel * delta)
+	var target_direction := target_velocity / target_speed
+	var speed := horizontal.length()
+	if speed > target_speed * 1.01:
+		horizontal = horizontal.move_toward(horizontal.normalized() * target_speed, config.ground_decel * delta)
+		speed = horizontal.length()
+	var traction := minf(config.ground_directional_friction * delta, 1.0)
+	horizontal = horizontal.lerp(target_direction * speed, traction)
+	var speed_limit := maxf(horizontal.length(), target_speed)
+	return (horizontal + target_direction * acceleration_scale * config.ground_accel * delta).limit_length(speed_limit)
+
+
 func _update_ground_heading(previous: Vector3, travel: Vector3, wish: Vector3, delta: float) -> void:
 	var direction := wish.normalized() if wish.length_squared() > 1e-4 else Vector3.ZERO
 	if direction == Vector3.ZERO:
@@ -883,8 +1194,10 @@ func _update_ground_heading(previous: Vector3, travel: Vector3, wish: Vector3, d
 		facing = direction
 	else:
 		ground_pivot_weight = 0.0
-		if direction != Vector3.ZERO:
+		if direction != Vector3.ZERO and wind_brace_weight <= 0.001:
 			facing = direction if speed < 0.25 else travel + direction * minf(speed * 0.4, 1.6)
+		elif direction != Vector3.ZERO:
+			facing = direction
 
 	if facing.length_squared() > 0.01:
 		var target_yaw := atan2(-facing.x, -facing.z)
@@ -1433,6 +1746,8 @@ func _start_slide() -> void:
 	_slide_dir = horiz.normalized() if horiz.length_squared() > 0.01 else (-global_transform.basis.z).normalized()
 	_slide_speed = maxf(horiz.length() + 1.2, config.slide_boost_speed)
 	_slide_timer = config.slide_duration
+	_wind_tunnel_slide_latched = _wind_tunnel_inside
+	_wind_slide_elapsed = 0.0
 	_slide_dive_time = 0.0
 	_set_capsule_slide(true)
 	if pose_mod:
@@ -1464,6 +1779,7 @@ func _try_end_slide() -> void:
 
 
 func _update_slide(delta: float) -> void:
+	var tunnel_slide := _wind_tunnel_slide_latched and _wind_tunnel_inside
 	var steer_x := chibi_input.move_vec.x if chibi_input else 0.0
 	_slide_dir = _slide_dir.rotated(Vector3.UP, deg_to_rad(-steer_x * 65.0 * delta)).normalized()
 
@@ -1478,21 +1794,40 @@ func _update_slide(delta: float) -> void:
 	var downhill := slope_dot > 0.08
 	if downhill:
 		_slide_speed = clampf(_slide_speed + slope_dot * 5.4 * delta, 2.6, 8.2)
-		_slide_timer = maxf(_slide_timer, 0.30)
+		if not tunnel_slide:
+			_slide_timer = maxf(_slide_timer, 0.30)
 	else:
 		_slide_speed = clampf(_slide_speed - 3.2 * delta, 1.8, 8.2)
-		_slide_timer -= delta
+		if not tunnel_slide:
+			_slide_timer -= delta
 
 	var low_ceiling := not _has_headroom()
 	if low_ceiling:
 		_slide_speed = maxf(_slide_speed, 2.8)
+	if tunnel_slide:
+		_slide_speed = maxf(_slide_speed, WIND_SLIDE_MIN_SPEED)
 
-	velocity.x = _slide_dir.x * _slide_speed
-	velocity.z = _slide_dir.z * _slide_speed
+	var slide_velocity := _slide_dir * _slide_speed
+	if tunnel_slide:
+		var flow_direction := _wind_flow_direction()
+		if not flow_direction.is_zero_approx():
+			var side_direction := flow_direction.cross(Vector3.UP).normalized()
+			var target_speed := WIND_SLIDE_MIN_SPEED + WIND_SLIDE_CARRY_SPEED * _wind_gust_weight()
+			var target_side_speed := _slide_dir.dot(side_direction) * target_speed * 0.65
+			var downwind_target := flow_direction * target_speed + side_direction * target_side_speed
+			var turn_weight := smoothstep(0.0, WIND_SLIDE_TURN_DURATION, _wind_slide_elapsed)
+			slide_velocity = slide_velocity.lerp(downwind_target, turn_weight)
+			_wind_slide_elapsed += delta
+		slide_velocity = slide_velocity.limit_length(WIND_SLIDE_SPEED_LIMIT)
+	velocity.x = slide_velocity.x
+	velocity.z = slide_velocity.z
 	velocity.y -= config.gravity * delta
 	move_and_slide()
 
-	var target_yaw := atan2(-_slide_dir.x, -_slide_dir.z)
+	var facing_direction := _slide_dir
+	if tunnel_slide and slide_velocity.length_squared() > 0.25 * 0.25:
+		facing_direction = slide_velocity.normalized()
+	var target_yaw := atan2(-facing_direction.x, -facing_direction.z)
 	rotation.y = lerp_angle(rotation.y, target_yaw, 1.0 - exp(-12.0 * delta))
 
 	# Dive arc progress (0.38s matching ChibiLedgeAnimInstance)
@@ -1508,7 +1843,7 @@ func _update_slide(delta: float) -> void:
 
 	if not is_on_floor():
 		transition_to("Locomotion")
-	elif not low_ceiling and (_slide_timer <= 0.0 or _slide_speed <= 2.1):
+	elif not tunnel_slide and not low_ceiling and (_slide_timer <= 0.0 or _slide_speed <= 2.1):
 		transition_to("Locomotion")
 
 

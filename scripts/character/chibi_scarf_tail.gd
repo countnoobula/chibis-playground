@@ -5,8 +5,6 @@ extends SkeletonModifier3D
 ## The rotation bias keeps the collar and segment lengths intact. The native
 ## spring simulator remains responsible for the tail's ongoing motion and settle.
 
-const START_STOW_PROGRESS := 0.68
-const START_STOW_OPEN := 0.72
 const EFFECT_DURATION := 0.68
 const EFFECT_FADE_START := 0.34
 const TELEPORT_DISTANCE := 1.75
@@ -23,10 +21,12 @@ const MAX_TURN_LAG_YAW := 0.20
 var _tail_bones := PackedInt32Array()
 var _age := -1.0
 var _motion_weight := 0.0
+var _toss_open_weight := 0.0
 var _lagged_world_velocity := Vector3.ZERO
 var _stow_triggered := false
 var _last_body_position := Vector3.ZERO
 var _has_last_body_position := false
+var _last_reset_serial := -1
 
 
 func _ready() -> void:
@@ -44,10 +44,13 @@ func _process_modification_with_delta(delta: float) -> void:
 			_reset_effect()
 			return
 
-	var phase: StringName = runner_body.scarf_glide_phase
-	if phase in [&"deploy", &"glide"] or runner_body.scarf_glide_stow_open < START_STOW_OPEN:
+	var phase := runner_body.scarf_glide_phase
+	var reset_serial := runner_body.wind_reset_serial
+	if reset_serial != _last_reset_serial or phase in [&"deploy", &"glide", &"cancel"]:
 		_reset_effect()
+		_last_reset_serial = reset_serial
 		_stow_triggered = false
+		_has_last_body_position = false
 		return
 
 	var body_position := runner_body.global_position
@@ -63,7 +66,12 @@ func _process_modification_with_delta(delta: float) -> void:
 		return
 
 	if _age < 0.0:
-		if _stow_triggered or phase != &"stow" or runner_body.scarf_glide_progress < START_STOW_PROGRESS:
+		if _stow_triggered or phase != &"stow" or not runner_body.scarf_glide_touchdown:
+			return
+		if ChibiScarfGlider.touchdown_hand_release(runner_body.scarf_glide_progress, 1) < 0.06:
+			return
+		_toss_open_weight = smoothstep(0.12, 0.84, runner_body.scarf_glide_stow_open)
+		if _toss_open_weight <= 0.001:
 			return
 		_begin_effect()
 
@@ -74,7 +82,7 @@ func _process_modification_with_delta(delta: float) -> void:
 		return
 
 	var actor_basis := runner_body.global_basis.orthonormalized()
-	var world_velocity := runner_body.get_real_velocity()
+	var world_velocity := runner_body.get_real_velocity() - runner_body.get_platform_velocity()
 	var planar_speed := Vector2(world_velocity.x, world_velocity.z).length()
 	var target_motion := smoothstep(0.20, MIN_RUN_SPEED, planar_speed)
 	var response := MOTION_RISE_RESPONSE if target_motion > _motion_weight else MOTION_FALL_RESPONSE
@@ -103,7 +111,7 @@ func _process_modification_with_delta(delta: float) -> void:
 	if local_lag_velocity.length_squared() > 0.08:
 		lag_heading = atan2(local_lag_velocity.x, -local_lag_velocity.z)
 	var turn_lag_yaw := clampf(lag_heading, -MAX_TURN_LAG_YAW, MAX_TURN_LAG_YAW)
-	var strength := envelope * _motion_weight
+	var strength := envelope * _motion_weight * _toss_open_weight
 
 	for i in _tail_bones.size():
 		var pose := skel.get_bone_global_pose(_tail_bones[i])
@@ -140,11 +148,12 @@ func _begin_effect() -> void:
 	_age = 0.0
 	_motion_weight = 0.0
 	_stow_triggered = true
-	var velocity := runner_body.get_real_velocity()
+	var velocity := runner_body.get_real_velocity() - runner_body.get_platform_velocity()
 	_lagged_world_velocity = Vector3(velocity.x, 0.0, velocity.z)
 
 
 func _reset_effect() -> void:
 	_age = -1.0
 	_motion_weight = 0.0
+	_toss_open_weight = 0.0
 	_lagged_world_velocity = Vector3.ZERO

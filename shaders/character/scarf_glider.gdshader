@@ -16,6 +16,8 @@ uniform float gust = 0.0;
 uniform float planar_airflow : hint_range(0.0, 1.0) = 0.0;
 uniform float descent_airflow : hint_range(0.0, 1.0) = 0.0;
 uniform float airflow_side : hint_range(-1.0, 1.0) = 0.0;
+uniform float wind_load : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 wind_direction = vec3(0.0);
 uniform float cloth_tension : hint_range(0.0, 1.0) = 0.0;
 uniform float deployment_catch : hint_range(0.0, 1.0) = 0.0;
 
@@ -48,12 +50,15 @@ void vertex() {
 	float hem_edge = smoothstep(0.60, 0.94, abs(side));
 	float planar = clamp(planar_airflow, 0.0, 1.0);
 	float descent = clamp(descent_airflow, 0.0, 1.0);
+	float wind = clamp(wind_load, 0.0, 1.0);
 	float tension = clamp(cloth_tension, 0.0, 1.0);
 	float phase = gust + airflow_side * UV.y * 1.7;
 	float ripple_a = sin(TIME * 3.1 + UV.y * 19.0 + side * 2.2 + phase);
 	float ripple_b = sin(TIME * 4.3 - UV.y * 12.5 + side * 4.1 + phase * 0.72);
 	float hem_ripples = (ripple_a * 0.64 + ripple_b * 0.36) * hem_edge
-		* (0.008 + planar * 0.007 + descent * 0.008) * tension;
+		* (0.008 + planar * 0.007 + descent * 0.008 + wind * 0.015) * tension;
+	float wind_hem_wave = sin(TIME * 5.1 + UV.y * 23.0 + side * 3.5 + phase * 1.3);
+	hem_ripples += wind_hem_wave * hem_edge * wind * 0.014 * tension;
 	// Lift the free middle of each hem in local Y. Both UV.y ends taper out
 	// around the gathered corners, while the outer-x mask stays clear of the print.
 	float hem_span = smoothstep(0.08, 0.22, UV.y)
@@ -61,10 +66,10 @@ void vertex() {
 	float hem_lift_wave = sin(TIME * 2.8 + UV.y * 13.0 + side * 1.2 + phase) * 0.70
 		+ sin(TIME * 4.5 - UV.y * 8.0 + side * 3.1 + phase * 0.65) * 0.30;
 	float hem_lift = hem_lift_wave * hem_edge * hem_span
-		* (0.014 + planar * 0.013 + descent * 0.025) * tension;
+		* (0.014 + planar * 0.013 + descent * 0.025 + wind * 0.017) * tension;
 	float body_gate = 0.30 + abs(side) * 0.42;
 	float body_wave = sin(TIME * 2.0 + UV.y * 7.2 + UV.x * 1.8 + phase)
-		* (0.002 + planar * 0.003 + descent * 0.002) * body_gate * tension;
+		* (0.002 + planar * 0.003 + descent * 0.002 + wind * 0.004) * body_gate * tension;
 	float breathing = sin(TIME * 0.82 + UV.y * 2.3 + gust * 0.48)
 		* 0.004 * (0.65 + abs(side) * 0.35) * tension;
 	float opening_catch = deployment_catch * (0.008 + descent * 0.004)
@@ -75,13 +80,15 @@ void vertex() {
 	float canopy_center = sin(PI * clamp(UV.x, 0.0, 1.0))
 		* sin(PI * clamp(UV.y, 0.0, 1.0));
 	float belly_pulse = 0.72 + 0.28 * sin(TIME * 2.7 + UV.y * 5.0 + phase);
-	float pressure = 0.018 + descent * 0.042 + planar * 0.026;
+	float pressure = 0.018 + descent * 0.042 + planar * 0.026 + wind * 0.048;
 	float belly = canopy_center * (pressure * belly_pulse * tension + deployment_catch * 0.055);
 	VERTEX.y += belly * inflated * free_cloth;
+	VERTEX.x += wind_direction.x * canopy_center * wind * 0.024 * inflated * free_cloth;
+	VERTEX.z += wind_direction.z * canopy_center * wind * 0.030 * inflated * free_cloth;
 
 	// A steering turn lifts the hem on its bank side, then relaxes with tension.
 	float turn_side = max(clamp(bank, -1.0, 1.0) * side, 0.0);
-	float turn_lift = turn_side * hem_edge * (0.028 + planar * 0.024 + descent * 0.012)
+	float turn_lift = turn_side * hem_edge * (0.028 + planar * 0.024 + descent * 0.012 + wind * 0.014)
 		* tension;
 	VERTEX.y += (hem_lift + turn_lift) * inflated * free_cloth;
 	VERTEX.x += (VERTEX.y - collapse_center.y) * clamp(bank, -1.0, 1.0)

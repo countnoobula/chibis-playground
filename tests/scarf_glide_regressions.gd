@@ -24,6 +24,8 @@ func run(tree: SceneTree, gym: Node3D, chibi: ParkourController, check: Callable
 	await _test_key_cancel_bindings()
 	await _test_steering_and_landing()
 	await _test_uninterrupted_glide_landing()
+	await _test_gentle_glide_first_step()
+	await _test_partial_touchdown_and_hop()
 	await _test_near_floor_and_ceiling()
 	await _test_trampoline_landing()
 	await _test_water_entry()
@@ -243,6 +245,104 @@ func _test_uninterrupted_glide_landing() -> void:
 	_touch_jump(point, false)
 	await _wait_until_available()
 	_check.call(_chibi.can_deploy_scarf(), "A normal scarf landing re-arms the next airtime")
+
+
+func _test_gentle_glide_first_step() -> void:
+	var contacts := [0]
+	var record_contact := func(_side: StringName) -> void:
+		contacts[0] += 1
+	var scarf := _chibi.pose_mod.scarf_glider
+	var skeleton := _chibi.pose_mod.get_skeleton()
+	var pinned_then_released := [false, false]
+	var sample_pins := func() -> void:
+		if not _chibi.scarf_glide_touchdown or scarf._opacity <= 0.15:
+			return
+		var progress := _chibi.scarf_glide_progress
+		var targets := scarf.get_corner_targets()
+		if targets.size() != 4:
+			return
+		var grip_error := Vector2.ZERO
+		for index in 4:
+			var side := 0 if index < 2 else 1
+			var hand := skeleton.get_bone_global_pose(scarf._hand_bones[side])
+			var wrist_target := skeleton.global_transform * hand * scarf._hand_pin_offsets[index]
+			grip_error[side] = maxf(grip_error[side], targets[index].distance_to(wrist_target))
+		if progress < 0.32 and grip_error.length() < 0.005:
+			pinned_then_released[0] = true
+		if progress > 0.53 and progress < 0.73 and grip_error.y > grip_error.x + 0.008:
+			pinned_then_released[1] = true
+	_chibi.anim_ctrl.ground_foot_contact.connect(record_contact)
+	skeleton.skeleton_updated.connect(sample_pins)
+	var approach_speed := await _land_dry_glide(0.40, 3.2)
+	var contact_speed := Vector2(_chibi.velocity.x, _chibi.velocity.z).length()
+	var started_gait := (_chibi.is_on_floor() and _chibi.scarf_glide_touchdown
+		and _chibi.anim_ctrl.current_state == "LocomotionGait")
+	_check.call(started_gait and approach_speed > 1.65 and absf(contact_speed - approach_speed) < 0.08,
+		"A gentle scarf landing carries %.2f m/s straight into the gait" % approach_speed)
+
+	var planted_side := -1
+	var first_plant_tick := -1
+	for frame in 7:
+		for side in 2:
+			if _chibi.pose_mod.is_ground_foot_planted(side):
+				planted_side = side
+				first_plant_tick = frame
+				break
+		if planted_side >= 0:
+			break
+		await _ticks(1)
+	_chibi.anim_ctrl.ground_foot_contact.disconnect(record_contact)
+	_check.call(planted_side >= 0 and contacts[0] == 1 and _chibi.scarf_glide_phase == &"stow",
+		"The first scarf landing shoe plants once while the wrap is active (tick %d)" % first_plant_tick)
+	await _ticks(17)
+	skeleton.skeleton_updated.disconnect(sample_pins)
+	_check.call(pinned_then_released[0] and pinned_then_released[1],
+		"The wrap starts with all corners in the hands and transfers the throwing side first")
+
+
+func _test_partial_touchdown_and_hop() -> void:
+	await _land_dry_glide(0.0, 0.48)
+	_check.call(_chibi.is_on_floor() and _chibi.scarf_glide_touchdown
+		and _chibi.scarf_glide_stow_open > 0.15 and _chibi.scarf_glide_stow_open < 0.99,
+		"Touching down during deployment gathers only the scarf that opened")
+	await _ticks(22)
+	_check.call(_chibi.scarf_glide_phase == &"stowed" and not _chibi.scarf_glide_touchdown,
+		"The partial scarf settles at the collar and releases the touchdown state")
+
+	await _land_dry_glide(0.72, 3.2)
+	var moving_plant := false
+	for frame in 6:
+		moving_plant = (moving_plant or _chibi.pose_mod.is_ground_foot_planted(0)
+			or _chibi.pose_mod.is_ground_foot_planted(1))
+		await _ticks(1)
+	_check.call(moving_plant, "A quicker scarf landing still makes a planted step before toe-off")
+	_chibi.chibi_input.set_touch_jump(true)
+	await _ticks(2)
+	_chibi.chibi_input.set_touch_jump(false)
+	_check.call(not _chibi.is_on_floor() and _chibi.velocity.y > 2.5
+		and _chibi.scarf_glide_phase == &"stow"
+		and not _chibi.pose_mod.is_ground_foot_planted(0) and not _chibi.pose_mod.is_ground_foot_planted(1),
+		"A fresh hop during the wrap releases the shoe and leaves the scarf gathering")
+	await _ticks(22)
+	_check.call(_chibi.scarf_glide_phase == &"stowed" and not _chibi.scarf_glide_touchdown,
+		"The wrap finishes in the new airtime")
+
+
+func _land_dry_glide(move_strength: float, height: float) -> float:
+	_reset(OPEN_DECK + Vector3.UP * height)
+	_chibi.camera_ctrl.reset_after_teleport()
+	_chibi.chibi_input.set_touch_move(Vector2.UP * move_strength)
+	await _wait_until_available()
+	_chibi.chibi_input.set_touch_jump(true)
+	await _ticks(1)
+	_chibi.chibi_input.set_touch_jump(false)
+	var approach_speed := 0.0
+	for frame in 170:
+		await _ticks(1)
+		if _chibi.is_on_floor():
+			break
+		approach_speed = Vector2(_chibi.velocity.x, _chibi.velocity.z).length()
+	return approach_speed
 
 
 func _test_near_floor_and_ceiling() -> void:
