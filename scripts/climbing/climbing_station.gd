@@ -16,7 +16,7 @@ var net_solver: ClimbingNetSolver = null
 var _net_materials: Array[ShaderMaterial] = []
 
 var _runner: ParkourController = null
-var _auto_grab_after: float = 0.0
+var _auto_grab_cooldown: float = 0.0
 
 # Wall route data (local Godot meters: +X right, +Y up, +Z toward climber)
 var _bands: Array = []
@@ -170,7 +170,7 @@ func _anchor(limb: int, stance: Vector2i) -> Vector3:
 
 func _physics_process(delta: float) -> void:
 	_update_net(delta)
-	var now := Time.get_ticks_msec() * 0.001
+	_auto_grab_cooldown = maxf(0.0, _auto_grab_cooldown - delta)
 
 	if _runner == null:
 		var player := get_tree().get_first_node_in_group("player") as ParkourController
@@ -188,7 +188,7 @@ func _physics_process(delta: float) -> void:
 			var stick := player.chibi_input.move_vec
 			var wish := player.camera_ctrl.get_right_xz() * stick.x - player.camera_ctrl.get_forward_xz() * stick.y
 			approaching = wish.dot(wall_inward) > 0.18
-		var auto_grab := local_p.z <= grab_depth and local_p.y <= 2.64 and now >= _auto_grab_after and approaching
+		var auto_grab := local_p.z <= grab_depth and local_p.y <= 2.64 and _auto_grab_cooldown <= 0.0 and approaching
 		if auto_grab:
 			_mount(player, local_p)
 		return
@@ -202,8 +202,32 @@ func _physics_process(delta: float) -> void:
 	var climb_in := Vector2(move_in.x, -move_in.y)
 
 	if is_rope_net:
+		# A blocked body sweep must not advance the knot targets independently of
+		# the rig. Keep a snapshot so the hands, feet, and load stay on the last
+		# supported stance when an obstacle rejects this frame's body motion.
+		var previous_stance := _net_stance
+		var previous_phase := _phase
+		var previous_lead := _lead
+		var previous_next_lead := _next_lead
+		var previous_swing_foot := _net_swing_foot
+		var previous_contacts := _contacts.duplicate()
+		var previous_reach_targets := _net_reach_target.duplicate()
+		var previous_contact_locked := _contact_locked.duplicate()
+		var previous_net_contacts := _net_contact.duplicate()
+		var previous_load_weights := _net_load_weight.duplicate()
 		_move_on_net(climb_in, delta)
-		_apply_pose(delta)
+		if not _apply_pose(delta):
+			_net_stance = previous_stance
+			_phase = previous_phase
+			_lead = previous_lead
+			_next_lead = previous_next_lead
+			_net_swing_foot = previous_swing_foot
+			for i in 4:
+				_contacts[i] = previous_contacts[i]
+				_net_reach_target[i] = previous_reach_targets[i]
+				_contact_locked[i] = previous_contact_locked[i]
+				_net_contact[i] = previous_net_contacts[i]
+				_net_load_weight[i] = previous_load_weights[i]
 		return
 
 	var vert := (1 if climb_in.y > 0.35 else (-1 if climb_in.y < -0.35 else 0))
@@ -299,10 +323,14 @@ func _mount(player: ParkourController, local_p: Vector3) -> void:
 		_foot_phase[i] = 1.0
 
 	var wall_normal_world := global_transform.basis.z.normalized() # +Z faces climber
+	if not _apply_pose(0.0):
+		_runner = null
+		if is_rope_net:
+			_reset_net_attachment()
+		return
 	_runner.enter_climbing_station(self, is_rope_net, wall_normal_world)
 	if _runner.juice:
 		_runner.juice.play_sfx("LedgeGrab")
-	_apply_pose(0.0)
 
 
 func _release() -> void:
@@ -311,7 +339,24 @@ func _release() -> void:
 	var push_out := global_transform.basis.z.normalized()
 	_runner.exit_climbing_station(push_out)
 	_runner = null
-	_auto_grab_after = Time.get_ticks_msec() * 0.001 + 0.40
+	_auto_grab_cooldown = 0.40
+	if is_rope_net:
+		_reset_net_attachment()
+
+
+func _reset_net_attachment() -> void:
+	_net_stance = Vector2.ZERO
+	_net_body_pos = Vector3.ZERO
+	_net_swing_foot = 3
+	_phase = 0.0
+	_lead = 0
+	_next_lead = 0
+	for i in 4:
+		_contacts[i] = Vector3.ZERO
+		_net_reach_target[i] = Vector3.ZERO
+		_net_contact[i] = Vector3.ZERO
+		_net_load_weight[i] = 0.0
+		_contact_locked[i] = true
 
 
 func _update_net(delta: float) -> void:
@@ -402,9 +447,9 @@ func _place_foot(side: int, delta: float, hip_local: Vector3) -> Vector3:
 	return _foot_from[side].lerp(_foot_goal[side], t) + Vector3(0.0, 0.0, 0.02 * sin(PI * t))
 
 
-func _apply_pose(delta: float) -> void:
+func _apply_pose(delta: float) -> bool:
 	if _runner == null:
-		return
+		return false
 	var targets: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO, Vector3.ZERO, Vector3.ZERO]
 	for i in 4:
 		if is_rope_net:
@@ -439,10 +484,16 @@ func _apply_pose(delta: float) -> void:
 		var rest_mid := Vector3(0.20 * _net_stance.x, 0.49 + 0.16 * _net_stance.y, 0.218)
 		var hand_mid := (_net_contact[0] + _net_contact[1]) * 0.5 + Vector3(0.0, 0.01, 0.0)
 		base += rest_mid - hand_mid
-		_net_body_pos = base if delta <= 0.0 else _net_body_pos.lerp(base, 1.0 - exp(-16.0 * delta))
-		base = _net_body_pos
-
-	_runner.global_position = to_global(base)
+		var smoothed_net_body := base if delta <= 0.0 else _net_body_pos.lerp(base, 1.0 - exp(-16.0 * delta))
+		base = smoothed_net_body
+	var target_feet := to_global(base)
+	if is_rope_net:
+		target_feet = _keep_net_capsule_above_deck(target_feet)
+		if not _runner.try_move_traversal(target_feet):
+			return false
+		_net_body_pos = to_local(target_feet)
+	else:
+		_runner.global_position = target_feet
 	var face := (-global_transform.basis.z).normalized()
 	_runner.rotation.y = atan2(-face.x, -face.z)
 
@@ -456,3 +507,24 @@ func _apply_pose(delta: float) -> void:
 		_runner.pose_mod.climb_station_basis = global_transform.basis
 		for i in 4:
 			_runner.pose_mod.climb_limb_targets_world[i] = to_global(targets[i])
+	return true
+
+
+func _keep_net_capsule_above_deck(target_feet: Vector3) -> Vector3:
+	var current_feet := _runner.global_position
+	# The walk-on starts close to the deck. Probe only the short vertical interval
+	# beneath this target, so climbing higher never snaps Chibi back toward a floor.
+	var from := Vector3(target_feet.x, maxf(target_feet.y, current_feet.y) + 0.12, target_feet.z)
+	var to := Vector3(target_feet.x, target_feet.y - 0.42, target_feet.z)
+	var query := PhysicsRayQueryParameters3D.create(from, to, ParkourController.TRAVERSAL_SOLID_MASK, [_runner.get_rid()])
+	var hit := _runner.get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return target_feet
+	var normal: Vector3 = hit.get("normal", Vector3.ZERO)
+	if normal.y < 0.65:
+		return target_feet
+	var clearance := maxf(_runner.safe_margin, 0.015)
+	var supported_y: float = (hit["position"] as Vector3).y + clearance
+	if target_feet.y >= supported_y:
+		return target_feet
+	return Vector3(target_feet.x, supported_y, target_feet.z)

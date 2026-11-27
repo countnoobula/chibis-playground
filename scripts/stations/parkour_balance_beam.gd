@@ -4,14 +4,10 @@ extends Node3D
 ## Narrow balance beam (runs along local -Z from 0 to beam_length).
 
 const PALETTE := preload("res://scripts/gym/rooftop_palette.gd")
-const CATCH_HALF_WIDTH := 0.325
-const CATCH_END_INSET := 0.15
+const TOP_HEIGHT_TOLERANCE := 0.10
 
 @export var beam_length: float = 8.0
 @export var beam_radius: float = 0.14
-
-var _tracked_player: ParkourController = null
-
 
 func _ready() -> void:
 	_build_beam()
@@ -27,6 +23,7 @@ func foot_surface(at: Vector3) -> Transform3D:
 func _build_beam() -> void:
 	var body := StaticBody3D.new()
 	body.collision_layer = 1
+	body.set_meta(&"parkour_top_station", self)
 	var col := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = Vector3(beam_radius * 2.0, beam_radius * 2.0, beam_length)
@@ -49,41 +46,20 @@ func _build_beam() -> void:
 	body.add_child(mesh)
 	add_child(body)
 
-	var area := Area3D.new()
-	area.collision_layer = 8
-	area.collision_mask = 2
-	var tcol := CollisionShape3D.new()
-	var tbox := BoxShape3D.new()
-	tbox.size = Vector3(CATCH_HALF_WIDTH * 2.0, 0.55, beam_length - CATCH_END_INSET * 2.0)
-	tcol.shape = tbox
-	tcol.position = Vector3(0.0, beam_radius + 0.25, -beam_length * 0.5)
-	area.add_child(tcol)
-	area.body_entered.connect(func(b):
-		if b is ParkourController:
-			_tracked_player = b
-			_try_mount(b)
-	)
-	area.body_exited.connect(func(b):
-		if b == _tracked_player:
-			_tracked_player = null
-	)
-	add_child(area)
 
-
-func _try_mount(p: ParkourController) -> void:
-	if not is_instance_valid(p):
-		return
-	var local_feet := to_local(p.global_position)
-	var radius := p.config.capsule_radius
-	if absf(local_feet.x) > CATCH_HALF_WIDTH + radius:
-		return
-	if local_feet.z > radius - CATCH_END_INSET or local_feet.z < -beam_length + CATCH_END_INSET - radius:
-		return
-	var top_y := global_position.y + beam_radius
-	if absf(p.global_position.y - top_y) <= 0.42:
-		p.try_enter_balance_beam(self)
-
-
-func _physics_process(_delta: float) -> void:
-	if _tracked_player != null:
-		_try_mount(_tracked_player)
+func land_on_top(player: ParkourController, impact_velocity: float, was_on_floor: bool) -> bool:
+	if not is_instance_valid(player) or player.current_state != "Locomotion":
+		return false
+	if not was_on_floor and impact_velocity > 1.5:
+		return false
+	var local_feet := to_local(player.global_position)
+	var radius := player.config.capsule_radius
+	if absf(local_feet.y - beam_radius) > TOP_HEIGHT_TOLERANCE:
+		return false
+	if absf(local_feet.x) > beam_radius + radius + 0.025:
+		return false
+	if local_feet.z > radius + 0.025 or local_feet.z < -beam_length - radius - 0.025:
+		return false
+	# A floor-supported walk-on is valid too; the controller reports this only
+	# when the beam itself supplied the current floor contact.
+	return player.try_enter_balance_beam(self)

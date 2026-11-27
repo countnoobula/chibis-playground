@@ -5,10 +5,16 @@ extends CharacterBody3D
 ## orchestrated through Godot State Charts, Phantom Camera, AnimationTree, and ChibiPoseModifier.
 
 const WORLD_MASK := 1 # Layer 1: World
+const TRAVERSAL_SOLID_MASK := WORLD_MASK | (1 << 2) # World and Climbable
+const TRAVERSAL_CONTACT_SLOP := 0.002
+const TRAVERSAL_PATH_SECTIONS := 24
+const TOP_STATION_META := &"parkour_top_station"
 const JUMP_POSE_DURATION := 0.27
 const GROUND_PIVOT_DURATION := 0.18
 const MIN_SOFT_LAND_IMPACT_SPEED := 2.1
-const VAULT_PHASES := [0.0, 0.24, 0.56, 1.0]
+const LEDGE_DROP_COAST_DURATION := 0.18
+const LEDGE_DROP_LATERAL_BRAKE_SCALE := 0.30
+const VAULT_PHASES := [0.0, 0.24, 0.42, 0.72, 1.0]
 const WallClimbMotion := preload("res://scripts/climbing/wall_climb_motion.gd")
 const WallClimbGeometry := preload("res://scripts/climbing/wall_climb_geometry.gd")
 const PickupItem := preload("res://scripts/items/pickup_item.gd")
@@ -102,8 +108,8 @@ var swing_cooldown: float = 0.0
 # SpeedVault state
 var _vault_alpha: float = 0.0
 var _vault_duration: float = 0.80
-var _vault_points := PackedVector3Array([Vector3.ZERO, Vector3.ZERO, Vector3.ZERO, Vector3.ZERO])
-var _vault_tangents := PackedVector3Array([Vector3.ZERO, Vector3.ZERO, Vector3.ZERO, Vector3.ZERO])
+var _vault_points := PackedVector3Array()
+var _vault_exit_velocity := Vector3.ZERO
 
 # Ledge / Shimmy / Corner / Mantle state
 var ledge_edge_point: Vector3 = Vector3.ZERO
@@ -112,12 +118,15 @@ var ledge_hang_time: float = 0.0
 var mantle_alpha: float = 0.0
 var _mantle_duration: float = 0.88
 var _mantle_start: Vector3 = Vector3.ZERO
-var _mantle_ctrl: Vector3 = Vector3.ZERO
+var _mantle_hang: Vector3 = Vector3.ZERO
+var _mantle_lift: Vector3 = Vector3.ZERO
 var _mantle_end: Vector3 = Vector3.ZERO
 var shimmy_phase: float = 0.0
 var shimmy_start_edge: Vector3 = Vector3.ZERO
 var shimmy_end_edge: Vector3 = Vector3.ZERO
-var _shimmy_dir_sign: float = 1.0
+var _ledge_travel_velocity := Vector3.ZERO
+var _ledge_drop_coast_axis := Vector3.ZERO
+var _ledge_drop_coast_time := 0.0
 var _corner_alpha: float = 0.0
 var _corner_start_pos: Vector3 = Vector3.ZERO
 var _corner_ctrl_pos: Vector3 = Vector3.ZERO
@@ -128,6 +137,7 @@ var _corner_new_edge: Vector3 = Vector3.ZERO
 var _corner_new_normal: Vector3 = Vector3.FORWARD
 
 # WallRun state
+var _wall_run_entry_armed: bool = false
 var _wall_run_timer: float = 0.0
 var _wall_run_side: float = 1.0
 var _wall_run_normal: Vector3 = Vector3.RIGHT
@@ -139,6 +149,7 @@ var _slide_dir: Vector3 = Vector3.FORWARD
 var _slide_speed: float = 0.0
 var _slide_dive_time: float = 0.0
 var _standing_clearance := CapsuleShape3D.new()
+var _traversal_capsule := CapsuleShape3D.new()
 var _roll_timer: float = 0.0
 var _roll_dir: Vector3 = Vector3.FORWARD
 
@@ -147,7 +158,6 @@ var _pole_top_pos: Vector3 = Vector3.ZERO
 var _pole_hold_time: float = 0.0
 var _pole_hop_start: Vector3 = Vector3.ZERO
 var _pole_hop_end: Vector3 = Vector3.ZERO
-var _pole_hop_target_top: Vector3 = Vector3.ZERO
 var _pole_hop_alpha: float = 0.0
 var _pole_hop_duration: float = 0.48
 var _pole_hop_arc: float = 0.65
@@ -192,7 +202,6 @@ var _wall_jump_buffer := 0.0
 var _wall_jump_direction := Vector2.ZERO
 var _wall_upward_leap := false
 var _wall_mantle_active := false
-var _wall_mantle_lift := Vector3.ZERO
 var _pool_surface_y: float = 0.0
 var _pool_underwater_weight: float = 0.0
 var _swim_recovery_time := 0.0
@@ -243,6 +252,54 @@ func _set_world_collision(enabled: bool) -> void:
 	set_collision_mask_value(1, enabled)
 
 
+func traversal_segment_clear(from_feet: Vector3, to_feet: Vector3) -> bool:
+	if collision_shape == null or not collision_shape.shape is CapsuleShape3D:
+		return false
+	var active := collision_shape.shape as CapsuleShape3D
+	# Keep touching a floor or perch legal within the solver's contact tolerance.
+	_traversal_capsule.radius = active.radius - TRAVERSAL_CONTACT_SLOP
+	_traversal_capsule.height = active.height - TRAVERSAL_CONTACT_SLOP * 2.0
+	var offset := collision_shape.global_position - global_position
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = _traversal_capsule
+	query.transform = Transform3D(collision_shape.global_basis, from_feet + offset)
+	query.collision_mask = TRAVERSAL_SOLID_MASK
+	query.exclude = [get_rid()]
+	var space := get_world_3d().direct_space_state
+	var motion := to_feet - from_feet
+	if motion.length_squared() > 0.00000001:
+		if not space.intersect_shape(query, 1).is_empty():
+			return false
+		query.motion = motion
+		var travel := space.cast_motion(query)
+		if travel.size() != 2 or travel[0] < 0.999:
+			return false
+		query.motion = Vector3.ZERO
+	query.transform = Transform3D(query.transform.basis, to_feet + offset)
+	return space.intersect_shape(query, 1).is_empty()
+
+
+func try_move_traversal(target_feet: Vector3) -> bool:
+	if not traversal_segment_clear(global_position, target_feet):
+		return false
+	global_position = target_feet
+	return true
+
+
+func _traversal_path_clear(path: Callable) -> bool:
+	var previous := global_position
+	for step in range(1, TRAVERSAL_PATH_SECTIONS + 1):
+		var target: Vector3 = path.call(float(step) / TRAVERSAL_PATH_SECTIONS)
+		if not traversal_segment_clear(previous, target):
+			return false
+		previous = target
+	return true
+
+
+func _has_dedicated_traversal(collider: Object) -> bool:
+	return collider.has_meta(TOP_STATION_META) or WallClimbGeometry.owns_collider(collider)
+
+
 func add_flow_boost(amount: float) -> void:
 	var prev := flow_level
 	flow_level = clampf(flow_level + amount, 0.0, 1.0)
@@ -256,7 +313,9 @@ func add_flow_boost(amount: float) -> void:
 func transition_to(new_state: String) -> void:
 	if current_state == new_state:
 		return
+	_wall_run_entry_armed = false
 	if current_state == "Locomotion" and new_state != "Locomotion":
+		_ledge_drop_coast_time = 0.0
 		# Keep the velocity already imparted by the gust, but do not carry its
 		# Flow bookkeeping into an unrelated movement state.
 		_scarf_wind_flow_attribution_velocity = Vector3.ZERO
@@ -282,8 +341,6 @@ func transition_to(new_state: String) -> void:
 		visual_pivot.transform = _visual_rest_transform
 	elif current_state == "BalanceBeam":
 		_beam = null
-	elif current_state == "SpeedVault" or current_state == "MantleUp" or current_state == "PoleHop":
-		_set_world_collision(true)
 	if current_state == "Climbing" and is_wall_climbing():
 		_clear_wall_climb(_wall_mantle_active)
 	if current_state == "MantleUp" and _wall_mantle_active:
@@ -360,10 +417,13 @@ func reset_for_respawn(spawn_position: Vector3) -> void:
 	super_bounce_grace_timer = 0.0
 	super_bounce_active = false
 	ledge_grab_cooldown = 0.0
+	_ledge_travel_velocity = Vector3.ZERO
+	_ledge_drop_coast_time = 0.0
 	_wall_climb_cooldown = 0.0
 	_wall_climb_probe_timer = 0.0
 	_air_wall_approach = Vector3.ZERO
 	wall_run_cooldown = 0.0
+	_wall_run_entry_armed = false
 	corner_turn_cooldown = 0.0
 	trampoline_cooldown = 0.0
 	pole_cooldown = 0.0
@@ -480,6 +540,7 @@ func _physics_process(delta: float) -> void:
 
 func _tick_cooldowns(delta: float) -> void:
 	ledge_grab_cooldown = maxf(0.0, ledge_grab_cooldown - delta)
+	_ledge_drop_coast_time = maxf(0.0, _ledge_drop_coast_time - delta)
 	_wall_climb_cooldown = maxf(0.0, _wall_climb_cooldown - delta)
 	_wall_climb_probe_timer = maxf(0.0, _wall_climb_probe_timer - delta)
 	_wall_jump_buffer = maxf(0.0, _wall_jump_buffer - delta)
@@ -716,11 +777,12 @@ func request_slide_or_roll() -> void:
 					_start_slide()
 			else:
 				roll_buffer_timer = config.roll_buffer_window
-		"LedgeHang":
-			# Drop off ledge
-			ledge_grab_cooldown = 0.42
-			transition_to("Locomotion")
-			velocity = ledge_wall_normal * 1.4 + Vector3(0.0, -1.2, 0.0)
+		"LedgeHang", "LedgeShimmy", "LedgeCorner":
+			var outward := global_basis.z.normalized() if current_state == "LedgeCorner" else ledge_wall_normal
+			var carry := _ledge_travel_velocity.slide(outward)
+			_ledge_drop_coast_axis = carry.normalized()
+			_ledge_drop_coast_time = LEDGE_DROP_COAST_DURATION if not carry.is_zero_approx() else 0.0
+			_drop_ledge_traversal(carry + outward * 1.4 + Vector3.DOWN * 1.2)
 		"RopeLine", "ZipLine":
 			_drop_from_parkour_line()
 		"Climbing":
@@ -730,6 +792,7 @@ func request_slide_or_roll() -> void:
 
 func _execute_ground_jump() -> void:
 	_air_wall_approach = -global_basis.z
+	_wall_run_entry_armed = Vector2(velocity.x, velocity.z).length() >= config.wall_run_entry_min_speed
 	jump_buffer_timer = 0.0
 	coyote_timer = 0.0
 	if anim_ctrl != null:
@@ -782,6 +845,7 @@ func can_deploy_scarf() -> bool:
 
 
 func _start_scarf_deploy() -> void:
+	_wall_run_entry_armed = false
 	_scarf_glide_used_this_airtime = true
 	scarf_glide_phase = &"deploy"
 	scarf_glide_progress = 0.0
@@ -952,7 +1016,13 @@ func _update_locomotion(delta: float) -> void:
 				var target_v := wish * max_speed
 				horiz = horiz.move_toward(target_v, config.ground_accel * config.air_control * delta)
 			else:
-				horiz = horiz.move_toward(Vector3.ZERO, config.air_decel * delta)
+				var braking := config.air_decel * delta
+				var braked := horiz.move_toward(Vector3.ZERO, braking)
+				if _ledge_drop_coast_time > 0.0:
+					var side_speed := horiz.dot(_ledge_drop_coast_axis)
+					var coast_speed := move_toward(side_speed, 0.0, braking * LEDGE_DROP_LATERAL_BRAKE_SCALE)
+					braked += _ledge_drop_coast_axis * (coast_speed - braked.dot(_ledge_drop_coast_axis))
+				horiz = braked
 
 	velocity.x = horiz.x
 	velocity.z = horiz.z
@@ -987,6 +1057,11 @@ func _update_locomotion(delta: float) -> void:
 		realized_carry_speed = minf(realized_carry_speed, requested_carry_speed)
 		_scarf_wind_carry_velocity = scarf_wind_carry_direction * realized_carry_speed
 		_scarf_wind_flow_attribution_velocity = _scarf_wind_carry_velocity
+	if not now_falling:
+		_wall_run_entry_armed = false
+		_ledge_drop_coast_time = 0.0
+		if _try_land_top_station(vertical_speed_before_slide, on_floor):
+			return
 	var scarf_glide_was_used := _scarf_glide_used_this_airtime
 	resolved_planar_speed = Vector2(actual_velocity.x, actual_velocity.z).length()
 	var planar_speed := resolved_planar_speed
@@ -1080,9 +1155,8 @@ func _update_locomotion(delta: float) -> void:
 		if velocity.y < 2.4:
 			if try_grab_ledge():
 				return
-		if air_time > 0.06:
-			if _try_start_wall_run():
-				return
+		if _wall_run_entry_armed and _try_start_wall_run(wish):
+			return
 
 	# Buffered jump on touchdown
 	if jump_buffer_timer > 0.0:
@@ -1240,7 +1314,7 @@ func _try_step_up(motion: Vector3) -> void:
 	if not hit.is_empty() and (hit["normal"] as Vector3).y > 0.75:
 		var step_h: float = (hit["position"] as Vector3).y - global_position.y
 		if step_h > 0.02 and step_h <= config.max_step_height:
-			global_position.y += step_h
+			try_move_traversal(global_position + Vector3.UP * step_h)
 
 
 # ---------------------------------------------------------------------------
@@ -1259,7 +1333,7 @@ func _try_start_speed_vault() -> bool:
 	))
 	if hit_front.is_empty():
 		return false
-	if WallClimbGeometry.owns_collider(hit_front.get("collider")):
+	if _has_dedicated_traversal(hit_front["collider"]):
 		return false
 	var n: Vector3 = hit_front["normal"]
 	if fwd.dot(n) >= -0.45:
@@ -1277,6 +1351,8 @@ func _try_start_speed_vault() -> bool:
 	))
 	if hit_top.is_empty():
 		return false
+	if hit_top["collider"] != hit_front["collider"] or (hit_top["normal"] as Vector3).y < 0.7:
+		return false
 	var top_pt: Vector3 = hit_top["position"]
 	var obs_h := top_pt.y - feet_y
 	if obs_h < config.vault_min_height or obs_h > config.vault_max_height:
@@ -1289,20 +1365,43 @@ func _try_start_speed_vault() -> bool:
 		Vector3(far_xz.x, top_pt.y - 1.60, far_xz.z),
 		WORLD_MASK, exc
 	))
-	if hit_far.is_empty():
+	if hit_far.is_empty() or (hit_far["normal"] as Vector3).y < 0.7:
 		return false
 	var far_pt: Vector3 = hit_far["position"]
 	if far_pt.y >= top_pt.y - 0.25:
 		return false
 
+	var front := Vector3(pt_front.x, top_pt.y, pt_front.z)
+	var back_probe := front - Vector3.UP * 0.08
+	var hit_back := space.intersect_ray(PhysicsRayQueryParameters3D.create(
+		back_probe + vault_dir * config.vault_clearance_depth, back_probe, WORLD_MASK, exc
+	))
+	if hit_back.is_empty() or hit_back["collider"] != hit_front["collider"]:
+		return false
+	var back: Vector3 = hit_back["position"]
+	var plant := front - vault_dir * (config.capsule_radius - 0.045)
+	plant.y = maxf(global_position.y, top_pt.y - 0.12)
+	var lift := Vector3(plant.x, maxf(plant.y, top_pt.y + 0.025), plant.z)
+	var clear := back + vault_dir * (config.capsule_radius + 0.03)
+	clear.y = lift.y
+	var finish := far_pt + Vector3.UP * 0.02
+	if (finish - clear).dot(vault_dir) <= 0.0:
+		return false
+	_vault_points = PackedVector3Array([global_position, plant, lift, clear, finish])
+	if not _traversal_path_clear(_vault_position):
+		return false
+
 	_vault_alpha = 0.0
 	_vault_duration = clampf(lerpf(config.vault_base_duration, config.vault_base_duration * 0.88, flow_level), 0.25, 2.0)
-	_configure_vault_path(pt_front, top_pt.y, far_pt, vault_dir)
+	var entry_speed := Vector2(velocity.x, velocity.z).length()
+	var exit_speed := clampf(entry_speed, config.base_run_speed, config.max_flow_speed)
+	_vault_exit_velocity = vault_dir * exit_speed
+	ledge_edge_point = front
+	ledge_wall_normal = -vault_dir
 
 	coyote_timer = 0.0
 	jump_buffer_timer = 0.0
 	rotation.y = atan2(-vault_dir.x, -vault_dir.z)
-	_set_world_collision(false)
 	velocity = Vector3.ZERO
 	add_flow_boost(config.vault_flow_boost)
 	if juice:
@@ -1312,54 +1411,24 @@ func _try_start_speed_vault() -> bool:
 	return true
 
 
-func _configure_vault_path(front: Vector3, top_y: float, landing: Vector3, forward: Vector3) -> void:
-	# At phase 0.24 the imported clip puts both hands forward about 15 cm and up 25 cm.
-	var plant := front + forward * maxf(-0.105, (global_position - front).dot(forward))
-	plant.y = maxf(global_position.y, top_y - 0.25)
-	var clearance := front + forward * 0.44
-	clearance.y = top_y
-	var finish := landing + Vector3.UP * 0.02
-	_vault_points = PackedVector3Array([global_position, plant, clearance, finish])
-	# Tangents are in meters per unit of phase and shared between adjacent curve segments.
-	var approach := (plant - global_position) / (VAULT_PHASES[1] - VAULT_PHASES[0])
-	var lift := (clearance - plant) / (VAULT_PHASES[2] - VAULT_PHASES[1])
-	var descent := (finish - clearance) / (VAULT_PHASES[3] - VAULT_PHASES[2])
-	var entry_speed := Vector2(velocity.x, velocity.z).length()
-	var entry := forward * minf(entry_speed * _vault_duration, approach.dot(forward) * 1.8)
-	entry.y = clampf(velocity.y * _vault_duration, 0.0, approach.y * 1.8)
-	var support := forward * minf(approach.dot(forward), lift.dot(forward))
-	support.y = minf(approach.y, lift.y)
-	var clear := forward * minf(lift.dot(forward), descent.dot(forward))
-	clear.y = lift.y
-	var exit_speed := clampf(entry_speed, config.base_run_speed, config.max_flow_speed)
-	var exit := forward * minf(exit_speed * _vault_duration, descent.dot(forward) * 1.8)
-	exit.y = descent.y * 3.0
-	_vault_tangents = PackedVector3Array([entry, support, clear, exit])
+func _vault_position(phase: float) -> Vector3:
+	for segment in range(VAULT_PHASES.size() - 1):
+		if phase <= VAULT_PHASES[segment + 1]:
+			var progress := smoothstep(VAULT_PHASES[segment], VAULT_PHASES[segment + 1], phase)
+			return _vault_points[segment].lerp(_vault_points[segment + 1], progress)
+	return _vault_points[-1]
 
 
 func _update_speed_vault(delta: float) -> void:
-	_vault_alpha = minf(1.0, _vault_alpha + delta / _vault_duration)
+	var phase := minf(1.0, _vault_alpha + delta / _vault_duration)
+	if not try_move_traversal(_vault_position(phase)):
+		_finish_traversal(Vector3.DOWN)
+		return
+	_vault_alpha = phase
 	if anim_ctrl != null:
 		anim_ctrl.set_traversal_phase("SpeedVault", _vault_alpha)
-	var segment := 0
-	if _vault_alpha >= VAULT_PHASES[2]:
-		segment = 2
-	elif _vault_alpha >= VAULT_PHASES[1]:
-		segment = 1
-	var span: float = VAULT_PHASES[segment + 1] - VAULT_PHASES[segment]
-	var t := (_vault_alpha - float(VAULT_PHASES[segment])) / span
-	var start := _vault_points[segment]
-	var end := _vault_points[segment + 1]
-	global_position = start.bezier_interpolate(
-		start + _vault_tangents[segment] * span / 3.0,
-		end - _vault_tangents[segment + 1] * span / 3.0,
-		end,
-		t
-	)
 	if _vault_alpha >= 1.0:
-		var exit_velocity := _vault_tangents[3] / _vault_duration
-		exit_velocity.y = 0.0
-		_finish_traversal(exit_velocity)
+		_finish_traversal(_vault_exit_velocity)
 
 
 # ---------------------------------------------------------------------------
@@ -1368,6 +1437,26 @@ func _update_speed_vault(delta: float) -> void:
 func try_grab_ledge() -> bool:
 	if current_state != "Locomotion" or ledge_grab_cooldown > 0.0:
 		return false
+	var ledge := _find_ledge()
+	if ledge.is_empty() or not _try_move_to_ledge(ledge["edge"], ledge["normal"]):
+		return false
+	ledge_edge_point = ledge["edge"]
+	ledge_wall_normal = ledge["normal"]
+	ledge_hang_time = 0.0
+	_ledge_travel_velocity = Vector3.ZERO
+	shimmy_phase = 0.0
+	coyote_timer = 0.0
+	jump_buffer_timer = 0.0
+	velocity = Vector3.ZERO
+	add_flow_boost(0.06)
+	if juice:
+		juice.play_sfx("LedgeGrab")
+	_play_anim("LedgeHang")
+	transition_to("LedgeHang")
+	return true
+
+
+func _find_ledge() -> Dictionary:
 	var space := get_world_3d().direct_space_state
 	var exc: Array[RID] = [get_rid()]
 	var center := get_capsule_center()
@@ -1380,7 +1469,7 @@ func try_grab_ledge() -> bool:
 		))
 		if hit_wall.is_empty():
 			continue
-		if WallClimbGeometry.owns_collider(hit_wall.get("collider")):
+		if _has_dedicated_traversal(hit_wall["collider"]):
 			continue
 		var wn: Vector3 = hit_wall["normal"]
 		if absf(wn.y) >= 0.35:
@@ -1408,34 +1497,30 @@ func try_grab_ledge() -> bool:
 		if not in_band:
 			continue
 
-		ledge_edge_point = Vector3(wp.x, tp.y, wp.z)
-		ledge_wall_normal = wn_xz
-		ledge_hang_time = 0.0
-		shimmy_phase = 0.0
-		coyote_timer = 0.0
-		jump_buffer_timer = 0.0
-		velocity = Vector3.ZERO
-		add_flow_boost(0.06)
-		if juice:
-			juice.play_sfx("LedgeGrab")
-		_play_anim("LedgeHang")
-		transition_to("LedgeHang")
-		_snap_to_ledge(ledge_edge_point, ledge_wall_normal)
-		return true
-	return false
+		var edge := Vector3(wp.x, tp.y, wp.z)
+		if traversal_segment_clear(global_position, _ledge_feet(edge, wn_xz)):
+			return {"edge": edge, "normal": wn_xz}
+	return {}
 
 
-func _snap_to_ledge(edge: Vector3, wn: Vector3) -> void:
-	# Unreal set actor center to edge + wn*0.20 + UP*0.06 -> feet are 0.60 below center
-	var target_center := edge + wn * 0.20 + Vector3(0.0, 0.06, 0.0)
-	global_position = target_center - Vector3(0.0, config.capsule_height * 0.5, 0.0)
+func _ledge_feet(edge: Vector3, wn: Vector3) -> Vector3:
+	return edge + wn * (config.capsule_radius + 0.015) + Vector3.UP * (0.06 - _current_half_height())
+
+
+func _try_move_to_ledge(edge: Vector3, wn: Vector3) -> bool:
+	if not try_move_traversal(_ledge_feet(edge, wn)):
+		return false
 	var face := (-wn).normalized()
 	rotation.y = atan2(-face.x, -face.z)
+	return true
 
 
 func _update_ledge_hang(delta: float) -> void:
 	ledge_hang_time += delta
-	_snap_to_ledge(ledge_edge_point, ledge_wall_normal)
+	_ledge_travel_velocity = Vector3.ZERO
+	if not _try_move_to_ledge(ledge_edge_point, ledge_wall_normal):
+		_drop_ledge_traversal()
+		return
 	_play_anim("LedgeHang")
 
 	var move_in := chibi_input.move_vec if chibi_input else Vector2.ZERO
@@ -1481,10 +1566,13 @@ func _try_start_shimmy(dir_sign: float) -> bool:
 	if hit_t.is_empty() or (hit_t["normal"] as Vector3).y < 0.65:
 		return false
 
+	var end_edge := Vector3(wp.x, (hit_t["position"] as Vector3).y, wp.z)
+	if not traversal_segment_clear(global_position, _ledge_feet(end_edge, ledge_wall_normal)):
+		return false
 	shimmy_start_edge = ledge_edge_point
-	shimmy_end_edge = Vector3(wp.x, (hit_t["position"] as Vector3).y, wp.z)
+	shimmy_end_edge = end_edge
 	shimmy_phase = 0.0
-	_shimmy_dir_sign = dir_sign
+	_ledge_travel_velocity = right * dir_sign * config.ledge_shimmy_speed
 	if juice:
 		juice.play_sfx("Shimmy")
 	_play_anim("ShimmyR" if dir_sign > 0.0 else "ShimmyL")
@@ -1496,8 +1584,13 @@ func _update_ledge_shimmy(delta: float) -> void:
 	shimmy_phase = minf(1.0, shimmy_phase + delta / config.ledge_shimmy_step_duration)
 	var u := clampf(inverse_lerp(0.3, 0.7, shimmy_phase), 0.0, 1.0)
 	var s := u * u * (3.0 - 2.0 * u)
-	ledge_edge_point = shimmy_start_edge.lerp(shimmy_end_edge, s)
-	_snap_to_ledge(ledge_edge_point, ledge_wall_normal)
+	var edge := shimmy_start_edge.lerp(shimmy_end_edge, s)
+	var previous := global_position
+	if not _try_move_to_ledge(edge, ledge_wall_normal):
+		_drop_ledge_traversal()
+		return
+	_remember_ledge_travel(previous, delta)
+	ledge_edge_point = edge
 	if shimmy_phase >= 1.0:
 		ledge_edge_point = shimmy_end_edge
 		transition_to("LedgeHang")
@@ -1535,14 +1628,17 @@ func _try_start_ledge_corner(dir_sign: float) -> bool:
 	_corner_new_edge = Vector3(sp.x, (hit_top["position"] as Vector3).y, sp.z)
 	_corner_new_normal = new_wn_xz
 	_corner_start_pos = global_position
-	var end_center := _corner_new_edge + _corner_new_normal * 0.20 + Vector3(0.0, 0.06, 0.0)
-	_corner_end_pos = end_center - Vector3(0.0, config.capsule_height * 0.5, 0.0)
-	_corner_ctrl_pos = _corner_start_pos.lerp(_corner_end_pos, 0.5) + (ledge_wall_normal + _corner_new_normal).normalized() * 0.35
+	_corner_end_pos = _ledge_feet(_corner_new_edge, _corner_new_normal)
+	var away_from_corner := (ledge_wall_normal + _corner_new_normal).normalized()
+	_corner_ctrl_pos = _corner_start_pos.lerp(_corner_end_pos, 0.5) + away_from_corner * (config.capsule_radius * 2.2)
 	_corner_start_yaw = rotation.y
 	var end_face := (-_corner_new_normal).normalized()
 	_corner_end_yaw = atan2(-end_face.x, -end_face.z)
 	_corner_alpha = 0.0
+	if not _traversal_path_clear(_ledge_corner_position):
+		return false
 
+	_ledge_travel_velocity = (_corner_ctrl_pos - _corner_start_pos).normalized() * config.ledge_shimmy_speed
 	if juice:
 		juice.play_sfx("Shimmy")
 	_play_anim("CornerR" if dir_sign > 0.0 else "CornerL")
@@ -1553,7 +1649,11 @@ func _try_start_ledge_corner(dir_sign: float) -> bool:
 func _update_ledge_corner(delta: float) -> void:
 	_corner_alpha = minf(1.0, _corner_alpha + delta / config.ledge_corner_duration)
 	var s := _corner_alpha * _corner_alpha * (3.0 - 2.0 * _corner_alpha)
-	global_position = _quad_bezier(_corner_start_pos, _corner_ctrl_pos, _corner_end_pos, s)
+	var previous := global_position
+	if not try_move_traversal(_ledge_corner_position(_corner_alpha)):
+		_drop_ledge_traversal()
+		return
+	_remember_ledge_travel(previous, delta)
 	rotation.y = lerp_angle(_corner_start_yaw, _corner_end_yaw, s)
 	if _corner_alpha >= 1.0:
 		ledge_edge_point = _corner_new_edge
@@ -1563,16 +1663,54 @@ func _update_ledge_corner(delta: float) -> void:
 		transition_to("LedgeHang")
 
 
-func start_ledge_mantle() -> void:
-	var inward := (-ledge_wall_normal).normalized()
+func _ledge_corner_position(phase: float) -> Vector3:
+	return _quad_bezier(_corner_start_pos, _corner_ctrl_pos, _corner_end_pos, smoothstep(0.0, 1.0, phase))
+
+
+func _remember_ledge_travel(previous: Vector3, delta: float) -> void:
+	var travel := (global_position - previous).slide(Vector3.UP)
+	# Keep the direction through the brief planted poses at each end of a step.
+	if not travel.is_zero_approx():
+		var speed := maxf(config.ledge_shimmy_speed, travel.length() / delta)
+		_ledge_travel_velocity = travel.normalized() * speed
+
+
+func _drop_ledge_traversal(exit_velocity: Vector3 = Vector3.DOWN) -> void:
+	ledge_grab_cooldown = 0.42
+	_finish_traversal(exit_velocity)
+
+
+func start_ledge_mantle() -> bool:
+	return _try_ledge_mantle(ledge_edge_point, ledge_wall_normal)
+
+
+func _try_ledge_mantle(edge: Vector3, normal: Vector3) -> bool:
+	var space := get_world_3d().direct_space_state
 	_mantle_start = global_position
-	# Exact Unreal StartLedgeMantle curve (converted from capsule center to feet Y):
-	# CtrlPos = edge + wall_normal*0.14 + UP*0.02, EndPos = edge + inward*0.44 + UP*0.02
-	_mantle_ctrl = ledge_edge_point + ledge_wall_normal * 0.14 + Vector3(0.0, 0.02, 0.0)
-	_mantle_end = ledge_edge_point + inward * 0.44 + Vector3(0.0, 0.02, 0.0)
+	_mantle_hang = _ledge_feet(edge, normal)
+	for inset in [0.44, 0.32, 0.24, 0.16]:
+		var landing_probe: Vector3 = edge - normal * inset
+		var floor := space.intersect_ray(PhysicsRayQueryParameters3D.create(
+			landing_probe + Vector3.UP * 0.40, landing_probe - Vector3.UP * 0.08, WORLD_MASK, [get_rid()]
+		))
+		if floor.is_empty() or (floor["normal"] as Vector3).y < cos(floor_max_angle):
+			continue
+		_mantle_end = (floor["position"] as Vector3) + Vector3.UP * 0.025
+		_mantle_lift = Vector3(_mantle_hang.x, _mantle_end.y, _mantle_hang.z)
+		if not _traversal_path_clear(_mantle_position):
+			continue
+		ledge_edge_point = edge
+		ledge_wall_normal = normal
+		var facing := -normal
+		rotation.y = atan2(-facing.x, -facing.z)
+		_begin_mantle()
+		return true
+	return false
+
+
+func _begin_mantle() -> void:
 	mantle_alpha = 0.0
 	_mantle_duration = clampf(lerpf(config.mantle_base_duration, config.mantle_base_duration * 0.85, flow_level), 0.25, 2.0)
-	_set_world_collision(_wall_mantle_active)
 	velocity = Vector3.ZERO
 	add_flow_boost(config.ledge_flow_boost)
 	if juice:
@@ -1581,21 +1719,26 @@ func start_ledge_mantle() -> void:
 	transition_to("MantleUp")
 
 
+func _mantle_position(phase: float) -> Vector3:
+	var lift_start := 0.0
+	if not _wall_mantle_active and not _mantle_start.is_equal_approx(_mantle_hang):
+		lift_start = 0.16
+		if phase < lift_start:
+			return _mantle_start.lerp(_mantle_hang, smoothstep(0.0, lift_start, phase))
+	var start := _mantle_start if _wall_mantle_active else _mantle_hang
+	if phase < 0.58:
+		return start.lerp(_mantle_lift, smoothstep(lift_start, 0.58, phase))
+	return _mantle_lift.lerp(_mantle_end, smoothstep(0.58, 1.0, phase))
+
+
 func _update_mantle(delta: float) -> void:
-	mantle_alpha = minf(1.0, mantle_alpha + delta / _mantle_duration)
+	var phase := minf(1.0, mantle_alpha + delta / _mantle_duration)
+	if not try_move_traversal(_mantle_position(phase)):
+		_drop_ledge_traversal()
+		return
+	mantle_alpha = phase
 	if anim_ctrl != null:
 		anim_ctrl.set_traversal_phase("MantleUp", mantle_alpha)
-	if _wall_mantle_active:
-		var up := _mantle_start.lerp(_wall_mantle_lift, smoothstep(0.0, 0.58, mantle_alpha))
-		var target := up.lerp(_mantle_end, smoothstep(0.58, 1.0, mantle_alpha))
-		var motion := target - global_position
-		if motion.length_squared() > 0.000001:
-			move_and_collide(motion)
-		if global_position.distance_to(target) > 0.025:
-			_finish_traversal(Vector3.DOWN)
-			return
-	else:
-		global_position = _quad_bezier(_mantle_start, _mantle_ctrl, _mantle_end, mantle_alpha)
 	if mantle_alpha >= 1.0:
 		_finish_traversal(Vector3.ZERO)
 
@@ -1611,11 +1754,13 @@ func _finish_traversal(exit_velocity: Vector3) -> void:
 # ---------------------------------------------------------------------------
 # WALL RUN & WALL KICK
 # ---------------------------------------------------------------------------
-func _try_start_wall_run() -> bool:
-	if wall_run_cooldown > 0.0:
+func _try_start_wall_run(wish: Vector3) -> bool:
+	if wall_run_cooldown > 0.0 or air_time <= 0.06 or air_time > config.wall_run_entry_window:
+		return false
+	if wish.length_squared() < config.wall_run_entry_min_input * config.wall_run_entry_min_input:
 		return false
 	var horiz := Vector3(velocity.x, 0.0, velocity.z)
-	if horiz.length() < 1.30 or velocity.y < -7.80:
+	if horiz.length_squared() < config.wall_run_entry_min_speed * config.wall_run_entry_min_speed or velocity.y < -7.80:
 		return false
 	var horiz_dir := horiz.normalized()
 	var space := get_world_3d().direct_space_state
@@ -1623,7 +1768,7 @@ func _try_start_wall_run() -> bool:
 	var center := get_capsule_center()
 	var right := global_transform.basis.x.normalized()
 	var fwd := (-global_transform.basis.z).normalized()
-	var d := config.wall_run_detect_distance
+	var d := config.wall_run_entry_distance
 
 	var probes := [
 		[right, d],
@@ -1643,7 +1788,15 @@ func _try_start_wall_run() -> bool:
 		if absf(wn.y) >= 0.28:
 			continue
 		var wn_xz := Vector3(wn.x, 0.0, wn.z).normalized()
-		if absf(horiz_dir.dot(wn_xz)) >= 0.78:
+		var wall_point: Vector3 = hit["position"]
+		if (center - wall_point).dot(wn_xz) > d or absf(horiz_dir.dot(wn_xz)) >= 0.78:
+			continue
+		var tangent := Vector3.UP.cross(wn_xz).normalized()
+		var along_speed := horiz.dot(tangent)
+		if absf(along_speed) < config.wall_run_entry_min_speed:
+			continue
+		var run_dir := tangent * signf(along_speed)
+		if wish.dot(run_dir) < config.wall_run_entry_min_input:
 			continue
 		# Confirm wall extends upward (+0.58 m)
 		var hi_hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(
@@ -1652,10 +1805,6 @@ func _try_start_wall_run() -> bool:
 		if hi_hit.is_empty():
 			continue
 
-		# Tangent along wall: UP.cross(wn) gives one tangent; pick sign aligned with travel
-		var tangent := Vector3.UP.cross(wn_xz).normalized()
-		var side_sign := 1.0 if tangent.dot(horiz_dir) >= 0.0 else -1.0
-		var run_dir := tangent * side_sign
 		# Wall is on Chibi's RIGHT if right_of_run.dot(-wn) > 0
 		var run_right := run_dir.cross(Vector3.UP).normalized()
 		var wall_on_right := 1.0 if run_right.dot(-wn_xz) > 0.0 else -1.0
@@ -1735,6 +1884,7 @@ func _start_wall_kick() -> void:
 		juice.spawn_dust(get_capsule_center() - _wall_run_normal * 0.28)
 		juice.spawn_flow_sparkle(get_capsule_center())
 	transition_to("Locomotion")
+	_wall_run_entry_armed = true
 	_start_air_animation("WallKick", 0.42)
 
 
@@ -1874,14 +2024,32 @@ func _update_land_roll(delta: float) -> void:
 # ---------------------------------------------------------------------------
 # INTERACTIVE STATIONS: TRAMPOLINE, POLE, BEAM, LINES, ROPE SWING
 # ---------------------------------------------------------------------------
+func _try_land_top_station(impact_velocity: float, was_on_floor: bool) -> bool:
+	for index in get_slide_collision_count():
+		var collision := get_slide_collision(index)
+		for contact in collision.get_collision_count():
+			if collision.get_normal(contact).dot(Vector3.UP) < cos(floor_max_angle):
+				continue
+			var support := collision.get_collider(contact)
+			if not is_instance_valid(support):
+				continue
+			var station: Node = support.get_meta(TOP_STATION_META) if support.has_meta(TOP_STATION_META) else null
+			if is_instance_valid(station) and station.call("land_on_top", self, impact_velocity, was_on_floor):
+				return true
+	return false
+
+
 func trigger_trampoline_bounce(base_vel: float, super_mult: float) -> bool:
 	if trampoline_cooldown > 0.0 or current_state != "Locomotion":
 		return false
+	_wall_run_entry_armed = false
 	_clear_scarf_glide_phase(true, true)
 	trampoline_cooldown = 0.25
+	coyote_timer = 0.0
 	last_trampoline_velocity = base_vel
 	last_trampoline_super_mult = super_mult
 	var is_super := jump_buffer_timer > 0.0 or (chibi_input != null and chibi_input.jump_held)
+	jump_buffer_timer = 0.0
 	super_bounce_active = is_super
 	super_bounce_grace_timer = 0.0 if is_super else 0.18
 	velocity.y = base_vel * (super_mult if is_super else 1.0)
@@ -1904,10 +2072,11 @@ func try_enter_pole_perch(pole_top_world: Vector3) -> bool:
 		return false
 	if velocity.y > 1.8:
 		return false
+	if not try_move_traversal(pole_top_world):
+		return false
 	_pole_top_pos = pole_top_world
 	_pole_hold_time = 0.0
 	velocity = Vector3.ZERO
-	global_position = pole_top_world
 	add_flow_boost(0.08)
 	if juice:
 		juice.trigger_squash(1.12, 0.88)
@@ -1919,7 +2088,6 @@ func try_enter_pole_perch(pole_top_world: Vector3) -> bool:
 
 func _update_pole_perch(delta: float) -> void:
 	_pole_hold_time += delta
-	global_position = _pole_top_pos
 	velocity = Vector3.ZERO
 	var move_in := chibi_input.move_vec if chibi_input else Vector2.ZERO
 	if move_in.length() > 0.25 and camera_ctrl != null:
@@ -1935,8 +2103,7 @@ func _jump_or_hop_off_pole() -> void:
 	var best_pole := _find_best_pole_target(aim_dir)
 	if best_pole != null:
 		_pole_hop_start = global_position
-		_pole_hop_target_top = best_pole.call("get_top_world_position")
-		_pole_hop_end = _pole_hop_target_top
+		_pole_hop_end = best_pole.call("get_top_world_position")
 		_pole_hop_alpha = 0.0
 		var dist := _pole_hop_start.distance_to(_pole_hop_end)
 		_pole_hop_duration = clampf(dist / 7.2, 0.28, 0.65)
@@ -1945,7 +2112,6 @@ func _jump_or_hop_off_pole() -> void:
 		dir.y = 0.0
 		if dir.length_squared() > 0.01:
 			rotation.y = atan2(-dir.x, -dir.z)
-		_set_world_collision(false)
 		add_flow_boost(0.12)
 		if juice:
 			juice.trigger_squash(0.90, 1.15)
@@ -1978,19 +2144,26 @@ func _find_best_pole_target(aim_dir: Vector3) -> Node3D:
 			continue
 		var score := align * 3.0 - dist * 0.25
 		if score > best_score:
+			var arc := clampf(global_position.distance_to(top) * 0.22, 0.45, 1.10)
+			if not _traversal_path_clear(_pole_hop_position.bind(global_position, top, arc)):
+				continue
 			best_score = score
 			best = node
 	return best
 
 
+func _pole_hop_position(phase: float, start: Vector3, finish: Vector3, arc: float) -> Vector3:
+	return start.lerp(finish, phase) + Vector3.UP * (sin(PI * phase) * arc)
+
+
 func _update_pole_hop(delta: float) -> void:
 	_pole_hop_alpha = minf(1.0, _pole_hop_alpha + delta / maxf(0.15, _pole_hop_duration))
-	var p := _pole_hop_start.lerp(_pole_hop_end, _pole_hop_alpha)
-	p.y += sin(PI * _pole_hop_alpha) * _pole_hop_arc
-	global_position = p
+	if not try_move_traversal(_pole_hop_position(_pole_hop_alpha, _pole_hop_start, _pole_hop_end, _pole_hop_arc)):
+		pole_cooldown = 0.35
+		_finish_traversal(Vector3.DOWN)
+		return
 	if _pole_hop_alpha >= 1.0:
-		_set_world_collision(true)
-		_pole_top_pos = _pole_hop_target_top
+		_pole_top_pos = _pole_hop_end
 		_pole_hold_time = 0.0
 		if juice:
 			juice.trigger_squash(1.12, 0.88)
@@ -2004,9 +2177,12 @@ func try_enter_balance_beam(beam: ParkourBalanceBeam) -> bool:
 		return false
 	if velocity.y > 1.5:
 		return false
-	_beam = beam
 	var margin := minf(0.15, beam.beam_length * 0.25)
-	_beam_progress = clampf(-beam.to_local(global_position).z, margin, beam.beam_length - margin)
+	var progress := clampf(-beam.to_local(global_position).z, margin, beam.beam_length - margin)
+	if not try_move_traversal(beam.to_global(Vector3(0.0, beam.beam_radius, -progress))):
+		return false
+	_beam = beam
+	_beam_progress = progress
 	_beam_direction = 1.0 if global_basis.z.dot(beam.global_basis.z) >= 0.0 else -1.0
 	_beam_footing.reset(_beam_progress, _beam_direction, beam.beam_length)
 	velocity = Vector3.ZERO
@@ -2050,8 +2226,11 @@ func _update_balance_beam(delta: float) -> void:
 		speed = 0.0
 
 	var previous_progress := _beam_progress
-	_beam_progress = clampf(_beam_progress + speed * delta, 0.0, _beam.beam_length)
-	global_position = _beam.to_global(Vector3(0.0, _beam.beam_radius, -_beam_progress))
+	var next_progress := clampf(_beam_progress + speed * delta, 0.0, _beam.beam_length)
+	if not try_move_traversal(_beam.to_global(Vector3(0.0, _beam.beam_radius, -next_progress))):
+		speed = 0.0
+	else:
+		_beam_progress = next_progress
 	_beam_footing.advance(previous_progress, _beam_progress, delta)
 
 	if not is_zero_approx(speed):
@@ -2080,10 +2259,15 @@ func _jump_off_beam() -> void:
 func try_enter_parkour_line(line_node: Node3D, is_zip: bool, start_t: float, length: float, zip_min: float, zip_max: float) -> bool:
 	if line_cooldown > 0.0 or current_state != "Locomotion":
 		return false
+	var line_length := maxf(0.5, length)
+	var distance := clampf(start_t * line_length, 0.28, maxf(0.28, line_length - 0.28))
+	var target := _line_feet_at(line_node, distance / line_length, is_zip)
+	if global_position.distance_to(target) > 0.65 or not traversal_segment_clear(global_position, target):
+		return false
 	_active_line = line_node
 	_line_is_zip = is_zip
-	_line_length = maxf(0.5, length)
-	_line_distance = clampf(start_t * _line_length, 0.28, maxf(0.28, _line_length - 0.28))
+	_line_length = line_length
+	_line_distance = distance
 	_line_time = 0.0
 	_rope_climb_sfx_timer = 0.0
 	var line_dir: Vector3 = _active_line.call("get_line_direction")
@@ -2108,6 +2292,31 @@ func try_enter_parkour_line(line_node: Node3D, is_zip: bool, start_t: float, len
 	else:
 		_play_anim("RopeHang")
 		transition_to("RopeLine")
+	return true
+
+
+func _line_feet_at(line: Node3D, progress: float, is_zip: bool) -> Vector3:
+	var rope_pos: Vector3 = line.call("get_rope_world_pos_at_t", progress)
+	if not is_zip:
+		# SlothCrawl wraps hands and shoes 0.616 m above the actor origin.
+		return rope_pos - Vector3.UP * 0.616
+	var direction: Vector3 = line.call("get_line_direction")
+	var forward := Vector3(direction.x, 0.0, direction.z).normalized()
+	# ZipGlide reaches forward to the handle suspended 0.76 m below the cable.
+	return rope_pos - forward * 0.29 - Vector3.UP * 1.325
+
+
+func _move_line_rider(progress: float, is_zip: bool, delta: float) -> bool:
+	var target := _line_feet_at(_active_line, progress, is_zip)
+	var settle_time := 0.08 if is_zip else 0.10
+	if _line_time < settle_time:
+		var settle_rate := 30.0 if is_zip else 24.0
+		target = global_position.lerp(target, 1.0 - exp(-settle_rate * delta))
+	if not try_move_traversal(target):
+		_drop_from_parkour_line()
+		velocity = Vector3.DOWN
+		return false
+	_active_line.call("set_rider_progress", progress)
 	return true
 
 
@@ -2146,15 +2355,8 @@ func _update_rope_line(delta: float) -> void:
 		return
 
 	var t := clampf(_line_distance / _line_length, 0.0, 1.0)
-	if _active_line.has_method("set_rider_progress"):
-		_active_line.call("set_rider_progress", t)
-	var rope_pos: Vector3 = _active_line.call("get_rope_world_pos_at_t", t)
-	# In Anim_Chibi_SlothHang / SlothCrawl, both hands & feet sit at Y = +0.616 m above Chibi feet!
-	var target_feet := rope_pos - Vector3(0.0, 0.616, 0.0)
-	if _line_time < 0.10:
-		global_position = global_position.lerp(target_feet, 1.0 - exp(-24.0 * delta))
-	else:
-		global_position = target_feet
+	if not _move_line_rider(t, false, delta):
+		return
 
 	if absf(step_dir) > 0.5:
 		_play_anim("RopeClimb")
@@ -2214,16 +2416,8 @@ func _update_zip_line(delta: float) -> void:
 	if _line_distance >= _line_length - 0.36:
 		_finish_zip_line(false)
 		return
-	if _active_line.has_method("set_rider_progress"):
-		_active_line.call("set_rider_progress", t)
-	var rope_pos: Vector3 = _active_line.call("get_rope_world_pos_at_t", t)
-	# In Anim_Chibi_ZipGlide, hands sit at Y = +0.565 m and forward +0.29 m.
-	# PulleyHandle hangs -0.76 m below cable (matching BP_ParkourLine) -> feet = rope_pos - fwd*0.29 - UP*1.325 m.
-	var target_feet := rope_pos - line_xz * 0.29 - Vector3(0.0, 1.325, 0.0)
-	if _line_time < 0.08:
-		global_position = global_position.lerp(target_feet, 1.0 - exp(-30.0 * delta))
-	else:
-		global_position = target_feet
+	if not _move_line_rider(t, true, delta):
+		return
 	rotation.y = lerp_angle(rotation.y, atan2(-line_xz.x, -line_xz.z), 1.0 - exp(-22.0 * delta))
 	_play_anim("ZipGlide")
 
@@ -2264,7 +2458,6 @@ func try_enter_rope_swing(
 ) -> bool:
 	if swing_cooldown > 0.0 or current_state != "Locomotion":
 		return false
-	_active_swing = swing_node
 	_swing_anchor = anchor_world
 	_swing_length = maxf(0.8, rope_len)
 	_swing_max_angle = deg_to_rad(max_angle_deg)
@@ -2279,6 +2472,11 @@ func try_enter_rope_swing(
 	var fwd_proj := offset.dot(_swing_plane_fwd)
 	var down_proj := maxf(0.1, -offset.y)
 	_swing_angle = clampf(atan2(fwd_proj, down_proj), -_swing_max_angle, _swing_max_angle)
+	var rope_dir := _swing_plane_fwd * sin(_swing_angle) - Vector3.UP * cos(_swing_angle)
+	var target := _swing_feet_at(rope_dir, _swing_angle + 0.42)
+	if global_position.distance_to(target) > 0.70 or not traversal_segment_clear(global_position, target):
+		return false
+	_active_swing = swing_node
 	var tangent := _swing_plane_fwd * cos(_swing_angle) + Vector3.UP * sin(_swing_angle)
 	_swing_ang_vel = velocity.dot(tangent) / _swing_length
 	velocity = Vector3.ZERO
@@ -2314,14 +2512,13 @@ func _update_rope_swing(delta: float) -> void:
 
 	var rope_dir := _swing_plane_fwd * sin(_swing_angle) - Vector3.UP * cos(_swing_angle)
 	var lean := _swing_angle + 0.42 + (pump_in * (0.14 if pump_in >= 0.0 else 0.07))
-	var knot := _swing_anchor + rope_dir * _swing_length
-	var body_fwd := _swing_plane_fwd * cos(lean) + Vector3.UP * sin(lean)
-	var body_up := -_swing_plane_fwd * sin(lean) + Vector3.UP * cos(lean)
-	var target_feet := knot - body_fwd * 0.20 - body_up * 0.66
+	var target_feet := _swing_feet_at(rope_dir, lean)
 	if _swing_time < 0.08:
-		global_position = global_position.lerp(target_feet, 1.0 - exp(-32.0 * delta))
-	else:
-		global_position = target_feet
+		target_feet = global_position.lerp(target_feet, 1.0 - exp(-32.0 * delta))
+	if not try_move_traversal(target_feet):
+		_release_rope_swing()
+		_finish_traversal(Vector3.DOWN)
+		return
 	rotation.y = lerp_angle(rotation.y, atan2(-_swing_plane_fwd.x, -_swing_plane_fwd.z), 1.0 - exp(-24.0 * delta))
 	if visual_pivot != null:
 		visual_pivot.rotation = Vector3(lean, 0.0, 0.0)
@@ -2337,12 +2534,33 @@ func _update_rope_swing(delta: float) -> void:
 		_active_swing.call("set_rope_world_direction", rope_dir, _swing_plane_fwd)
 
 
-func _jump_off_rope_swing() -> void:
+func _swing_feet_at(rope_dir: Vector3, lean: float) -> Vector3:
+	var knot := _swing_anchor + rope_dir * _swing_length
+	var forward := _swing_plane_fwd * cos(lean) + Vector3.UP * sin(lean)
+	var up := -_swing_plane_fwd * sin(lean) + Vector3.UP * cos(lean)
+	return knot - forward * 0.41 - up * 0.74
+
+
+func get_rope_swing_grip_weight() -> float:
+	return smoothstep(0.03, 0.13, _swing_time) if current_state == "RopeSwing" else 0.0
+
+
+func get_rope_swing_hand_target(side: int) -> Vector3:
+	if not is_instance_valid(_active_swing) or not _active_swing is ParkourRopeSwing:
+		return Vector3.INF
+	return (_active_swing as ParkourRopeSwing).get_hand_grip_world(side)
+
+
+func _release_rope_swing() -> void:
 	if is_instance_valid(_active_swing) and _active_swing.has_method("set_ridden"):
 		_active_swing.call("set_ridden", false)
 	_active_swing = null
 	swing_cooldown = 0.45
 	suppress_auto_roll = true
+
+
+func _jump_off_rope_swing() -> void:
+	_release_rope_swing()
 	var tangent := _swing_plane_fwd * cos(_swing_angle) + Vector3.UP * sin(_swing_angle)
 	var lin_vel := tangent * (_swing_ang_vel * _swing_length)
 	velocity = lin_vel + Vector3(0.0, _swing_launch_boost_up, 0.0)
@@ -2482,10 +2700,11 @@ func _try_start_wall_mantle(summit_only: bool = false) -> bool:
 		return false
 	ledge_edge_point = lip["edge"]
 	ledge_wall_normal = _wall_climb.frame.z
-	_wall_mantle_lift = lip["lift"]
-	_wall_mantle_active = true
-	start_ledge_mantle()
+	_mantle_start = global_position
+	_mantle_lift = lip["lift"]
 	_mantle_end = lip["landing"]
+	_wall_mantle_active = true
+	_begin_mantle()
 	return true
 
 
@@ -2530,7 +2749,6 @@ func enter_climbing_station(station: Node3D, is_rope_net: bool, wall_normal_worl
 	if anim_ctrl != null:
 		# Procedural contact poses blend in without a running or falling loop underneath.
 		anim_ctrl.set_locomotion_gait(0.0, config, 0.2)
-	_set_world_collision(false)
 	if pose_mod:
 		pose_mod.climb_active = true
 		pose_mod.climb_is_rope_net = is_rope_net
@@ -2544,8 +2762,10 @@ func enter_climbing_station(station: Node3D, is_rope_net: bool, wall_normal_worl
 func exit_climbing_station(push_out_dir: Vector3) -> void:
 	_active_climb_station = null
 	_set_world_collision(true)
-	global_position += push_out_dir * 0.42
+	var pushed_clear := try_move_traversal(global_position + push_out_dir * 0.42)
 	velocity = push_out_dir * 1.4 + Vector3(0.0, 1.2, 0.0)
+	if not pushed_clear:
+		velocity = Vector3.DOWN
 	if pose_mod:
 		pose_mod.climb_active = false
 	if camera_ctrl:
@@ -2616,17 +2836,16 @@ func _update_swim_recovery(delta: float) -> void:
 
 
 func try_climb_out_of_pool() -> bool:
-	var prev_state := current_state
-	current_state = "Locomotion"
-	var grabbed := try_grab_ledge()
-	if not grabbed:
-		current_state = prev_state
+	if ledge_grab_cooldown > 0.0:
 		return false
+	var ledge := _find_ledge()
+	if ledge.is_empty() or not _try_ledge_mantle(ledge["edge"], ledge["normal"]):
+		return false
+	add_flow_boost(0.06)
 	set_active_water_body(null)
 	_pool_underwater_weight = 0.0
 	if visual_pivot != null:
 		visual_pivot.transform = _visual_rest_transform
-	start_ledge_mantle()
 	return true
 
 
@@ -2640,6 +2859,7 @@ func _sync_pose_modifier(delta: float) -> void:
 	pose_mod.ledge_edge_world = ledge_edge_point
 	pose_mod.ledge_wall_normal_world = ledge_wall_normal
 	pose_mod.mantle_alpha = mantle_alpha
+	pose_mod.vault_alpha = _vault_alpha
 	pose_mod.shimmy_start_edge = shimmy_start_edge
 	pose_mod.shimmy_end_edge = shimmy_end_edge
 	pose_mod.shimmy_phase = shimmy_phase

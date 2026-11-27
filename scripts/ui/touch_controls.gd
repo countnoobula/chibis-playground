@@ -353,6 +353,8 @@ func update_hud(state_name: String, flow_level: float, speed_mps: float, wall_cl
 		"LedgeHang":
 			jump = ["Climb Up", "ledge"]
 			slide = ["Drop", "drop"]
+		"LedgeShimmy", "LedgeCorner":
+			slide = ["Drop", "drop"]
 		"RopeLine", "ZipLine":
 			jump = ["Jump Off", "off"]
 			slide = ["Drop", "drop"]

@@ -75,6 +75,10 @@ extends Resource
 @export var ledge_flow_boost: float = 0.16
 
 @export_group("Wall Run & Kick")
+@export var wall_run_entry_distance: float = 0.52 ## Maximum horizontal gap from capsule center to wall.
+@export var wall_run_entry_min_speed: float = 3.20
+@export var wall_run_entry_min_input: float = 0.55 ## Movement input projected along the wall.
+@export var wall_run_entry_window: float = 0.65
 @export var wall_run_detect_distance: float = 0.68
 @export var wall_run_base_speed: float = 4.20
 @export var wall_run_max_duration: float = 2.20

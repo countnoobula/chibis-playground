@@ -5,6 +5,10 @@ extends Node3D
 
 const PALETTE := preload("res://scripts/gym/rooftop_palette.gd")
 const GRAB_RADIUS := 0.65
+const CONNECTOR_REACH := 0.70
+const GRIP_SPACING := 0.36
+const GRIP_DROP := 0.17
+const GRIP_BACKSET := 0.075
 const GRAB_HEIGHT_FRACTION := 0.85
 const GRAB_CENTER_FRACTION := 0.65
 
@@ -54,6 +58,17 @@ func _build_visuals_and_trigger() -> void:
 	knot.material_override = knot_mat
 	_rope_pivot.add_child(knot)
 
+	var half_span := GRIP_SPACING * 0.5
+	_add_handle_segment("Crossbar", knot.position - Vector3.RIGHT * half_span,
+		knot.position + Vector3.RIGHT * half_span, 0.024, knot_mat)
+	for side: float in [-1.0, 1.0]:
+		var hand := "Left" if side < 0.0 else "Right"
+		var mount := knot.position + Vector3.RIGHT * half_span * side
+		var grip := mount + Vector3(0.0, -GRIP_DROP, GRIP_BACKSET)
+		_add_handle_segment(hand + "GripStem", mount, grip, 0.020, knot_mat)
+		_add_handle_segment(hand + "HandGrip", grip - Vector3.RIGHT * 0.035,
+			grip + Vector3.RIGHT * 0.035, 0.028, knot_mat)
+
 	# Grab trigger around lower half of rope
 	var area := Area3D.new()
 	area.name = "GrabTrigger"
@@ -71,10 +86,23 @@ func _build_visuals_and_trigger() -> void:
 	_rope_pivot.add_child(area)
 
 
+func _add_handle_segment(part_name: String, from: Vector3, to: Vector3, radius: float, material: Material) -> void:
+	var segment := MeshInstance3D.new()
+	segment.name = part_name
+	var cylinder := CylinderMesh.new()
+	cylinder.top_radius = radius
+	cylinder.bottom_radius = radius
+	cylinder.height = from.distance_to(to)
+	segment.mesh = cylinder
+	segment.position = from.lerp(to, 0.5)
+	segment.quaternion = Quaternion(Vector3.UP, (to - from).normalized())
+	segment.material_override = material
+	_rope_pivot.add_child(segment)
+
+
 func _on_body_entered(body: Node3D) -> void:
 	if body is ParkourController:
 		_tracked_player = body as ParkourController
-		_try_attach(_tracked_player)
 
 
 func _on_body_exited(body: Node3D) -> void:
@@ -86,16 +114,20 @@ func _try_attach(player: ParkourController) -> void:
 	if is_ridden or not is_instance_valid(player):
 		return
 	var local_center := _rope_pivot.to_local(player.get_capsule_center())
-	var padding := player.config.capsule_height * 0.5
-	if Vector2(local_center.x, local_center.z).length() > GRAB_RADIUS + padding:
-		return
-	if absf(local_center.y + rope_length * GRAB_CENTER_FRACTION) > rope_length * GRAB_HEIGHT_FRACTION * 0.5 + padding:
+	var connector_local := Vector3(0.0, -rope_length, 0.0)
+	if local_center.distance_to(connector_local) > CONNECTOR_REACH:
 		return
 	player.try_enter_rope_swing(self, global_position, rope_length, max_swing_angle_deg, swing_pump_accel, launch_boost_up)
 
 
 func set_ridden(ridden: bool) -> void:
 	is_ridden = ridden
+
+
+func get_hand_grip_world(side: int) -> Vector3:
+	var lateral := (-0.5 if side == 0 else 0.5) * GRIP_SPACING
+	var grip := Vector3(lateral, -rope_length - GRIP_DROP + 0.02, GRIP_BACKSET)
+	return _rope_pivot.get_global_transform_interpolated() * grip
 
 
 func set_rope_world_direction(rope_dir: Vector3, plane_fwd: Vector3) -> void:

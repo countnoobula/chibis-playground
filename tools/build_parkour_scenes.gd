@@ -573,8 +573,8 @@ func _build_rooftop_gym_scene() -> void:
 	z4.add_child(tramp)
 	_add_box(z4, "TrampolineHighDeck", Vector3(-5.0, 2.1, -31.0), Vector3(5.0, 4.2, 4.5), mat_white, mat_mint, 0.13)
 
-	# 5-Pole Hop Chain (+0.50 m starter block so Pole 1 is cleanly reachable under 16.17 m/s^2 gravity)
-	_add_box(z4, "PoleStartStep", Vector3(0.0, 0.25, -23.0), Vector3(2.2, 0.50, 1.4), mat_white, mat_lavender, 0.11)
+	# Raised starter lets a running jump land from above the first pole cap.
+	_add_box(z4, "PoleStartStep", Vector3(0.0, 0.30, -23.0), Vector3(2.2, 0.60, 1.4), mat_white, mat_lavender, 0.11)
 	var pole_offsets := [
 		Vector3(0.0, 0.0, -25.0),
 		Vector3(0.5, 0.3, -28.0),

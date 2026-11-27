@@ -74,6 +74,8 @@ Add each active target here with its owner, status, and a short description. Che
 
 ### 2026-11-27
 
+- Chibi checks capsule clearance before and during vaults, ledge moves, mantles, net climbs, and aerial rides. The vault clears all three bars with planted hands. Low net mounts stay above the deck, and blocked pool pull-ups keep Chibi swimming.
+- Pole and beam mounts and trampoline bounces use physical top contact. Raised the first pole's starter step to 0.60 m. Rope catches check reach and clearance, and the swing has a visible handle with two tracked hand grips.
 - Added a 2.35 m warm-white launch perch with a mint-trimmed ramp and a peach step-off marker beside the tunnel entrance. The rooftop builder includes the perch, and the ground lane stays clear for running and sliding.
 - Added soft ivory and mint gust ribbons through the lane. Local wisps split around Chibi’s palm and shoes and sweep along the open scarf. Cleared the mast nearest the launch to give the chase camera a view of the canopy.
 - Added an open-air wind tunnel on the dry deck southeast of spawn. Mint arrows mark the airflow, and ivory streamers, drifting streaks, and a quiet spatial wind loop follow the same 4.2-second gust cycle. The rooftop scene builder includes the lane.
@@ -100,6 +102,9 @@ Add each active target here with its owner, status, and a short description. Che
 
 ### 2026-11-27
 
+- Wall runs start from a running jump close to the wall with steering along it. Casual hops and ledge drops stay in normal air movement, and a wall kick can transfer to the opposite wall. Verified the rooftop corridor with the Mobile renderer at 60 physics ticks per second and passed all 330 headless checks.
+- Releasing A or D when dropping from a shimmy gives Chibi 0.18 seconds of gentler sideways braking. Directional input can steer her as soon as she lets go.
+- C, Ctrl, and touch Drop release Chibi while she shimmies or rounds a ledge corner. She carries her sideways motion into the fall and drops without sideways drift from a resting hang.
 - Rebuilt the scarf canopy as a deeper continuous arch with a real thickened shell, a cream binding, a shaded underside, and a subtle weave. The canopy spreads across first, then fills out with air. The crown and edges respond more strongly to descent, banking, and tunnel wind while the four corners stay anchored in Chibi's hands.
 - Chibi carries her speed from scarf glide into the first running step. The gait starts at touchdown with the leading reachable boot, a short landing compression, and a support that releases at toe-off. Near-stationary landings keep a soft two-foot settle.
 - The canopy gathers while all four corners are still in Chibi’s hands. The throwing hand starts to swing back first as the fabric transfers to the collar, and the loose end trails into the running stride. Partial openings use a smaller gather. Jump can take Chibi into a fresh hop before the wrap finishes.
@@ -185,6 +190,9 @@ Add each active target here with its owner, status, and a short description. Che
 
 ### 2026-11-27
 
+- Passed 325 Godot 4.7.2 headless checks. Side-view rooftop replays at 30 and 60 FPS on Windows D3D12 Mobile confirmed left and right carry when A or D is released at the same time as C or Ctrl.
+- Passed 323 Godot 4.7.2 headless checks. Side-view rooftop replays at 30 and 60 FPS on Windows D3D12 Mobile verified left and right shimmy releases, stationary drops, and a drop during a corner turn.
+- Passed 318 integrated Godot 4.7.2 headless checks and the focused wall, tower climb, gap, drop-well, and tunnel camera checks. Replayed the rooftop traversal routes from gameplay and side views at 30 and 60 FPS on Windows D3D12 Mobile at 1280×720. The swing kept both wrists within 2.3 cm of their grips. Some standalone tower checks reported the existing resource cleanup warnings at shutdown.
 - The canopy pass retained all 288 Godot headless checks. Verified the four exact grip anchors on the imported 2,848-triangle mesh and replayed opening, steering, and landing from the chase and side views on Windows D3D12 Mobile. Peak-wind replays at 30 and 60 FPS showed full cloth load, and the touch cancel returned to free fall.
 - Passed 288 integrated Godot 4.7.2 headless checks, including eight new checks for gait entry, first-shoe contact, cloth transfer, partial wraps, and hopping during a wrap.
 - Compared the same rooftop inputs before and after at 30 and 60 render FPS in gameplay and side views on Windows D3D12 Mobile at 1280×720. The replays covered the wind perch, gentle steering, a neutral landing, a turn, and a quick hop. At 40% stick, Chibi kept her 1.76 m/s approach speed and entered the gait on touchdown, removing a 14-tick pause. The largest sampled wrist movement in that replay dropped from 13.9 cm to 8.1 cm per frame at 60 FPS.

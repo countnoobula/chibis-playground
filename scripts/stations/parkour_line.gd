@@ -7,6 +7,7 @@ extends Node3D
 
 const SEGMENTS := 12
 const PALETTE := preload("res://scripts/gym/rooftop_palette.gd")
+const CONNECTOR_REACH := 0.65
 
 @export var end_offset: Vector3 = Vector3(0.0, 0.0, -9.0)
 @export var is_zip_line: bool = false
@@ -127,7 +128,6 @@ func _build_visuals_and_trigger() -> void:
 func _on_body_entered(body: Node3D) -> void:
 	if body is ParkourController:
 		_tracked_player = body as ParkourController
-		_try_attach(_tracked_player)
 
 
 func _on_body_exited(body: Node3D) -> void:
@@ -136,7 +136,7 @@ func _on_body_exited(body: Node3D) -> void:
 
 
 func _try_attach(player: ParkourController) -> void:
-	if _has_rider or player == null:
+	if _has_rider or not is_instance_valid(player):
 		return
 	if player.is_on_floor():
 		return
@@ -156,12 +156,13 @@ func _try_attach(player: ParkourController) -> void:
 		dist = clampf(raw_dist, 0.28, maxf(0.28, line_len - 0.28))
 	var t := clampf(dist / line_len, 0.0, 1.0)
 	var rope_pt := get_rope_local_pos_at_u(t)
-
-	var diff := local_center - rope_pt
-	var xy_dist := Vector2(diff.x, diff.z).length()
-	var min_dy := -1.50 if is_zip_line else -1.05
-	var max_dy := 0.40 if is_zip_line else 0.50
-	if xy_dist >= 0.92 or diff.y <= min_dy or diff.y >= max_dy:
+	var connector_world := to_global(rope_pt)
+	if is_zip_line:
+		var line_direction := get_line_direction()
+		var line_xz := Vector3(line_direction.x, 0.0, line_direction.z).normalized()
+		# The rider's hands meet the moving handle, below and slightly behind the cable.
+		connector_world -= line_xz * 0.29 + Vector3.UP * 0.76
+	if player.get_capsule_center().distance_to(connector_world) > CONNECTOR_REACH:
 		return
 	player.try_enter_parkour_line(self, is_zip_line, t, line_len, zip_speed_min, zip_speed_max)
 

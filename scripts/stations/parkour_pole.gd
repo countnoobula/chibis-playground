@@ -1,17 +1,13 @@
 class_name ParkourPole
 extends Node3D
 
-## Perchable parkour pole with top-landing trigger and pole-to-pole hop target group.
+## Perchable parkour pole with a collision-confirmed top mount and hop target group.
 
 const PALETTE := preload("res://scripts/gym/rooftop_palette.gd")
-const CATCH_RADIUS := 0.48
-const CATCH_HEIGHT := 0.22
+const TOP_HEIGHT_TOLERANCE := 0.08
 
 @export var pole_height: float = 1.20
 @export var pole_radius: float = 0.16
-
-var _tracked_player: ParkourController = null
-
 
 func _ready() -> void:
 	add_to_group("parkour_poles")
@@ -25,6 +21,7 @@ func get_top_world_position() -> Vector3:
 func _build_pole() -> void:
 	var body := StaticBody3D.new()
 	body.collision_layer = 1
+	body.set_meta(&"parkour_top_station", self)
 	var col := CollisionShape3D.new()
 	var cyl_shape := CylinderShape3D.new()
 	cyl_shape.radius = pole_radius
@@ -54,6 +51,13 @@ func _build_pole() -> void:
 	cap_m.height = 0.06
 	cap.mesh = cap_m
 	cap.position = Vector3(0.0, pole_height - 0.03, 0.0)
+	var cap_collision := CollisionShape3D.new()
+	var cap_shape := CylinderShape3D.new()
+	cap_shape.radius = cap_m.top_radius
+	cap_shape.height = cap_m.height
+	cap_collision.shape = cap_shape
+	cap_collision.position = cap.position
+	body.add_child(cap_collision)
 	var cap_mat := StandardMaterial3D.new()
 	cap_mat.albedo_color = PALETTE.LAVENDER
 	cap_mat.roughness = 0.66
@@ -61,38 +65,16 @@ func _build_pole() -> void:
 	body.add_child(cap)
 	add_child(body)
 
-	var area := Area3D.new()
-	area.collision_layer = 8
-	area.collision_mask = 2
-	var tcol := CollisionShape3D.new()
-	var sph := SphereShape3D.new()
-	sph.radius = CATCH_RADIUS
-	tcol.shape = sph
-	tcol.position = Vector3(0.0, pole_height + CATCH_HEIGHT, 0.0)
-	area.add_child(tcol)
-	area.body_entered.connect(func(b):
-		if b is ParkourController:
-			_tracked_player = b
-			_try_perch(b)
-	)
-	area.body_exited.connect(func(b):
-		if b == _tracked_player:
-			_tracked_player = null
-	)
-	add_child(area)
 
-
-func _try_perch(p: ParkourController) -> void:
-	if not is_instance_valid(p):
-		return
-	var top := get_top_world_position()
-	# A physics Area can report its previous overlap for a tick after a teleport.
-	var offset := p.global_position - top
-	var horizontal := Vector2(offset.x, offset.z).length()
-	if offset.y >= -0.35 and offset.y <= CATCH_HEIGHT + CATCH_RADIUS and horizontal <= CATCH_RADIUS + p.config.capsule_radius:
-		p.try_enter_pole_perch(top)
-
-
-func _physics_process(_delta: float) -> void:
-	if _tracked_player != null:
-		_try_perch(_tracked_player)
+func land_on_top(player: ParkourController, impact_velocity: float, was_on_floor: bool) -> bool:
+	if not is_instance_valid(player) or player.current_state != "Locomotion":
+		return false
+	if not was_on_floor and impact_velocity > 1.8:
+		return false
+	var local_feet := to_local(player.global_position)
+	var lateral_distance := Vector2(local_feet.x, local_feet.z).length()
+	if absf(local_feet.y - pole_height) > TOP_HEIGHT_TOLERANCE:
+		return false
+	if lateral_distance > pole_radius * 1.18 + player.config.capsule_radius + 0.025:
+		return false
+	return player.try_enter_pole_perch(get_top_world_position())

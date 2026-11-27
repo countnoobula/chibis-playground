@@ -11,6 +11,10 @@ const PALETTE := preload("res://scripts/gym/rooftop_palette.gd")
 var _pad_mesh: MeshInstance3D
 var _squish_timer: float = 0.0
 
+const PAD_RADIUS := 0.98
+const PAD_TOP := 0.32
+const LANDING_HEIGHT_TOLERANCE := 0.08
+
 
 func _ready() -> void:
 	_build_trampoline()
@@ -41,10 +45,24 @@ func _build_trampoline() -> void:
 	frame.add_child(ring)
 	add_child(frame)
 
+	# Separate collision body marks only the spring surface as a bounce target.
+	var pad_body := StaticBody3D.new()
+	pad_body.name = "TrampolinePadTop"
+	pad_body.collision_layer = 1
+	pad_body.set_meta(&"parkour_top_station", self)
+	var pad_collision := CollisionShape3D.new()
+	var pad_shape := CylinderShape3D.new()
+	pad_shape.radius = PAD_RADIUS
+	pad_shape.height = 0.10
+	pad_collision.shape = pad_shape
+	pad_collision.position = Vector3(0.0, 0.27, 0.0)
+	pad_body.add_child(pad_collision)
+	add_child(pad_body)
+
 	_pad_mesh = MeshInstance3D.new()
 	var pm := CylinderMesh.new()
-	pm.top_radius = 0.98
-	pm.bottom_radius = 0.98
+	pm.top_radius = PAD_RADIUS
+	pm.bottom_radius = PAD_RADIUS
 	pm.height = 0.10
 	_pad_mesh.mesh = pm
 	_pad_mesh.position = Vector3(0.0, 0.27, 0.0)
@@ -54,25 +72,21 @@ func _build_trampoline() -> void:
 	_pad_mesh.material_override = pmat
 	add_child(_pad_mesh)
 
-	var area := Area3D.new()
-	area.collision_layer = 8
-	area.collision_mask = 2
-	var tcol := CollisionShape3D.new()
-	var tcyl := CylinderShape3D.new()
-	tcyl.radius = 1.02
-	tcyl.height = 0.45
-	tcol.shape = tcyl
-	tcol.position = Vector3(0.0, 0.40, 0.0)
-	area.add_child(tcol)
-	area.body_entered.connect(_on_body_entered)
-	add_child(area)
 
-
-func _on_body_entered(body: Node3D) -> void:
-	if body is ParkourController:
-		var p := body as ParkourController
-		if p.trigger_trampoline_bounce(base_bounce_velocity, super_bounce_multiplier):
-			_squish_timer = 0.32
+func land_on_top(player: ParkourController, impact_velocity: float, was_on_floor: bool) -> bool:
+	if not is_instance_valid(player) or player.current_state != "Locomotion":
+		return false
+	if was_on_floor or impact_velocity >= -0.1:
+		return false
+	var local_feet := to_local(player.global_position)
+	if absf(local_feet.y - PAD_TOP) > LANDING_HEIGHT_TOLERANCE:
+		return false
+	if Vector2(local_feet.x, local_feet.z).length() > PAD_RADIUS + player.config.capsule_radius + 0.025:
+		return false
+	if player.trigger_trampoline_bounce(base_bounce_velocity, super_bounce_multiplier):
+		_squish_timer = 0.32
+		return true
+	return false
 
 
 func _process(delta: float) -> void:

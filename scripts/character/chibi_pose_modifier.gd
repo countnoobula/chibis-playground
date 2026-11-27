@@ -134,6 +134,7 @@ var wade_surface_y := 0.0
 var ledge_edge_world: Vector3 = Vector3.ZERO
 var ledge_wall_normal_world: Vector3 = Vector3.FORWARD
 var mantle_alpha: float = 0.0
+var vault_alpha: float = 0.0
 var shimmy_start_edge: Vector3 = Vector3.ZERO
 var shimmy_end_edge: Vector3 = Vector3.ZERO
 var shimmy_phase: float = 0.0
@@ -651,9 +652,11 @@ func update_ledge_targets(delta: float) -> void:
 	var is_hang := parkour_state == "LedgeHang"
 	var is_shimmy := parkour_state == "LedgeShimmy"
 	var is_mantle := parkour_state == "MantleUp"
+	var is_vault := parkour_state == "SpeedVault"
 	var on_edge := is_hang or is_shimmy
+	var acquiring := on_edge or is_vault or (is_mantle and mantle_alpha < 0.16)
 
-	if not on_edge and not is_mantle:
+	if not acquiring and not is_mantle:
 		_ledge_weight = 0.0
 		_was_holding = false
 		_prev_shimmy_phase = -1.0
@@ -670,10 +673,12 @@ func update_ledge_targets(delta: float) -> void:
 		return
 
 	var target_w := 1.0 if on_edge else (1.0 - smoothstep(0.50, 0.83, mantle_alpha))
-	if not _was_holding and on_edge:
+	if is_vault:
+		target_w = smoothstep(0.05, 0.19, vault_alpha) * (1.0 - smoothstep(0.27, 0.40, vault_alpha))
+	if not _was_holding and acquiring:
 		for arm in _arms:
 			arm.grip.clear()
-	_was_holding = on_edge
+	_was_holding = acquiring
 	_ledge_weight = minf(target_w, _ledge_weight + delta * 14.0)
 
 	# Godot right-handed: across_right = inward.cross(UP) points to Chibi's RIGHT when facing inward!
@@ -694,8 +699,11 @@ func update_ledge_targets(delta: float) -> void:
 	for side in 2:
 		var arm := _arms[side]
 		var hand_offset := across_right * (0.11 if side == 1 else -0.11)
-		if on_edge and not arm.grip.is_valid():
-			arm.grip = find_grip_in_space(space, exclude, start_edge + hand_offset, inward, ledge_collision_mask)
+		if acquiring and not arm.grip.is_valid():
+			var grip_edge := start_edge + hand_offset
+			if is_vault:
+				grip_edge += inward * 0.06
+			arm.grip = find_grip_in_space(space, exclude, grip_edge, inward, ledge_collision_mask)
 
 		if new_step:
 			arm.from_grip.copy_from(arm.grip)
@@ -724,7 +732,8 @@ func update_ledge_targets(delta: float) -> void:
 		var nrm := frame.basis.y.normalized()
 		arm.hand_basis_world = (frame.basis * arm.rest_basis.inverse()).orthonormalized()
 		# Mitten contact marker in bind pose: 3.42 cm along fingers and 2.78 cm toward palm
-		arm.wrist_world = frame.origin + (nrm * 0.0278 - fwd * 0.0342) * scale_val
+		var palm_height := 0.014 if is_vault else 0.0278
+		arm.wrist_world = frame.origin + (nrm * palm_height - fwd * 0.0342) * scale_val
 
 
 ## Capture the naturally leading reachable boot when a dry scarf glide lands into a run.
@@ -1231,6 +1240,8 @@ func _process_modification_with_delta(_delta: float) -> void:
 
 	if _ledge_weight > 0.001 and (_arms[0].active or _arms[1].active):
 		_apply_ledge_ik(skel)
+	if parkour_state == "RopeSwing" and runner_body != null:
+		_apply_rope_swing_grips(skel)
 	if wind_pose_brace_blend > 0.001 or wind_pose_recoil_blend > 0.001:
 		_apply_wind_brace_pose(skel)
 	if runner_body != null and runner_body.has_balance_footing():
@@ -2488,6 +2499,29 @@ func _apply_ledge_ik(skel: Skeleton3D) -> void:
 		skel.set_bone_global_pose(_arms[side].bones[0], skel_inv * (solved["upper"] as Transform3D))
 		skel.set_bone_global_pose(_arms[side].bones[1], skel_inv * (solved["lower"] as Transform3D))
 		skel.set_bone_global_pose(_arms[side].bones[2], skel_inv * tip_t)
+
+
+func _apply_rope_swing_grips(skel: Skeleton3D) -> void:
+	var weight := runner_body.get_rope_swing_grip_weight()
+	if weight <= 0.001:
+		return
+	var skel_world := skel.global_transform
+	var skel_inv := skel_world.affine_inverse()
+	for side in 2:
+		var target := runner_body.get_rope_swing_hand_target(side)
+		if not target.is_finite():
+			continue
+		var bones := _arms[side].bones
+		var upper := skel_world * skel.get_bone_global_pose(bones[0])
+		var lower := skel_world * skel.get_bone_global_pose(bones[1])
+		var wrist := skel_world * skel.get_bone_global_pose(bones[2])
+		var pole := skel_world.basis * Vector3(-0.2 if side == 0 else 0.2, -0.3, 0.05)
+		var solved := TwoBoneIK.solve_chain(upper, lower, wrist, wrist.origin.lerp(target, weight), pole, true, 0.06)
+		var hand: Transform3D = solved["tip"]
+		hand.basis = wrist.basis
+		skel.set_bone_global_pose(bones[0], skel_inv * (solved["upper"] as Transform3D))
+		skel.set_bone_global_pose(bones[1], skel_inv * (solved["lower"] as Transform3D))
+		skel.set_bone_global_pose(bones[2], skel_inv * hand)
 
 
 func _apply_climbing_ik(skel: Skeleton3D) -> void:

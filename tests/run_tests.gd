@@ -139,6 +139,10 @@ func _test_touch_hud() -> void:
 
 	hud.update_hud("LedgeHang", 0.0, 0.0)
 	var ledge_icons: bool = jump.get("symbol") == "ledge" and slide.get("symbol") == "drop"
+	hud.update_hud("LedgeShimmy", 0.0, 0.0)
+	var shimmy_drop: bool = slide.get("symbol") == "drop"
+	hud.update_hud("LedgeCorner", 0.0, 0.0)
+	_assert_true(shimmy_drop and slide.get("symbol") == "drop", "Touch keeps the Drop control visible while shimmying and rounding a corner")
 	hud.update_hud("ZipLine", 0.0, 0.0)
 	_assert_true(ledge_icons and jump.get("symbol") == "off" and slide.get("symbol") == "drop", "Ledge and zipline controls show the climb and dismount silhouettes")
 	hud.update_hud("Climbing", 0.0, 0.0, true)
@@ -451,6 +455,7 @@ func _test_full_gym_and_physics() -> void:
 				var hw := (skel.global_transform * skel.get_bone_global_pose(pm._arms[s].bones[2])).origin
 				last_hand_err[s] = hw.distance_to(pm._arms[s].wrist_world)
 	skel.skeleton_updated.connect(on_skel)
+	chibi.reset_for_respawn(Vector3(-24.0, 1.11, 8.90))
 	chibi.ledge_edge_point = Vector3(-24.0, 1.65, 8.60)
 	chibi.ledge_wall_normal = Vector3(0.0, 0.0, 1.0)
 	chibi.transition_to("LedgeHang")
@@ -463,10 +468,9 @@ func _test_full_gym_and_physics() -> void:
 	chibi.transition_to("Locomotion")
 	await physics_frame
 
-	# Verify StateChart transitions across core states (checking both immediate entry and guarded states)
+	# Verify dispatch independently of the geometry needed to run those states.
 	for st in ["SpeedVault", "LedgeHang", "LedgeShimmy", "MantleUp", "PoolSwim", "Locomotion"]:
 		chibi.transition_to(st)
-		await physics_frame
 		_assert_true(chibi.current_state == st, "Transitioned cleanly to state: " + st)
 
 	# Verify Slide & LandRoll entry with realistic velocity & timers
@@ -695,9 +699,11 @@ func _test_full_gym_and_physics() -> void:
 	await _test_ground_foot_drift(chibi)
 	await _test_running_landing_overlay(chibi)
 	await _test_station_overlap_after_respawn(gym, chibi)
+	await preload("res://tests/rooftop_station_regressions.gd").new().run(self, gym, chibi, _assert_true)
 	await preload("res://tests/balance_footing_regression.gd").new().run(self, _assert_true, gym, chibi, skel)
 	await preload("res://tests/scarf_glide_regressions.gd").new().run(self, gym, chibi, _assert_true)
 	await _test_automatic_ledge_and_net(gym, chibi)
+	await preload("res://tests/rooftop_ledge_vault_regressions.gd").new().run(self, gym, chibi, _assert_true)
 	await preload("res://tests/wind_tunnel_regressions.gd").new().run(self, gym, chibi, _assert_true)
 	await preload("res://tests/wind_assisted_glide_regressions.gd").new().run(self, gym, chibi, _assert_true)
 
@@ -946,19 +952,25 @@ func _test_runner_motion(gym: Node3D, chibi: ParkourController, skeleton: Skelet
 		var found := chibi._try_start_speed_vault()
 		_assert_true(found, "Real rooftop bar starts a vault at flow %.1f" % flow)
 		var phase_error := 0.0
-		var closest_plant := 1.0
-		var hand_error := INF
+		var plant_sample := [INF, INF]
+		var sample_plant := func():
+			if chibi.current_state != "SpeedVault":
+				return
+			var distance_from_plant := absf(chibi._vault_alpha - 0.24)
+			if distance_from_plant < plant_sample[0]:
+				var hand := (skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("hand_l"))).origin
+				var rail := Vector3(hand.x, top_y, clampf(hand.z, front_z - bar_size.z, front_z))
+				plant_sample[0] = distance_from_plant
+				plant_sample[1] = hand.distance_to(rail)
+		skeleton.skeleton_updated.connect(sample_plant)
 		for _i in 60:
 			await _wait_physics_frames(1)
 			if chibi.current_state != "SpeedVault":
 				break
 			var phase := _get_clip_phase(anim, "SpeedVault")
 			phase_error = maxf(phase_error, absf(chibi._vault_alpha - phase))
-			if absf(phase - 0.24) < closest_plant:
-				closest_plant = absf(phase - 0.24)
-				var hand := (skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("hand_l"))).origin
-				var rail := Vector3(hand.x, top_y, clampf(hand.z, front_z - bar_size.z, front_z))
-				hand_error = hand.distance_to(rail)
+		skeleton.skeleton_updated.disconnect(sample_plant)
+		var hand_error: float = plant_sample[1]
 		_assert_true(phase_error < 0.065 and hand_error < 0.085 and chibi.current_state == "Locomotion" and chibi.get_collision_mask_value(1),
 			"Vault clip follows body through plant and clearance at flow %.1f (phase error %.3f, contact %.3f m)" % [flow, phase_error, hand_error])
 
@@ -1002,10 +1014,52 @@ func _test_wall_run_and_roll(gym: Node3D, chibi: ParkourController) -> void:
 	var wall := gym.get_node("Zone2_WallRunAndLedges/WallRun_Left1") as StaticBody3D
 	var wall_collision := _find_type(wall, "CollisionShape3D") as CollisionShape3D
 	var wall_face := wall_collision.global_position.x + (wall_collision.shape as BoxShape3D).size.x * 0.5
-	chibi.reset_for_respawn(Vector3(wall_face + 0.56, 0.06, -3.0))
+	var along_wall := Vector2(0.0, -1.0)
+	chibi.camera_ctrl.yaw = 0.0
+	for scenario in [
+		[0.44, 0, along_wall, "A casual hop beside the wall stays in locomotion as Chibi speeds up"],
+		[0.44, 11, Vector2.ZERO, "A running jump without continued steering stays in locomotion"],
+		[0.60, 11, along_wall, "A running jump outside close wall reach stays in locomotion"],
+	]:
+		chibi.chibi_input.set_touch_move(Vector2.ZERO)
+		chibi.reset_for_respawn(Vector3(wall_face + float(scenario[0]), 0.06, -3.0))
+		chibi.rotation.y = 0.0
+		await _wait_physics_frames(18)
+		chibi.chibi_input.set_touch_move(along_wall)
+		await _wait_physics_frames(scenario[1])
+		chibi.chibi_input.set_touch_jump(true)
+		await _wait_physics_frames(2)
+		var jumped := not chibi.is_on_floor() and chibi.velocity.y > 3.0
+		chibi.chibi_input.set_touch_jump(false)
+		chibi.chibi_input.set_touch_move(scenario[2])
+		var stayed_in_locomotion := true
+		for _i in 30:
+			await _wait_physics_frames(1)
+			stayed_in_locomotion = stayed_in_locomotion and chibi.current_state == "Locomotion"
+		_assert_true(jumped and stayed_in_locomotion, scenario[3])
+
+	var platform := _test_collision_box(gym, Vector3(wall_face + 0.48, 1.10, -1.45), Vector3(0.96, 0.2, 1.7))
+	chibi.chibi_input.set_touch_move(Vector2.ZERO)
+	chibi.reset_for_respawn(Vector3(wall_face + 0.44, 1.28, -0.80))
 	chibi.rotation.y = 0.0
 	await _wait_physics_frames(18)
-	chibi.chibi_input.set_touch_move(Vector2(0.0, -1.0))
+	var started_on_ledge := chibi.is_on_floor()
+	var fell_from_ledge := false
+	var ran_during_drop := false
+	chibi.chibi_input.set_touch_move(along_wall)
+	for _i in 55:
+		await _wait_physics_frames(1)
+		fell_from_ledge = fell_from_ledge or (not chibi.is_on_floor() and chibi.velocity.y < -2.0)
+		ran_during_drop = ran_during_drop or chibi.current_state == "WallRun"
+	_assert_true(started_on_ledge and fell_from_ledge and not ran_during_drop,
+		"Running off a high ledge beside a wall produces a normal fall")
+	platform.queue_free()
+
+	chibi.chibi_input.set_touch_move(Vector2.ZERO)
+	chibi.reset_for_respawn(Vector3(wall_face + 0.44, 0.06, -3.0))
+	chibi.rotation.y = 0.0
+	await _wait_physics_frames(18)
+	chibi.chibi_input.set_touch_move(along_wall)
 	await _wait_physics_frames(11)
 	chibi.chibi_input.set_touch_jump(true)
 	await _wait_physics_frames(2)
@@ -1020,12 +1074,20 @@ func _test_wall_run_and_roll(gym: Node3D, chibi: ParkourController) -> void:
 	_assert_true(chibi.current_state == "WallRun" and wall_gap > chibi.config.capsule_radius and wall_gap < 0.35
 		and max_wall_step < 0.067 and absf(chibi.velocity.z) >= chibi.config.wall_run_base_speed,
 		"Wall run closes the gap while preserving capsule clearance and forward speed (gap %.3f m, max correction %.3f m)" % [wall_gap, max_wall_step])
+	chibi.chibi_input.set_touch_move(Vector2(0.70, -0.714))
 	chibi.chibi_input.set_touch_jump(true)
 	await _wait_physics_frames(2)
 	chibi.chibi_input.set_touch_jump(false)
 	await _wait_physics_frames(7)
 	_assert_true(chibi.current_state == "Locomotion" and anim.current_state == "WallKick" and _get_clip_phase(anim, "WallKick") > 0.15
 		and chibi.velocity.x > 1.8 and chibi.velocity.y > 2.5, "Jump input kicks off the wall and advances the kick pose")
+	var reached_opposite_wall := false
+	for _i in 33:
+		await _wait_physics_frames(1)
+		if chibi.current_state == "WallRun" and chibi._wall_run_normal.dot(Vector3.LEFT) > 0.9:
+			reached_opposite_wall = true
+			break
+	_assert_true(reached_opposite_wall, "Steering after a wall kick transfers to the opposite corridor wall")
 
 	chibi.chibi_input.set_touch_move(Vector2.ZERO)
 	chibi.reset_for_respawn(Vector3(4.0, 3.3, 21.0))
@@ -1212,10 +1274,10 @@ func _test_station_overlap_after_respawn(gym: Node3D, chibi: ParkourController) 
 	var perched := chibi.current_state == "PolePerch"
 
 	chibi.reset_for_respawn(beam.to_global(Vector3(0.0, 0.24, -1.0)))
-	# Simulate a pole overlap update that arrives before the Area exits on the next step.
-	pole._try_perch(chibi)
+	# A callback carrying a contact from before the teleport must reject the new position.
+	var stale_contact_rejected := not pole.land_on_top(chibi, -1.0, false)
 	await _wait_physics_frames(12)
-	_assert_true(perched and chibi.current_state == "BalanceBeam",
+	_assert_true(perched and stale_contact_rejected and chibi.current_state == "BalanceBeam",
 		"Respawning from a pole can mount the beam without the old pole recapturing Chibi")
 
 
