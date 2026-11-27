@@ -1,6 +1,8 @@
 class_name ParkourController
 extends CharacterBody3D
 
+const ExpressionDirector := preload("res://features/runner/expression_director.gd")
+
 ## Full 15-state Parkour controller ported 1:1 from Unreal AC_ParkourComponent,
 ## orchestrated through Godot State Charts, Phantom Camera, AnimationTree, and ChibiPoseModifier.
 
@@ -209,7 +211,13 @@ var _swim_exit_pose := Transform3D.IDENTITY
 var _visual_rest_transform: Transform3D = Transform3D.IDENTITY
 
 
+var expression_director: ExpressionDirector
+
+
 func _ready() -> void:
+	expression_director = ExpressionDirector.new()
+	expression_director.name = "ExpressionDirector"
+	add_child(expression_director)
 	_swim_controller.setup(self)
 	if config == null:
 		config = ParkourConfig.new()
@@ -360,6 +368,8 @@ func transition_to(new_state: String) -> void:
 
 
 func reset_for_respawn(spawn_position: Vector3) -> void:
+	if expression_director != null:
+		expression_director.clear_requests()
 	wind_reset_serial += 1
 	wind_velocity = Vector3.ZERO
 	wind_brace_weight = 0.0

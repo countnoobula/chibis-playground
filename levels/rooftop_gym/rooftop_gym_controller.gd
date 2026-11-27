@@ -36,6 +36,10 @@ func _ready() -> void:
 	get_tree().node_added.connect(_register_strawberry)
 	_player = get_node_or_null(player_path) as ParkourController
 	if _player != null:
+		var picker := preload("res://ui/emoji_picker.gd").new()
+		picker.name = "EmojiPicker"
+		add_child(picker)
+		picker.setup(_player)
 		_player.wind_field = get_node_or_null("WindTunnel") as RunnerWindField3D
 		if _player.touch_hud != null:
 			_player.touch_hud.bind_journal_level_progress(_journal_progress_provider)

@@ -30,6 +30,9 @@ var step_index: int = 0
 var slide_dust_cooldown: float = 0.0
 
 var dive_gear: ChibiDiveGear
+## Optional manual face poses delegate their blend-shape baselines through this
+## node so ChibiJuice remains the single writer for the animated character mesh.
+var expression_face: Node
 
 var _sfx_map: Dictionary = {}
 var _tower_foley: Dictionary[String, AudioStreamPlayer3D] = {}
@@ -252,10 +255,21 @@ func _update_expressions(delta: float, state_name: String, anim_name: String, fl
 	_set_bs("Blink_R", blink_val)
 	# Keep the mouth around the bite valve while the normal blink continues.
 	var bite := dive_gear.mouthpiece_weight if dive_gear != null else 0.0
-	_set_bs("Expr_Happy", morph_happy * (1.0 - bite))
-	_set_bs("Expr_Focused", morph_focused * (1.0 - bite))
-	_set_bs("Expr_Effort", morph_effort * (1.0 - bite))
-	_set_bs("Expr_Surprised", lerpf(morph_surprised, 0.92, bite))
+	var happy_weight := _get_pose_weight(&"Expr_Happy", morph_happy)
+	var focused_weight := _get_pose_weight(&"Expr_Focused", morph_focused)
+	var effort_weight := _get_pose_weight(&"Expr_Effort", morph_effort)
+	var surprised_weight := _get_pose_weight(&"Expr_Surprised", morph_surprised)
+	_set_bs("Expr_Happy", happy_weight * (1.0 - bite))
+	_set_bs("Expr_Focused", focused_weight * (1.0 - bite))
+	_set_bs("Expr_Effort", effort_weight * (1.0 - bite))
+	_set_bs("Expr_Surprised", lerpf(surprised_weight, 0.92, bite))
+
+
+func _get_pose_weight(shape_name: StringName, fallback: float) -> float:
+	if expression_face != null and is_instance_valid(expression_face) \
+		and expression_face.has_method("get_pose_blend_shape_value"):
+		return expression_face.get_pose_blend_shape_value(shape_name, fallback)
+	return fallback
 
 
 func _set_bs(bs_name: String, val: float) -> void:
