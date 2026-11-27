@@ -1,6 +1,7 @@
 """Export the three runtime dive-gear meshes from the fitted Blender scene.
 
-From Blender, open Chibi_Dive_Mask_Swimming.blend and run this script.
+From Blender, open source_art/ChibiDiveMask/Chibi_Dive_Mask_Swimming.blend
+and run this script.
 strip_runner_goggles() is also used by the character exporter.
 """
 

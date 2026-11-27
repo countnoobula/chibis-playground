@@ -29,3 +29,23 @@ godot --headless --path . --script res://tests/run_tests.gd
 ```
 
 Run this from the Godot project root using the installed Godot executable if `godot` is unavailable on PATH.
+
+## Project structure
+
+| Location | What belongs here |
+| --- | --- |
+| `features/water/` | Water volumes, profiles, shaders, and the playable rocky basin example. Place `water_body_3d.tscn` in a level and set its outline, depth, and profile. |
+| `features/runner/` | The playable `chibi_runner.tscn`, movement and climbing, camera, animation, gear, swimming, and runner effects. |
+| `features/stations/` | Placeable beam, pole, line, swing, and trampoline scenes, their behavior, and equipment paint defaults. Set station dimensions and line mode on each instance. |
+| `features/items/` | Pickups shared across levels, including the strawberry. |
+| `levels/rooftop_gym/` | The gym scene, course layout, spawns, palette, sky, pool, tower, wind tunnel, and rooftop-specific assemblies. |
+| `ui/` and `settings/` | Title and journal scenes and artwork in `ui/menu/`, touch controls in `ui/hud/`, and persisted preferences in the GameSettings autoload. |
+| `assets/` and `source_art/` | Shared runtime models, audio, fonts, and the self-contained woodland kit. Editable Blender masters and regeneration inputs live under the Godot-ignored `source_art/` root. |
+| `addons/` | Vendored Godot integrations and editor plugins. Keep upstream files, version information, and licenses together. |
+
+- Compose levels from feature scenes. Keep the geometry and tuning unique to a course in its level folder. A reusable feature should load without the rooftop scene.
+- A level can assign a `RunnerWindField3D` to `runner.wind_field`. A climbable assembly can supply authored leap profiles, corners, and summit data through `get_climb_capability()`. Bind a level's `JournalLevelProgressProvider` with `runner.touch_hud.bind_journal_level_progress(provider)` to show its area and pickups in the journal.
+- Keep woodland models, textures, manifest, shader, and post-import script together under `assets/environment/woodland/`. Regenerate with `tools/export_woodland_assets.py`. The kit has a runtime texture directory also named `source_art`; preserve it when copying or exporting the project.
+- Move Godot resources together with existing `.uid` and `.import` companions. Update explicit loads, formatted asset paths, shader includes, autoloads, generators, exporters, and tests in the same change.
+- `tools/build_parkour_scenes.gd` owns the runner, three particle scenes, and rooftop scene. Use its `-- --rooftop-only` option for course assembly changes. Edit a station's own scene or script for behavior shared by all instances.
+- For moves, verify a clean import, run the gameplay suite and affected standalone checks, then launch through Title → New Game → rooftop → pause → Resume. `tests/test_menu_level_flow.gd` covers that route. Exercise dynamically loaded art and shaders in a fresh export, and compare fixed-camera captures for rendering changes.

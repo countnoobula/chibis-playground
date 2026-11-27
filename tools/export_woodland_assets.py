@@ -2,8 +2,8 @@
 
 blender --background --python-exit-code 1 --python tools/export_woodland_assets.py
 
-The default archive contains SourceArt and UnrealExtract beside the Chibi
-project. Use --source-root and --unreal-extract to point at a relocated archive,
+The default inputs are source_art and source_art/UnrealExtract in Chibi.
+Use --source-root and --unreal-extract to point at a separate archive,
 or --output-root to build the GLBs and manifest into a separate directory.
 """
 import argparse
@@ -22,7 +22,7 @@ import bpy
 from mathutils import Vector
 
 PROJECT = Path(__file__).resolve().parents[1]
-ARCHIVE = PROJECT.parent / "Parkour-Art-Archive"
+SOURCE_ART = PROJECT / "source_art"
 OUTPUT = PROJECT / "assets/environment/woodland"
 IMPORTER = "res://assets/environment/woodland/import_woodland.gd"
 NATIVE_STATIC_SLOTS = {
@@ -476,15 +476,15 @@ def export_library(source, extraction, output):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source-root", type=Path, default=ARCHIVE / "SourceArt")
-    parser.add_argument("--unreal-extract", type=Path, default=ARCHIVE / "UnrealExtract")
+    parser.add_argument("--source-root", type=Path, default=SOURCE_ART)
+    parser.add_argument("--unreal-extract", type=Path, default=SOURCE_ART / "UnrealExtract")
     parser.add_argument("--output-root", type=Path, default=OUTPUT)
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
     source = args.source_root.resolve()
     extraction = args.unreal_extract.resolve()
     output = args.output_root.resolve()
     if not all((source / family).is_dir() for family in FAMILIES):
-        raise ValueError(f"Incomplete Parkour SourceArt: {source}")
+        raise ValueError(f"Incomplete woodland source art: {source}")
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="woodland-export-", dir=output.parent) as scratch:
         staging = Path(scratch)

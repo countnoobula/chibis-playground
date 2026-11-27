@@ -2,3 +2,4 @@
 .godot/
 /android/
 /builds/
+/source_art/**/*.blend[0-9]*

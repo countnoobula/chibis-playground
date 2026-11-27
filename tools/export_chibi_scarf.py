@@ -12,7 +12,10 @@ import bpy
 from mathutils import Vector
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SOURCE_BLEND = PROJECT_ROOT / "concept_art" / "Chibi" / "Parachute" / "Scarf" / "Chibi Scarf Parachute.blend"
+SOURCE_BLEND = (
+    PROJECT_ROOT / "source_art" / "concept_art" / "Chibi" / "Parachute" / "Scarf"
+    / "Chibi Scarf Parachute.blend"
+)
 OUTPUT_DIR = PROJECT_ROOT / "assets" / "characters"
 CANOPY_PATH = OUTPUT_DIR / "chibi_scarf_canopy.glb"
 PRINT_PATH = OUTPUT_DIR / "chibi_scarf_print.png"
@@ -228,7 +231,7 @@ def export():
     bones = ", ".join(f'"{pin["bone"]}"' for pin in pins)
     resource_text = f'''[gd_resource type="Resource" script_class="ChibiScarfLayout" load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/character/chibi_scarf_layout.gd" id="1_layout"]
+[ext_resource type="Script" path="res://features/runner/chibi_scarf_layout.gd" id="1_layout"]
 
 [resource]
 script = ExtResource("1_layout")

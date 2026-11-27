@@ -1,7 +1,7 @@
 extends SceneTree
 
-const COURSE_SCENE := "res://scenes/stations/drop_well_tunnel.tscn"
-const POOL_SCRIPT := "res://scripts/stations/chibi_pool.gd"
+const COURSE_SCENE := "res://levels/rooftop_gym/stations/drop_well_tunnel.tscn"
+const POOL_SCRIPT := "res://levels/rooftop_gym/stations/chibi_pool.gd"
 
 var _failed := false
 

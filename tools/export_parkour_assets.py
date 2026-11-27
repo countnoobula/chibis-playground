@@ -1,18 +1,15 @@
-"""Read-only export of ChibiRunner (all 36 animations verified non-static),
-rooftop climbing stations, route JSON, and audio from Unreal Parkour SourceArt
-into the Godot chibi project (in meters, Godot Y-up).
+"""Export ChibiRunner and audio from the editable source art into Godot.
 
 Usage:
     blender --background --python tools/export_parkour_assets.py
     blender --background --python tools/export_parkour_assets.py -- --source-root PATH --output-root PATH
 
-The default source is the sibling Parkour-Art-Archive/SourceArt when present,
-otherwise the original Unreal project SourceArt directory. Output defaults to
-the Godot project root and is written beneath its assets/ directory.
+The default source is the project's source_art directory. A checkout without
+that directory can use the sibling Parkour-Art-Archive/SourceArt. Blender
+writes under the Godot project's assets directory unless given another output root.
 """
 
 import argparse
-import json
 import math
 import runpy
 import shutil
@@ -23,9 +20,9 @@ import bpy
 from mathutils import Euler, Matrix
 
 GODOT_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_PARKOUR_SRC = Path(r"c:\Users\count\Documents\Unreal Projects\Parkour\SourceArt")
+LOCAL_SOURCE_ART = GODOT_ROOT / "source_art"
 ARCHIVE_PARKOUR_SRC = GODOT_ROOT.parent / "Parkour-Art-Archive" / "SourceArt"
-PARKOUR_SRC = ARCHIVE_PARKOUR_SRC if ARCHIVE_PARKOUR_SRC.is_dir() else DEFAULT_PARKOUR_SRC
+PARKOUR_SRC = LOCAL_SOURCE_ART if LOCAL_SOURCE_ART.is_dir() else ARCHIVE_PARKOUR_SRC
 OUTPUT_ROOT = GODOT_ROOT
 ASSETS_DIR = OUTPUT_ROOT / "assets"
 
@@ -39,7 +36,7 @@ def configure_paths():
         "--source-root",
         type=Path,
         default=PARKOUR_SRC,
-        help="Parkour SourceArt directory (defaults to the sibling archive when present).",
+        help="Editable source directory (defaults to source_art in the project).",
     )
     parser.add_argument(
         "--output-root",
@@ -64,7 +61,7 @@ def configure_paths():
     except ValueError:
         pass
     else:
-        parser.error(f"Output assets directory must not be inside SourceArt: {ASSETS_DIR}")
+        parser.error(f"Output assets directory must be outside the source directory: {ASSETS_DIR}")
 
 # FBX clips that either do not exist in ChibiRunner.blend or are newer/animated versions
 # (BeamIdle & BeamWalk inside ChibiRunner.blend are static 0-motion placeholders!).
@@ -507,61 +504,6 @@ def export_chibi_runner():
     print(f"[Export] Wrote {out_glb} with {len(all_actions)} verified animations.")
 
 
-def export_rooftop_stations():
-    print("[Export] Loading RooftopClimbing.blend (read-only)...")
-    bpy.ops.wm.open_mainfile(filepath=str(PARKOUR_SRC / "RooftopClimbing/RooftopClimbing.blend"))
-
-    out_dir = ASSETS_DIR / "stations"
-    out_dir.mkdir(parents=True, exist_ok=True)
-    rot_z90 = Matrix.Rotation(math.pi / 2.0, 4, "Z")
-
-    for col_name, out_name, undo_y in [
-        ("SM_RooftopHolds", "rooftop_holds.glb", 0.0),
-        ("SM_RooftopNet", "rooftop_net.glb", -250.0),
-    ]:
-        col = bpy.data.collections[col_name]
-        bpy.ops.object.select_all(action="DESELECT")
-        objs = list(col.objects)
-        for o in objs:
-            o.select_set(True)
-            if undo_y != 0.0:
-                o.location.y += undo_y
-        bpy.context.view_layer.update()
-
-        bpy.context.view_layer.objects.active = objs[0]
-        bpy.ops.object.convert(target="MESH")
-        bpy.ops.object.join()
-        merged = bpy.context.active_object
-        merged.name = col_name
-        merged.matrix_world = Matrix.Scale(0.01, 4) @ rot_z90 @ merged.matrix_world
-        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-
-        out_glb = out_dir / out_name
-        bpy.ops.export_scene.gltf(
-            filepath=str(out_glb),
-            export_format="GLB",
-            use_selection=True,
-            export_yup=True,
-            export_apply=True,
-            export_materials="EXPORT",
-        )
-        print(f"[Export] Wrote {out_glb} (dims={[round(d, 3) for d in merged.dimensions]})")
-
-    route_mod = runpy.run_path(str(PARKOUR_SRC / "RooftopClimbing/wall_route.py"))
-    route_json = {
-        "bands": [
-            [[round(lat * 0.01, 4), round(z * 0.01, 4), 0.04] for (lat, z) in band]
-            for band in route_mod["WALL_ROUTE"]
-        ],
-        "toe_chips": [
-            [round(lat * 0.01, 4), round(z * 0.01, 4), 0.03]
-            for (lat, z) in route_mod["TOE_CHIPS"]
-        ],
-    }
-    json_path = out_dir / "wall_route.json"
-    json_path.write_text(json.dumps(route_json, indent=2), encoding="utf-8")
-
-
 def copy_audio():
     src_audio = PARKOUR_SRC / "Audio"
     dst_audio = ASSETS_DIR / "audio"
@@ -573,6 +515,5 @@ def copy_audio():
 if __name__ == "__main__":
     configure_paths()
     export_chibi_runner()
-    export_rooftop_stations()
     copy_audio()
     print("[Export] Done.")

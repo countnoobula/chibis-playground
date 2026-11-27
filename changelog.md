@@ -6,6 +6,22 @@
 
 Add each active target here with its owner, status, and a short description. Check the current project and reread this file before editing. Update your own entry and preserve edits from other agents. When work is verified, move it to the relevant section below with the date and the checks that ran.
 
+## Project structure
+
+### 2026-11-27
+
+- Organized the [runner](features/runner/chibi_runner.tscn), [water](features/water/water_body_3d.tscn), stations, and pickups as project-local features. The [rooftop gym](levels/rooftop_gym/rooftop_parkour_gym.tscn) places reusable equipment scenes and supplies its wind field, climbing route, and journal progress. UI and settings have their own roots. The woodland kit retains its manifest, importer, and original paths. [AGENTS.md](AGENTS.md) records the placement and verification conventions.
+- Updated the scene builder, scarf exporter reference, shader includes, runtime asset loads, and tests. The water library accepts custom caustic materials. The runner now skips detached skeletons when a level unloads. Added coverage for a second wind provider, caustic receivers, journal updates, and the title-to-gym pause and resume flow.
+- Verified Godot 4.7.2 on Windows, D3D12 Forward Mobile with Jolt. All 340 main checks and six standalone gameplay checks passed. Imported a copy from an empty Godot cache, regenerated the five generated scenes there, and repeated all 340 checks with the developer menu. Fixed-camera 800 × 450 images of the rocky basin with a woodland tree and the rooftop pool matched the baseline PNGs byte-for-byte at fixed 60 FPS.
+- Exported Windows release and Android debug builds. The Windows executable launched, and its pack passed Title → New Game → rooftop → pause → Resume at 1280 × 720 and 844 × 390 with simulated mobile layout. All 69 woodland models instantiated from the pack. Android hardware was unavailable. Four standalone checks retain baseline shutdown resource diagnostics, and the Windows exporter retains its Callable serialization warning. One regenerated-suite run logged a Jolt job-capacity warning, then passed cleanly on repeat.
+
+## Source art
+
+### 2026-11-27
+
+- Consolidated Chibi's concept art, the 22 Blender masters, and the Parkour regeneration inputs under [source_art](source_art). Kept Parkour's concept versions in [concept_art/parkour](source_art/concept_art/parkour).
+- Regenerated the runner, audio, dive gear, scarf, and woodland kit from Chibi's local sources. Verified that all six assembled trees matched their saved GLBs byte-for-byte. A clean Godot import and Windows package skipped the source folder, and New Game opened the rooftop gym from the package.
+
 ## Woodland assets
 
 ### 2026-11-27
@@ -38,19 +54,19 @@ Add each active target here with its owner, status, and a short description. Che
 
 - The Berry Journal now opens over a fresh HUD-free gameplay capture with a baked bokeh-style blur. The backdrop fills the window with aspect-preserving crop, and all eight transparent book spreads remain sharp. Verified fresh captures in two rooftop locations at 1280 × 720 and in the 844 × 390 landscape touch preview on Forward Mobile (Metal).
 
-- Replaced the gameplay pause panel with the four Berry Journal spreads on desktop and [landscape mobile](concept_art/Menus/berry-journal-mobile-pause.png). Gear renders the actual scarf canopy, print, and weave alongside the animated runner wearing the Peach Scarf. Map shows the illustrated route to Lantern Cottage, and Journal counts strawberries collected in the current gym run.
-- Wired the stitched mobile settings index, desktop Graphics presets, View Controls, and Resume. Dynamic journal text uses the reusable [Berry Journal font](scenes/menu/berry_journal_font.tres), backed by the bundled OFL-licensed Lora font.
+- Replaced the gameplay pause panel with the four Berry Journal spreads on desktop and [landscape mobile](source_art/concept_art/Menus/berry-journal-mobile-pause.png). Gear renders the actual scarf canopy, print, and weave alongside the animated runner wearing the Peach Scarf. Map shows the illustrated route to Lantern Cottage, and Journal counts strawberries collected in the current gym run.
+- Wired the stitched mobile settings index, desktop Graphics presets, View Controls, and Resume. Dynamic journal text uses the reusable [Berry Journal font](ui/menu/berry_journal_font.tres), backed by the bundled OFL-licensed Lora font.
 - Entered through New Game and opened the journal with Escape or a simulated finger on the gear. Checked the four spreads, graphics presets, camera inversion, guide navigation, Resume, and pickup progress at 1280 × 720, 844 × 390, and 736 × 414 with Godot 4.7.2 Forward Mobile (Metal, Apple M1). The headless suite passed 294 checks at fixed 60 FPS. Phone checks used simulated touch.
 
 ## Main menu
 
 ### 2026-11-27
 
-- Implemented the [mobile Berry Journal](concept_art/Menus/berry-journal-mobile-options.png) with a stitched category index, touch sliders, a touch controls guide, and a fixed Back button. Verified settings, navigation, and persistence at landscape phone sizes (844 × 390 and 736 × 414) with simulated touch on the Mobile renderer. Checked desktop navigation and ran the headless suite (254 passed).
+- Implemented the [mobile Berry Journal](source_art/concept_art/Menus/berry-journal-mobile-options.png) with a stitched category index, touch sliders, a touch controls guide, and a fixed Back button. Verified settings, navigation, and persistence at landscape phone sizes (844 × 390 and 736 × 414) with simulated touch on the Mobile renderer. Checked desktop navigation and ran the headless suite (254 passed).
 
-- Replaced the title bar with [scarf ribbons](concept_art/Menus/desktop-scarf-ribbons.png) on desktop and a two-by-two grid of [picnic patches](concept_art/Menus/mobile-picnic-patches.png) on mobile. Each button sits directly on the scenery. The desktop preview flag is `-- --mobile-menu`.
+- Replaced the title bar with [scarf ribbons](source_art/concept_art/Menus/desktop-scarf-ribbons.png) on desktop and a two-by-two grid of [picnic patches](source_art/concept_art/Menus/mobile-picnic-patches.png) on mobile. Each button sits directly on the scenery. The desktop preview flag is `-- --mobile-menu`.
 - Checked keyboard and mouse navigation at 1280 × 720 and simulated finger taps and drags at 844 × 390 in Godot 4.7.2 Forward Mobile (Metal, Apple M1). Verified the berry, disabled Continue, New Game, Options, sliders, Back, and Quit. The headless suite passed 254/254 at fixed 60 FPS. Touch checks used the phone-sized desktop preview.
-- Enabled Options on the title screen using the [approved Berry Journal spread](concept_art/Menus/berry-journal-title-options.png). Master, Music, and Sound Effects sliders, camera sensitivity and Invert Y, and four graphics presets apply immediately and persist across launches. View Controls shows gameplay bindings. Back and Escape restore Options focus on the title.
+- Enabled Options on the title screen using the [approved Berry Journal spread](source_art/concept_art/Menus/berry-journal-title-options.png). Master, Music, and Sound Effects sliders, camera sensitivity and Invert Y, and four graphics presets apply immediately and persist across launches. View Controls shows gameplay bindings. Back and Escape restore Options focus on the title.
 - Verified the keyboard and mouse round trip at 1280 × 720 and 900 × 600, audio bus levels, gameplay look input, separate-process persistence, and all four presets from one rooftop viewpoint on Godot 4.7.2 Forward Mobile (Metal, Apple M1). Headless suite passed 254/254 at fixed 60 FPS.
 - Clicking the title strawberry now pulses it to about 110% and rocks it back to rest while all three strokes redraw together over 0.33 seconds. Verified single and repeated clicks, preserved menu focus, and resized hit targets on Godot 4.7.2 Forward Mobile (Metal). The headless suite passed 254/254 at fixed 60 FPS.
 - Made the approved *Scarf in the Sky* title screen the game entry point. New Game opens the rooftop gym, Quit exits, and Continue and Options are disabled. The strawberry wiggles occasionally and replays its three painted accent strokes when clicked.
@@ -60,21 +76,21 @@ Add each active target here with its owner, status, and a short description. Che
 
 ### 2026-11-27
 
-- Approved the Berry Journal in-game menu concept after reviewing all four spreads. [Gear](concept_art/Menus/berry-journal-gear.png), [Map](concept_art/Menus/berry-journal-map.png), [Journal](concept_art/Menus/berry-journal-v2.png), and [Options](concept_art/Menus/berry-journal-options.png).
+- Approved the Berry Journal in-game menu concept after reviewing all four spreads. [Gear](source_art/concept_art/Menus/berry-journal-gear.png), [Map](source_art/concept_art/Menus/berry-journal-map.png), [Journal](source_art/concept_art/Menus/berry-journal-v2.png), and [Options](source_art/concept_art/Menus/berry-journal-options.png).
 
 ### 2026-11-26
 
-- Approved [Scarf in the Sky](concept_art/Menus/scarf-in-the-sky-v7.png) as the Strawberry Hollow main menu concept. The canopy uses the posed 3D scarf as a shape reference, with a continuous sheet, overlapping hems, and gathered hand grips.
-- Turned the Scarf in the Sky canopy to match Chibi’s three-quarter glide. Visually checked the near underside and foreshortened far grip in `concept_art/Menus/scarf-in-the-sky-v6.png`.
-- Restored the original woven fabric texture on the peach canopy. Visually checked the weave, open underside, and smooth silhouette in `concept_art/Menus/scarf-in-the-sky-v5.png`.
-- Smoothed the Scarf in the Sky canopy into a single taut curve. Visually checked the open underside and sky gap on `concept_art/Menus/scarf-in-the-sky-v4.png`.
-- Opened the scarf canopy in the Scarf in the Sky title-screen concept so its underside and the gap above Chibi are visible. Visually checked `concept_art/Menus/scarf-in-the-sky-v3.png` at full size.
-- Updated five menu concepts with the petal lantern design. Revised the Scarf in the Sky mockup so Chibi holds a single billowing scarf canopy directly in her hands. Visually checked the revised artwork and saved it as versioned PNGs in `concept_art/Menus`.
-- Generated and visually checked three Strawberry Hollow title screens and three pause-menu concepts. The six widescreen mockups and their prompts are in `concept_art/Menus`.
+- Approved [Scarf in the Sky](source_art/concept_art/Menus/scarf-in-the-sky-v7.png) as the Strawberry Hollow main menu concept. The canopy uses the posed 3D scarf as a shape reference, with a continuous sheet, overlapping hems, and gathered hand grips.
+- Turned the Scarf in the Sky canopy to match Chibi’s three-quarter glide. Visually checked the near underside and foreshortened far grip in `source_art/concept_art/Menus/scarf-in-the-sky-v6.png`.
+- Restored the original woven fabric texture on the peach canopy. Visually checked the weave, open underside, and smooth silhouette in `source_art/concept_art/Menus/scarf-in-the-sky-v5.png`.
+- Smoothed the Scarf in the Sky canopy into a single taut curve. Visually checked the open underside and sky gap on `source_art/concept_art/Menus/scarf-in-the-sky-v4.png`.
+- Opened the scarf canopy in the Scarf in the Sky title-screen concept so its underside and the gap above Chibi are visible. Visually checked `source_art/concept_art/Menus/scarf-in-the-sky-v3.png` at full size.
+- Updated five menu concepts with the petal lantern design. Revised the Scarf in the Sky mockup so Chibi holds a single billowing scarf canopy directly in her hands. Visually checked the revised artwork and saved it as versioned PNGs in `source_art/concept_art/Menus`.
+- Generated and visually checked three Strawberry Hollow title screens and three pause-menu concepts. The six widescreen mockups and their prompts are in `source_art/concept_art/Menus`.
 - Removed the dark rounded backing from the scarf’s strawberry print, packed the transparent 4096 × 4096 texture into the Blender file, and rerendered both views.
 - Rendered Chibi gliding with her peach scarf, with two cloth corners gathered in each hand and the Strawberry Hollow print overhead. Verified the direct hand contact and fitted the existing goggles and strap to her head bone in the Blender scene.
 - Shaped the hand-held parachute like a pink gingham picnic blanket with four inward-curled corners. Updated the posed render and close-up, and verified the four mesh folds, steering loops, and packed logo in Blender.
-- Modeled and rendered Chibi’s hand-held cloth parachute, with blush and cream panels, mint trim, and two steering loops. Reopened the Blender scene and verified that the Strawberry Hollow logo from `icon.svg` is packed at 4096 × 4096. The posed render and canopy close-up are in `concept_art/Chibi/Parachute`.
+- Modeled and rendered Chibi’s hand-held cloth parachute, with blush and cream panels, mint trim, and two steering loops. Reopened the Blender scene and verified that the Strawberry Hollow logo from `icon.svg` is packed at 4096 × 4096. The posed render and canopy close-up are in `source_art/concept_art/Chibi/Parachute`.
 - Saved the approved Selfie and refreshed ten related concepts with Chibi's goggles, Pip's sculpted fairy design, and the rounded First Steps woodland terrain. Kept the map and HUD labels and verified all eleven Godot 4.7.2 texture imports against their source PNGs.
 - Refreshed ten concept images with Chibi's current short chestnut bob and single ahoge, including the Selfie, Scuba Mask, HUD, First Steps maps, and character moodboard scenes. Verified that all ten Godot 4.7.2 texture imports matched their source PNGs.
 
@@ -82,6 +98,9 @@ Add each active target here with its owner, status, and a short description. Che
 
 ### 2026-11-27
 
+- Removed the unused standalone fixed climbing wall, its holds mesh and route data, and its dedicated controller and IK code. The scene builder and exporter no longer produce the fixed wall or its assets. Starting from New Game in Godot 4.7.2 Forward Mobile at 1280 × 720 and fixed 60 FPS, verified the dynamic wall mount, diagonal leap, and top-out and the rope swing catch, grip contact, and release. The rendered run passed 27 checks and the headless suite passed 329.
+- Removed the retired rope net solver, deformation shader, climbing state, and net-only movement and IK code. From New Game in Godot 4.7.2 Forward Mobile at 1280 × 720 and fixed 60 FPS, verified the dynamic wall's mount, diagonal leap, and top-out, the rope swing's catch, grip contact, and release, and the standalone fixed wall's mount and release. The rendered run passed 29 checks and the headless suite passed 330.
+- Removed the Zone 3 rope net station and its Godot mesh asset. Updated the zone sign, scene builder, and asset exporter. In Godot 4.7.2 Forward Mobile at 1280 × 720 and fixed 60 FPS, verified the New Game route into Zone 3, the cleared net spot, and the dynamic wall mount, diagonal leap, and top-out. The headless suite passed 338 checks.
 - Chibi checks capsule clearance before and during vaults, ledge moves, mantles, net climbs, and aerial rides. The vault clears all three bars with planted hands. Low net mounts stay above the deck, and blocked pool pull-ups keep Chibi swimming.
 - Pole and beam mounts and trampoline bounces use physical top contact. Raised the first pole's starter step to 0.60 m. Rope catches check reach and clearance, and the swing has a visible handle with two tracked hand grips.
 - Added a 2.35 m warm-white launch perch with a mint-trimmed ramp and a peach step-off marker beside the tunnel entrance. The rooftop builder includes the perch, and the ground lane stays clear for running and sliding.

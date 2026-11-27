@@ -4,6 +4,20 @@ const OUTSIDE := Vector3(8.0, 0.08, 15.0)
 const LULL := 0.8
 const PEAK := 2.9
 
+class Crosswind extends RunnerWindField3D:
+	func contains_point(_point: Vector3) -> bool:
+		return true
+
+	func flow_velocity_at(_point: Vector3) -> Vector3:
+		return Vector3.RIGHT * 4.0
+
+	func get_flow_direction() -> Vector3:
+		return Vector3.RIGHT
+
+	func get_reference_speed() -> float:
+		return 4.0
+
+
 var _tree: SceneTree
 var _chibi: ParkourController
 var _tunnel: RooftopWindTunnel
@@ -15,9 +29,18 @@ func run(tree: SceneTree, gym: Node3D, chibi: ParkourController, check: Callable
 	_chibi = chibi
 	_tunnel = gym.get_node_or_null("WindTunnel") as RooftopWindTunnel
 	_check = check
-	_check.call(_tunnel != null and _chibi.wind_tunnel == _tunnel, "The rooftop binds its wind tunnel to Chibi")
+	_check.call(_tunnel != null and _chibi.wind_field == _tunnel, "The rooftop binds its typed wind field to Chibi")
 	if _tunnel == null:
 		return
+
+	var crosswind := Crosswind.new()
+	gym.add_child(crosswind)
+	chibi.wind_field = crosswind
+	await _ticks(2)
+	_check.call(chibi.wind_velocity.is_equal_approx(Vector3.RIGHT * 4.0),
+		"The runner samples a level-supplied crosswind independently of the rooftop tunnel")
+	chibi.wind_field = _tunnel
+	crosswind.free()
 
 	# Hold the phase during individual movement tests so their result is independent of render timing.
 	var elapsed := _tunnel.elapsed_physics

@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://levels/rooftop_gym/stations/rooftop_climb_tower.gd" id="1_tower"]
+[ext_resource type="AudioStream" path="res://assets/audio/SFX_TowerWind.wav" id="2_breeze"]
+
+[node name="RooftopClimbTower" type="Node3D"]
+script = ExtResource("1_tower")
+
+[node name="TowerBreeze" type="AudioStreamPlayer3D" parent="."]
+position = Vector3(0, 4.8, 0)
+stream = ExtResource("2_breeze")
+volume_db = -25.0
+unit_size = 7.0
+max_distance = 21.0
+autoplay = true
+bus = &"Foley"

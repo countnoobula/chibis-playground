@@ -1,0 +1,17 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://features/water/water_body_3d.gd" id="1_water_body"]
+[ext_resource type="Resource" path="res://features/water/default_water_profile.tres" id="2_profile"]
+[ext_resource type="Shader" path="res://features/water/shaders/water_surface.gdshader" id="3_surface_shader"]
+
+[sub_resource type="ShaderMaterial" id="SurfaceMaterial"]
+shader = ExtResource("3_surface_shader")
+
+[node name="WaterBody3D" type="Node3D"]
+script = ExtResource("1_water_body")
+outline = PackedVector2Array(-1, -1, 1, -1, 1, 1, -1, 1)
+max_depth = 1.2
+profile = ExtResource("2_profile")
+
+[node name="Surface" type="MeshInstance3D" parent="."]
+material_override = SubResource("SurfaceMaterial")

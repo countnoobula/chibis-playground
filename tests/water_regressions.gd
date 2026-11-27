@@ -1,7 +1,8 @@
 extends RefCounted
 
-const BASIN := "res://scenes/water/rocky_basin.tscn"
-const BODY_SCENE := "res://scenes/water/water_body_3d.tscn"
+const BASIN := "res://features/water/examples/rocky_basin.tscn"
+const BODY_SCENE := "res://features/water/water_body_3d.tscn"
+const RECEIVER_SHADER := preload("res://features/water/shaders/water_caustic_receiver.gdshader")
 
 
 func run(tree: SceneTree, check: Callable) -> void:
@@ -11,6 +12,7 @@ func run(tree: SceneTree, check: Callable) -> void:
 	var player := basin.get_node("ChibiRunner") as ParkourController
 	var water := basin.get_node("WaterBody3D") as WaterBody3D
 	var surface := water.get_surface_height()
+	_test_caustic_receivers(water, check)
 	var gear := player.pose_mod.dive_gear
 	var forehead := gear.find_child("ForeheadGoggles", true, false) as MeshInstance3D
 	var dive_mask := gear.find_child("DivingMask", true, false) as MeshInstance3D
@@ -193,6 +195,46 @@ func run(tree: SceneTree, check: Callable) -> void:
 	basin.queue_free()
 	await tree.process_frame
 	await tree.process_frame
+
+
+func _test_caustic_receivers(water: WaterBody3D, check: Callable) -> void:
+	var inline_receiver_shader := Shader.new()
+	inline_receiver_shader.code = RECEIVER_SHADER.code
+	var receiver := ShaderMaterial.new()
+	receiver.shader = inline_receiver_shader
+	receiver.set_shader_parameter("base_color", Color("d28ac2"))
+	water.register_caustic_receiver(receiver)
+	check.call(receiver.get_shader_parameter("water_outline_count") == water.outline.size()
+		and is_equal_approx(float(receiver.get_shader_parameter("water_plane_y")), water.get_volume_ceiling_height())
+		and receiver.get_shader_parameter("base_color").is_equal_approx(Color("d28ac2")),
+		"Explicit registration updates inline custom receivers and preserves their own surface settings")
+	var standard_surface := StandardMaterial3D.new()
+	standard_surface.albedo_color = Color("bf8c73")
+	standard_surface.roughness = 0.61
+	var standard_mesh := MeshInstance3D.new()
+	standard_mesh.material_override = standard_surface
+	water.configure_caustic_receiver(standard_mesh)
+	var converted_surface := standard_mesh.material_override as ShaderMaterial
+	check.call(converted_surface != null and converted_surface.shader == RECEIVER_SHADER
+		and converted_surface.get_shader_parameter("base_color").is_equal_approx(standard_surface.albedo_color)
+		and is_equal_approx(float(converted_surface.get_shader_parameter("roughness")), standard_surface.roughness),
+		"Legacy receiver setup converts standard surfaces and preserves their appearance")
+	var generic_source := ShaderMaterial.new()
+	generic_source.shader = RECEIVER_SHADER
+	var generic_mesh := MeshInstance3D.new()
+	generic_mesh.material_override = generic_source
+	water.configure_caustic_receiver(generic_mesh)
+	check.call(generic_mesh.material_override is ShaderMaterial and generic_mesh.material_override != generic_source
+		and (generic_mesh.material_override as ShaderMaterial).shader == RECEIVER_SHADER,
+		"Legacy receiver setup duplicates the generic shader material")
+	var blank_mesh := MeshInstance3D.new()
+	water.configure_caustic_receiver(blank_mesh)
+	check.call(blank_mesh.material_override is ShaderMaterial
+		and (blank_mesh.material_override as ShaderMaterial).shader == RECEIVER_SHADER,
+		"Legacy receiver setup supplies a shared shader for a mesh without a material")
+	standard_mesh.free()
+	generic_mesh.free()
+	blank_mesh.free()
 
 
 func _test_swim_glide(tree: SceneTree, player: ParkourController, start: Vector3, check: Callable) -> void:

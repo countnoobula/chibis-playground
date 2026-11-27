@@ -1,14 +1,11 @@
 extends SceneTree
 
 ## Headless scene builder that generates valid Godot 4.7 .tscn scenes for:
-##   - scenes/vfx/{dust_puff, flow_sparkle, super_bounce_wind}.tscn
-##   - scenes/character/chibi_runner.tscn
-##   - scenes/stations/{climbing_wall, climbing_net}.tscn
-##   - scenes/gym/rooftop_parkour_gym.tscn
+##   - features/runner/vfx/{dust_puff, flow_sparkle, super_bounce_wind}.tscn
+##   - features/runner/chibi_runner.tscn
+##   - levels/rooftop_gym/rooftop_parkour_gym.tscn
 
 const CHIBI_GLB := preload("res://assets/characters/chibi_runner.glb")
-const HOLDS_GLB := preload("res://assets/stations/rooftop_holds.glb")
-const NET_GLB := preload("res://assets/stations/rooftop_net.glb")
 
 const STATE_CHART_SCRIPT := preload("res://addons/godot_state_charts/state_chart.gd")
 const COMPOUND_STATE_SCRIPT := preload("res://addons/godot_state_charts/compound_state.gd")
@@ -19,14 +16,14 @@ const PCAM_3D_SCRIPT := preload("res://addons/phantom_camera/scripts/phantom_cam
 const PCAM_HOST_SCRIPT := preload("res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd")
 const PCAM_TWEEN_SCRIPT := preload("res://addons/phantom_camera/scripts/resources/tween_resource.gd")
 const CAM_RES_SCRIPT := preload("res://addons/phantom_camera/scripts/resources/camera_3d_resource.gd")
-const PALETTE := preload("res://scripts/gym/rooftop_palette.gd")
-const POOL_SCRIPT := preload("res://scripts/stations/chibi_pool.gd")
-const DROP_COURSE_SCRIPT := preload("res://scripts/stations/drop_well_tunnel.gd")
-const DROP_COURSE_SCENE := preload("res://scenes/stations/drop_well_tunnel.tscn")
-const CLIMB_TOWER_SCENE := preload("res://scenes/stations/rooftop_climb_tower.tscn")
-const WIND_TUNNEL_SCENE := preload("res://scenes/stations/rooftop_wind_tunnel.tscn")
-const WIND_LAUNCH_PERCH_SCENE := preload("res://scenes/stations/rooftop_wind_launch_perch.tscn")
-const TOWER_METER_SCRIPT := preload("res://scripts/gym/tower_fall_meter.gd")
+const PALETTE := preload("res://levels/rooftop_gym/rooftop_palette.gd")
+const POOL_SCRIPT := preload("res://levels/rooftop_gym/stations/chibi_pool.gd")
+const DROP_COURSE_SCRIPT := preload("res://levels/rooftop_gym/stations/drop_well_tunnel.gd")
+const DROP_COURSE_SCENE := preload("res://levels/rooftop_gym/stations/drop_well_tunnel.tscn")
+const CLIMB_TOWER_SCENE := preload("res://levels/rooftop_gym/stations/rooftop_climb_tower.tscn")
+const WIND_TUNNEL_SCENE := preload("res://levels/rooftop_gym/stations/rooftop_wind_tunnel.tscn")
+const WIND_LAUNCH_PERCH_SCENE := preload("res://levels/rooftop_gym/stations/rooftop_wind_launch_perch.tscn")
+const TOWER_METER_SCRIPT := preload("res://levels/rooftop_gym/tower_fall_meter.gd")
 const ROOFTOP_POOL_POSITION := Vector3(24.0, 0.0, -22.0)
 const CLIMB_TOWER_POSITION := Vector3(38.5, 0.0, -28.2)
 const WIND_TUNNEL_POSITION := Vector3(16.0, 0.0, 15.0)
@@ -39,15 +36,12 @@ func _init() -> void:
 		quit(0)
 		return
 
-	DirAccess.make_dir_recursive_absolute("res://scenes/vfx")
-	DirAccess.make_dir_recursive_absolute("res://scenes/character")
-	DirAccess.make_dir_recursive_absolute("res://scenes/stations")
-	DirAccess.make_dir_recursive_absolute("res://scenes/gym")
+	DirAccess.make_dir_recursive_absolute("res://features/runner/vfx")
+	DirAccess.make_dir_recursive_absolute("res://features/runner")
+	DirAccess.make_dir_recursive_absolute("res://levels/rooftop_gym")
 
 	_build_vfx_scenes()
 	_build_chibi_runner_scene()
-	_build_climbing_station_scene("res://scenes/stations/climbing_wall.tscn", false)
-	_build_climbing_station_scene("res://scenes/stations/climbing_net.tscn", true)
 	_build_rooftop_gym_scene()
 	print("[BuildScenes] All scenes built cleanly.")
 	quit(0)
@@ -75,15 +69,15 @@ func _set_owner_recursive(node: Node, owner_node: Node) -> void:
 
 
 func _build_vfx_scenes() -> void:
-	_make_burst_vfx("res://scenes/vfx/dust_puff.tscn", Color(0.91, 0.84, 0.78, 0.58), 6, 0.27, 0.055, 0.90)
-	_make_burst_vfx("res://scenes/vfx/flow_sparkle.tscn", Color(0.28, 0.95, 0.85, 0.92), 18, 0.55, 0.08, 3.2)
-	_make_burst_vfx("res://scenes/vfx/super_bounce_wind.tscn", Color(0.85, 0.98, 1.0, 0.85), 24, 0.60, 0.12, 4.8)
+	_make_burst_vfx("res://features/runner/vfx/dust_puff.tscn", Color(0.91, 0.84, 0.78, 0.58), 6, 0.27, 0.055, 0.90)
+	_make_burst_vfx("res://features/runner/vfx/flow_sparkle.tscn", Color(0.28, 0.95, 0.85, 0.92), 18, 0.55, 0.08, 3.2)
+	_make_burst_vfx("res://features/runner/vfx/super_bounce_wind.tscn", Color(0.85, 0.98, 1.0, 0.85), 24, 0.60, 0.12, 4.8)
 
 
 func _make_burst_vfx(path: String, col: Color, amount: int, lifetime: float, radius: float, speed: float) -> void:
 	var p := GPUParticles3D.new()
 	p.name = path.get_file().get_basename().to_pascal_case()
-	p.set_script(preload("res://scripts/vfx/one_shot_particles.gd"))
+	p.set_script(preload("res://features/runner/vfx/one_shot_particles.gd"))
 	p.amount = amount
 	p.lifetime = lifetime
 	p.one_shot = true
@@ -117,7 +111,7 @@ func _make_burst_vfx(path: String, col: Color, amount: int, lifetime: float, rad
 func _build_chibi_runner_scene() -> void:
 	var root := CharacterBody3D.new()
 	root.name = "ChibiRunner"
-	root.set_script(preload("res://scripts/character/parkour_controller.gd"))
+	root.set_script(preload("res://features/runner/parkour_controller.gd"))
 	root.collision_layer = 2 # Layer 2: Player
 	root.collision_mask = 1 | 4 # World + Climbable
 	root.add_to_group("player", true)
@@ -159,18 +153,18 @@ func _build_chibi_runner_scene() -> void:
 	pivot.add_child(ribbon_anchor)
 	var ribbon := MeshInstance3D.new()
 	ribbon.name = "WindRibbon"
-	ribbon.set_script(preload("res://scripts/vfx/wind_ribbon.gd"))
+	ribbon.set_script(preload("res://features/runner/vfx/wind_ribbon.gd"))
 	ribbon_anchor.add_child(ribbon)
 
 	# Subsystems
 	var input_node := Node.new()
 	input_node.name = "ChibiInput"
-	input_node.set_script(preload("res://scripts/character/chibi_input.gd"))
+	input_node.set_script(preload("res://features/runner/chibi_input.gd"))
 	root.add_child(input_node)
 
 	var anim_ctrl := Node.new()
 	anim_ctrl.name = "ChibiAnimController"
-	anim_ctrl.set_script(preload("res://scripts/character/chibi_anim_controller.gd"))
+	anim_ctrl.set_script(preload("res://features/runner/chibi_anim_controller.gd"))
 	root.add_child(anim_ctrl)
 
 	var sfx_player := AudioStreamPlayer3D.new()
@@ -187,15 +181,15 @@ func _build_chibi_runner_scene() -> void:
 
 	var juice := Node.new()
 	juice.name = "ChibiJuice"
-	juice.set_script(preload("res://scripts/character/chibi_juice.gd"))
+	juice.set_script(preload("res://features/runner/chibi_juice.gd"))
 	juice.set("config", cfg)
 	juice.set("visual_pivot", pivot)
 	juice.set("sfx_player", sfx_player)
 	juice.set("voice_player", voice_player)
 	juice.set("wind_ribbon", ribbon)
-	juice.set("dust_puff_scene", load("res://scenes/vfx/dust_puff.tscn"))
-	juice.set("flow_sparkle_scene", load("res://scenes/vfx/flow_sparkle.tscn"))
-	juice.set("super_bounce_wind_scene", load("res://scenes/vfx/super_bounce_wind.tscn"))
+	juice.set("dust_puff_scene", load("res://features/runner/vfx/dust_puff.tscn"))
+	juice.set("flow_sparkle_scene", load("res://features/runner/vfx/flow_sparkle.tscn"))
+	juice.set("super_bounce_wind_scene", load("res://features/runner/vfx/super_bounce_wind.tscn"))
 	root.add_child(juice)
 
 	# Hierarchical Godot State Chart
@@ -256,7 +250,7 @@ func _build_chibi_runner_scene() -> void:
 
 	var cam_ctrl := Node.new()
 	cam_ctrl.name = "ChibiCameraController"
-	cam_ctrl.set_script(preload("res://scripts/character/chibi_camera_controller.gd"))
+	cam_ctrl.set_script(preload("res://features/runner/chibi_camera_controller.gd"))
 	cam_ctrl.set("config", cfg)
 	cam_ctrl.set("parkour_pcam", parkour_pcam)
 	cam_ctrl.set("climb_pcam", climb_pcam)
@@ -266,7 +260,7 @@ func _build_chibi_runner_scene() -> void:
 	# Touch HUD + StateChartDebugger
 	var hud := CanvasLayer.new()
 	hud.name = "TouchControlsHUD"
-	hud.set_script(preload("res://scripts/ui/touch_controls.gd"))
+	hud.set_script(preload("res://ui/hud/touch_controls.gd"))
 	hud.set("chibi_input", input_node)
 	hud.set("state_chart", sc)
 	root.add_child(hud)
@@ -274,7 +268,7 @@ func _build_chibi_runner_scene() -> void:
 	# Rig Binder (binds Skeleton3D, AnimationTree, ChibiPoseModifier, SpringBoneSimulator3D)
 	var binder := Node.new()
 	binder.name = "ChibiRigBinder"
-	binder.set_script(preload("res://scripts/character/chibi_rig_binder.gd"))
+	binder.set_script(preload("res://features/runner/chibi_rig_binder.gd"))
 	binder.set("controller", root)
 	binder.set("visual_pivot", pivot)
 	binder.set("anim_tree", anim_tree)
@@ -292,7 +286,7 @@ func _build_chibi_runner_scene() -> void:
 	root.set("visual_pivot", pivot)
 	root.set("touch_hud", hud)
 
-	_save_scene(root, "res://scenes/character/chibi_runner.tscn")
+	_save_scene(root, "res://features/runner/chibi_runner.tscn")
 
 
 func _build_state_chart() -> Node:
@@ -334,12 +328,11 @@ func _build_state_chart() -> Node:
 	climb_comp.name = "Climbing"
 	climb_comp.set_script(COMPOUND_STATE_SCRIPT)
 	root_state.add_child(climb_comp)
-	for sname in ["ClimbWall", "ClimbNet"]:
-		var st := Node.new()
-		st.name = sname
-		st.set_script(ATOMIC_STATE_SCRIPT)
-		climb_comp.add_child(st)
-		leaf_map[sname.to_snake_case()] = st
+	var climb_wall := Node.new()
+	climb_wall.name = "ClimbWall"
+	climb_wall.set_script(ATOMIC_STATE_SCRIPT)
+	climb_comp.add_child(climb_wall)
+	leaf_map["climb_wall"] = climb_wall
 	climb_comp.set("initial_state", climb_comp.get_path_to(leaf_map["climb_wall"]))
 
 	# Interactive compound state
@@ -370,37 +363,10 @@ func _build_state_chart() -> Node:
 	return sc
 
 
-func _build_climbing_station_scene(path: String, is_net: bool) -> void:
-	var root := Node3D.new()
-	root.name = "ClimbingNet" if is_net else "ClimbingWall"
-	root.set_script(preload("res://scripts/climbing/climbing_station.gd"))
-	root.set("is_rope_net", is_net)
-
-	var visual := (NET_GLB if is_net else HOLDS_GLB).instantiate()
-	visual.name = "VisualMesh"
-	root.add_child(visual)
-
-	# Backing panel StaticBody3D matching Unreal ClimbingStation::OnConstruction
-	# Unreal Backing: loc=(7, 0, 138) cm, extent=(6, 70 or 150, 138) cm
-	# Godot local: pos=(0, 1.38, -0.07) m, size=(1.40 or 3.00, 2.76, 0.12) m
-	var backing := StaticBody3D.new()
-	backing.name = "PanelCollision"
-	backing.collision_layer = 1 | 4 # World + Climbable
-	var col := CollisionShape3D.new()
-	var box := BoxShape3D.new()
-	box.size = Vector3(1.40 if is_net else 3.00, 2.76, 0.12)
-	col.shape = box
-	col.position = Vector3(0.0, 1.38, -0.07)
-	backing.add_child(col)
-	root.add_child(backing)
-
-	_save_scene(root, path)
-
-
 func _build_rooftop_gym_scene() -> void:
 	var root := Node3D.new()
 	root.name = "RooftopParkourGym"
-	root.set_script(preload("res://scripts/gym/rooftop_gym_controller.gd"))
+	root.set_script(preload("res://levels/rooftop_gym/rooftop_gym_controller.gd"))
 
 	# Low evening sun and lavender fill keep shaded route cues readable.
 	var env := Environment.new()
@@ -408,7 +374,7 @@ func _build_rooftop_gym_scene() -> void:
 	# The visible sky animates; the cubemap pass uses the inexpensive atmosphere.
 	sky.process_mode = Sky.PROCESS_MODE_REALTIME
 	var sky_mat := ShaderMaterial.new()
-	sky_mat.shader = preload("res://shaders/rooftop_sky.gdshader")
+	sky_mat.shader = preload("res://levels/rooftop_gym/shaders/rooftop_sky.gdshader")
 	var cloud_noise := FastNoiseLite.new()
 	cloud_noise.seed = 4137
 	cloud_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
@@ -499,7 +465,7 @@ func _build_rooftop_gym_scene() -> void:
 	var z1 := Node3D.new()
 	z1.name = "Zone1_FlowAndSlides"
 	root.add_child(z1)
-	var berry := preload("res://scenes/items/strawberry_pickup.tscn").instantiate() as Node3D
+	var berry := preload("res://features/items/strawberry_pickup.tscn").instantiate() as Node3D
 	berry.position = Vector3(3.35, 0.24, 3.7)
 	z1.add_child(berry)
 	_add_box_visual(z1, "VaultLane", Vector3(0.0, 0.003, -3.45), Vector3(5.5, 0.012, 16.4), mat_lane, 0.0)
@@ -537,24 +503,18 @@ func _build_rooftop_gym_scene() -> void:
 	_add_beveled_ledge(z2, "LedgeBeveled_Trimesh", Vector3(-24.0, 0.0, 7.5), Vector3(4.2, 1.65, 2.2), 0.24, mat_white, mat_mint)
 
 	# =========================================================================
-	# ZONE 3: Dynamic Climbing Plaza + Deforming Rope Net
+	# ZONE 3: Dynamic Climbing Wall
 	# =========================================================================
 	var z3 := Node3D.new()
 	z3.name = "Zone3_ClimbingPlaza"
 	root.add_child(z3)
-	var wall_scene: PackedScene = load("res://scenes/stations/dynamic_climbing_wall.tscn")
+	var wall_scene: PackedScene = load("res://levels/rooftop_gym/stations/dynamic_climbing_wall.tscn")
 	var wall := wall_scene.instantiate() as Node3D
 	wall.name = "Climb_HandholdWall"
 	wall.position = Vector3(14.5, 0.0, -4.0)
 	z3.add_child(wall)
 
-	var net_scene: PackedScene = load("res://scenes/stations/climbing_net.tscn")
-	var net := net_scene.instantiate() as Node3D
-	net.name = "Climb_RopeNet"
-	net.position = Vector3(19.5, 0.0, -4.0)
-	z3.add_child(net)
-
-	# Top mantle-off deck behind both climbing stations
+	# Top mantle-off deck behind the climbing wall
 	_add_box(z3, "ClimbTopDeck", Vector3(17.0, 1.38, -6.2), Vector3(10.5, 2.76, 4.2), mat_white, mat_mint, 0.12)
 	_add_ramp(z3, "ClimbReturnRamp", Vector3(23.5, 1.38, -6.2), Vector3(2.8, 0.3, 7.5), 22.0, mat_white, mat_mint)
 
@@ -566,9 +526,8 @@ func _build_rooftop_gym_scene() -> void:
 	root.add_child(z4)
 
 	# Trampoline -> Elevated Launch Deck (4.2 m top: super bounce 4.98 m clears cleanly, normal bounce 3.34 m grabs ledge)
-	var tramp := Node3D.new()
+	var tramp := preload("res://features/stations/parkour_trampoline.tscn").instantiate() as ParkourTrampoline
 	tramp.name = "Trampoline_01"
-	tramp.set_script(preload("res://scripts/stations/parkour_trampoline.gd"))
 	tramp.position = Vector3(-5.0, 0.0, -25.0)
 	z4.add_child(tramp)
 	_add_box(z4, "TrampolineHighDeck", Vector3(-5.0, 2.1, -31.0), Vector3(5.0, 4.2, 4.5), mat_white, mat_mint, 0.13)
@@ -583,18 +542,16 @@ func _build_rooftop_gym_scene() -> void:
 		Vector3(0.0, 1.2, -37.0),
 	]
 	for i in pole_offsets.size():
-		var pole := Node3D.new()
+		var pole := preload("res://features/stations/parkour_pole.tscn").instantiate() as ParkourPole
 		pole.name = "ParkourPole_%02d" % (i + 1)
-		pole.set_script(preload("res://scripts/stations/parkour_pole.gd"))
 		pole.position = pole_offsets[i]
 		z4.add_child(pole)
 	_add_box(z4, "PoleEndDeck", Vector3(0.0, 1.2, -41.0), Vector3(5.0, 2.4, 3.5), mat_white, mat_lavender, 0.12)
 
 	# Balance Beam
 	_add_box(z4, "BeamStartPad", Vector3(6.5, 0.8, -24.5), Vector3(3.0, 1.6, 2.8), mat_white, mat_lavender, 0.11)
-	var beam := Node3D.new()
+	var beam := preload("res://features/stations/parkour_balance_beam.tscn").instantiate() as ParkourBalanceBeam
 	beam.name = "BalanceBeam_01"
-	beam.set_script(preload("res://scripts/stations/parkour_balance_beam.gd"))
 	beam.position = Vector3(6.5, 1.6, -26.0)
 	z4.add_child(beam)
 	_add_box(z4, "BeamEndPad", Vector3(6.5, 0.8, -35.5), Vector3(3.0, 1.6, 2.8), mat_white, mat_lavender, 0.11)
@@ -602,9 +559,8 @@ func _build_rooftop_gym_scene() -> void:
 	# SlothCrawl Line (+1.10 m side step to climb onto 2.20 m tower)
 	_add_box(z4, "SlothStartStep", Vector3(12.0, 0.55, -21.8), Vector3(2.4, 1.10, 1.4), mat_white, mat_peach, 0.11)
 	_add_box(z4, "SlothStartTower", Vector3(12.0, 1.1, -24.0), Vector3(3.0, 2.2, 2.8), mat_white, mat_peach, 0.12)
-	var sloth := Node3D.new()
+	var sloth := preload("res://features/stations/parkour_line.tscn").instantiate() as ParkourLine
 	sloth.name = "SlothLine_01"
-	sloth.set_script(preload("res://scripts/stations/parkour_line.gd"))
 	sloth.set("is_zip_line", false)
 	sloth.set("end_offset", Vector3(0.0, 0.0, -9.0))
 	sloth.position = Vector3(12.0, 3.25, -25.4)
@@ -617,9 +573,8 @@ func _build_rooftop_gym_scene() -> void:
 	_add_box(z4, "ZipStartPostL", Vector3(15.1, 3.775, -25.55), Vector3(0.20, 1.75, 0.20), mat_support)
 	_add_box(z4, "ZipStartPostR", Vector3(17.9, 3.775, -25.55), Vector3(0.20, 1.75, 0.20), mat_support)
 	_add_box(z4, "ZipStartBar", Vector3(16.5, 4.60, -25.55), Vector3(3.0, 0.20, 0.20), mat_support)
-	var zipline := Node3D.new()
+	var zipline := preload("res://features/stations/parkour_line.tscn").instantiate() as ParkourLine
 	zipline.name = "ZipLine_01"
-	zipline.set_script(preload("res://scripts/stations/parkour_line.gd"))
 	zipline.set("is_zip_line", true)
 	zipline.set("end_offset", Vector3(0.0, -2.30, -11.0))
 	zipline.position = Vector3(16.5, 4.50, -25.55)
@@ -633,9 +588,8 @@ func _build_rooftop_gym_scene() -> void:
 	_add_box(z4, "SwingStartStep", Vector3(-11.5, 0.55, -22.2), Vector3(2.4, 1.10, 1.4), mat_white, mat_peach, 0.11)
 	_add_box(z4, "SwingStartPad", Vector3(-11.5, 1.1, -24.5), Vector3(3.4, 2.2, 3.0), mat_white, mat_coral, 0.12)
 	_add_box(z4, "SwingGantry", Vector3(-11.5, 5.5, -30.0), Vector3(4.2, 0.35, 0.35), mat_support)
-	var swing := Node3D.new()
+	var swing := preload("res://features/stations/parkour_rope_swing.tscn").instantiate() as ParkourRopeSwing
 	swing.name = "RopeSwing_01"
-	swing.set_script(preload("res://scripts/stations/parkour_rope_swing.gd"))
 	swing.position = Vector3(-11.5, 5.3, -30.0)
 	z4.add_child(swing)
 	_add_box(z4, "SwingEndPad", Vector3(-11.5, 1.1, -35.5), Vector3(4.0, 2.2, 3.5), mat_white, mat_coral, 0.12)
@@ -673,13 +627,13 @@ func _build_rooftop_gym_scene() -> void:
 	# 3D Zone Signposts for instant orientation
 	_add_zone_sign(root, "Zone 1: Flow, Vaults & Slides", Vector3(2.5, 3.2, 1.5))
 	_add_zone_sign(root, "Zone 2: Wall-Run & Beveled Ledges", Vector3(-18.0, 4.8, 0.0))
-	_add_zone_sign(root, "Zone 3: Dynamic Climb & Rope Net", Vector3(17.0, 3.6, -4.0))
+	_add_zone_sign(root, "Zone 3: Dynamic Climb", Vector3(17.0, 3.6, -4.0))
 	_add_zone_sign(root, "Zone 4: Aerial Apparatus", Vector3(2.0, 4.8, -24.5))
 	_add_zone_sign(root, "Zone 5: Swim Training Basin", Vector3(24.0, 3.2, -22.0))
 	_add_zone_sign(root, "Climb Tower", CLIMB_TOWER_POSITION + Vector3(3.4, 2.1, 3.0))
 
 	# Spawn ChibiRunner at Zone 1 Plaza
-	var chibi_scene: PackedScene = load("res://scenes/character/chibi_runner.tscn")
+	var chibi_scene: PackedScene = load("res://features/runner/chibi_runner.tscn")
 	var chibi := chibi_scene.instantiate() as Node3D
 	chibi.name = "ChibiRunner"
 	chibi.position = Vector3(0.0, 0.1, 6.0)
@@ -693,7 +647,7 @@ func _build_rooftop_gym_scene() -> void:
 	fall_meter.set("drop_water_path", NodePath("../TowerDropCourse/DropWater"))
 	root.add_child(fall_meter)
 
-	_save_scene(root, "res://scenes/gym/rooftop_parkour_gym.tscn")
+	_save_scene(root, "res://levels/rooftop_gym/rooftop_parkour_gym.tscn")
 
 
 func _add_deck_section(parent: Node, section_name: String, corner: Vector2, opposite: Vector2, mat: Material) -> void:
@@ -760,7 +714,7 @@ func _make_mat(col: Color, rough: float) -> StandardMaterial3D:
 
 func _make_grid_mat(col: Color, line_col: Color, grid_scale: float, rough: float) -> ShaderMaterial:
 	var sm := ShaderMaterial.new()
-	sm.shader = preload("res://shaders/gym_grid.gdshader")
+	sm.shader = preload("res://levels/rooftop_gym/shaders/gym_grid.gdshader")
 	sm.set_shader_parameter("base_color", col)
 	sm.set_shader_parameter("line_color", line_col)
 	sm.set_shader_parameter("grid_scale", grid_scale)

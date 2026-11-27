@@ -1,0 +1,2920 @@
+{
+  "engineVersion": "5.8.4-58902052+++UE5+Release-5.8",
+  "sourceProject": "C:/Users/count/Documents/Unreal Projects/Parkour_Extract_Work/Parkour.uproject",
+  "sourceMap": "/Game/Parkour/Maps/Lvl_FirstSteps",
+  "portableFormat": "glb",
+  "meshAssets": {
+    "SM_FirstSteps_RiverGravel": {
+      "name": "SM_FirstSteps_RiverGravel",
+      "assetPath": "/Game/Parkour/Environment/ValleyGround/SM_FirstSteps_RiverGravel.SM_FirstSteps_RiverGravel",
+      "boundsOriginCm": {
+        "x": -9.977294921875,
+        "y": 1048.1224975585938,
+        "z": -56.6771445274353
+      },
+      "dimensionsCm": {
+        "x": 5228.4287109375,
+        "y": 867.6348876953125,
+        "z": 92.95428943634033
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "Material_0",
+          "asset": "/Game/Parkour/Environment/ValleyGround/M_ValleyCreekGravel.M_ValleyCreekGravel"
+        }
+      ],
+      "export": {
+        "ok": true,
+        "errors": [],
+        "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/SM_FirstSteps_RiverGravel.glb",
+        "bytes": 282704
+      }
+    },
+    "SM_Forest_MossTerrain_Solid": {
+      "name": "SM_Forest_MossTerrain_Solid",
+      "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_MossTerrain_Solid.SM_Forest_MossTerrain_Solid",
+      "boundsOriginCm": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 48.49570083618164
+      },
+      "dimensionsCm": {
+        "x": 620.0000610351562,
+        "y": 620.0000610351562,
+        "z": 140.99140167236328
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_MossBank",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_MossBank.MI_Forest_MossBank"
+        }
+      ],
+      "export": {
+        "ok": true,
+        "errors": [],
+        "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/SM_Forest_MossTerrain_Solid.glb",
+        "bytes": 52000
+      }
+    },
+    "SM_Forest_CanopyCrown": {
+      "name": "SM_Forest_CanopyCrown",
+      "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyCrown.SM_Forest_CanopyCrown",
+      "boundsOriginCm": {
+        "x": -24.2091064453125,
+        "y": 7.0645751953125,
+        "z": 223.92709350585938
+      },
+      "dimensionsCm": {
+        "x": 1585.0283203125,
+        "y": 1639.362548828125,
+        "z": 736.5140991210938
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        },
+        {
+          "index": 1,
+          "slot": "MI_Forest_StrawberryLeaf",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+        }
+      ]
+    },
+    "SM_Forest_CanopyBough_A": {
+      "name": "SM_Forest_CanopyBough_A",
+      "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_A.SM_Forest_CanopyBough_A",
+      "boundsOriginCm": {
+        "x": 8.833419799804688,
+        "y": -467.9780979156494,
+        "z": 118.96267318725586
+      },
+      "dimensionsCm": {
+        "x": 920.9089050292969,
+        "y": 972.7040824890137,
+        "z": 326.61353302001953
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        },
+        {
+          "index": 1,
+          "slot": "MI_Forest_StrawberryLeaf",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+        }
+      ]
+    },
+    "SM_Forest_CanopyBough_B": {
+      "name": "SM_Forest_CanopyBough_B",
+      "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_B.SM_Forest_CanopyBough_B",
+      "boundsOriginCm": {
+        "x": 53.71754455566406,
+        "y": -435.38026237487793,
+        "z": 66.6825180053711
+      },
+      "dimensionsCm": {
+        "x": 647.7835998535156,
+        "y": 910.7652320861816,
+        "z": 448.2970733642578
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        },
+        {
+          "index": 1,
+          "slot": "MI_Forest_StrawberryLeaf",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+        }
+      ]
+    },
+    "SM_BankArchTuft": {
+      "name": "SM_BankArchTuft",
+      "assetPath": "/Game/Parkour/Environment/CloverBank/SM_BankArchTuft.SM_BankArchTuft",
+      "boundsOriginCm": {
+        "x": -3.237154960632324,
+        "y": -1.5281963348388672,
+        "z": 20.236348509788513
+      },
+      "dimensionsCm": {
+        "x": 55.890634536743164,
+        "y": 59.73829650878906,
+        "z": 46.47269940376282
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "WorldGridMaterial",
+          "asset": "/Game/Parkour/Environment/CloverBank/M_BankSatinGrass.M_BankSatinGrass"
+        }
+      ],
+      "export": {
+        "ok": true,
+        "errors": [],
+        "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_BankArchTuft.glb",
+        "bytes": 527924
+      }
+    },
+    "SM_BankClover": {
+      "name": "SM_BankClover",
+      "assetPath": "/Game/Parkour/Environment/CloverBank/SM_BankClover.SM_BankClover",
+      "boundsOriginCm": {
+        "x": 0.2507457733154297,
+        "y": -1.6109418869018555,
+        "z": 24.529383897781372
+      },
+      "dimensionsCm": {
+        "x": 49.041378021240234,
+        "y": 54.55264854431152,
+        "z": 57.05877065658569
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "WorldGridMaterial",
+          "asset": "/Game/Parkour/Environment/CloverBank/M_BankClover.M_BankClover"
+        }
+      ],
+      "export": {
+        "ok": true,
+        "errors": [],
+        "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_BankClover.glb",
+        "bytes": 2132392
+      }
+    },
+    "SM_BankSatinGrass": {
+      "name": "SM_BankSatinGrass",
+      "assetPath": "/Game/Parkour/Environment/CloverBank/SM_BankSatinGrass.SM_BankSatinGrass",
+      "boundsOriginCm": {
+        "x": 6.158185005187988,
+        "y": 2.2611608505249023,
+        "z": 19.60197412967682
+      },
+      "dimensionsCm": {
+        "x": 47.826276779174805,
+        "y": 45.94681358337402,
+        "z": 45.20394968986511
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "WorldGridMaterial",
+          "asset": "/Game/Parkour/Environment/CloverBank/M_BankSatinGrass.M_BankSatinGrass"
+        }
+      ],
+      "export": {
+        "ok": true,
+        "errors": [],
+        "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_BankSatinGrass.glb",
+        "bytes": 176900
+      }
+    },
+    "SM_Crossing_ArchingBellflowers": {
+      "name": "SM_Crossing_ArchingBellflowers",
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/SM_Crossing_ArchingBellflowers.SM_Crossing_ArchingBellflowers",
+      "boundsOriginCm": {
+        "x": 2.7916126251220703,
+        "y": 3.0198230743408203,
+        "z": 38.95399558544159
+      },
+      "dimensionsCm": {
+        "x": 127.26322555541992,
+        "y": 39.601253509521484,
+        "z": 81.20315384864807
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "Stem",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Stem.MI_Bellflower_Stem"
+        },
+        {
+          "index": 1,
+          "slot": "Lavender",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_FlutedLavender.MI_Bellflower_FlutedLavender"
+        },
+        {
+          "index": 2,
+          "slot": "Lining",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_PinkPetal.MI_Forest_PinkPetal"
+        },
+        {
+          "index": 3,
+          "slot": "Pollen",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_BlossomCenter.MI_Forest_BlossomCenter"
+        },
+        {
+          "index": 4,
+          "slot": "Leaf",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_CrossingStrawberry_Leaf.MI_CrossingStrawberry_Leaf"
+        }
+      ],
+      "export": {
+        "ok": true,
+        "errors": [],
+        "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_Crossing_ArchingBellflowers.glb",
+        "bytes": 772236
+      }
+    },
+    "SM_Crossing_DimpledStrawberry": {
+      "name": "SM_Crossing_DimpledStrawberry",
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/SM_Crossing_DimpledStrawberry.SM_Crossing_DimpledStrawberry",
+      "boundsOriginCm": {
+        "x": -0.29340553283691406,
+        "y": -5.009654998779297,
+        "z": 36.87302756309509
+      },
+      "dimensionsCm": {
+        "x": 79.55489730834961,
+        "y": 54.211158752441406,
+        "z": 77.02605485916138
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "Stalk",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Stem.MI_Bellflower_Stem"
+        },
+        {
+          "index": 1,
+          "slot": "Flesh",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_CrossingStrawberry_Flesh.MI_CrossingStrawberry_Flesh"
+        },
+        {
+          "index": 2,
+          "slot": "Seed",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_CrossingStrawberry_Seed.MI_CrossingStrawberry_Seed"
+        },
+        {
+          "index": 3,
+          "slot": "Leaf",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_CrossingStrawberry_Leaf.MI_CrossingStrawberry_Leaf"
+        },
+        {
+          "index": 4,
+          "slot": "Vein",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Stem.MI_Bellflower_Stem"
+        }
+      ],
+      "export": {
+        "ok": true,
+        "errors": [],
+        "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_Crossing_DimpledStrawberry.glb",
+        "bytes": 2307120
+      }
+    },
+    "SM_Valley_MixedBellflowerCluster": {
+      "name": "SM_Valley_MixedBellflowerCluster",
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/SM_Valley_MixedBellflowerCluster.SM_Valley_MixedBellflowerCluster",
+      "boundsOriginCm": {
+        "x": -1.0134735107421875,
+        "y": 32.282772064208984,
+        "z": 43.33142948150635
+      },
+      "dimensionsCm": {
+        "x": 130.6009979248047,
+        "y": 168.96985626220703,
+        "z": 91.54163932800293
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "Stem",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Stem.MI_Bellflower_Stem"
+        },
+        {
+          "index": 1,
+          "slot": "Lavender",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Lavender.MI_Bellflower_Lavender"
+        },
+        {
+          "index": 2,
+          "slot": "Lining",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_PinkPetal.MI_Forest_PinkPetal"
+        },
+        {
+          "index": 3,
+          "slot": "Pollen",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_BlossomCenter.MI_Forest_BlossomCenter"
+        },
+        {
+          "index": 4,
+          "slot": "MI_Forest_Clover",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_Clover.MI_Forest_Clover"
+        },
+        {
+          "index": 5,
+          "slot": "MI_Forest_BlossomWhite",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_BlossomWhite.MI_Forest_BlossomWhite"
+        }
+      ],
+      "export": {
+        "ok": true,
+        "errors": [],
+        "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_Valley_MixedBellflowerCluster.glb",
+        "bytes": 804620
+      }
+    },
+    "SM_ValleyBellflowers": {
+      "name": "SM_ValleyBellflowers",
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/SM_ValleyBellflowers.SM_ValleyBellflowers",
+      "boundsOriginCm": {
+        "x": 5.712919235229492,
+        "y": -1.2803239822387695,
+        "z": 47.238147649914026
+      },
+      "dimensionsCm": {
+        "x": 78.48699569702148,
+        "y": 53.21026802062988,
+        "z": 94.7085801884532
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "M_ValleyFlora",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/M_ValleyFlora.M_ValleyFlora"
+        }
+      ],
+      "export": {
+        "ok": true,
+        "errors": [],
+        "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_ValleyBellflowers.glb",
+        "bytes": 1934888
+      }
+    },
+    "SM_ValleyLeafShrub": {
+      "name": "SM_ValleyLeafShrub",
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/SM_ValleyLeafShrub.SM_ValleyLeafShrub",
+      "boundsOriginCm": {
+        "x": 2.1006927490234375,
+        "y": -4.499443054199219,
+        "z": 48.49449151754379
+      },
+      "dimensionsCm": {
+        "x": 162.4700927734375,
+        "y": 142.02069091796875,
+        "z": 99.3188019990921
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "M_ValleyFlora",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/M_ValleyFlora.M_ValleyFlora"
+        }
+      ],
+      "export": {
+        "ok": true,
+        "errors": [],
+        "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_ValleyLeafShrub.glb",
+        "bytes": 4452052
+      }
+    },
+    "SM_ValleyStrawberry": {
+      "name": "SM_ValleyStrawberry",
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/SM_ValleyStrawberry.SM_ValleyStrawberry",
+      "boundsOriginCm": {
+        "x": 1.1460399627685547,
+        "y": 0.7830467224121094,
+        "z": 35.773639395833015
+      },
+      "dimensionsCm": {
+        "x": 113.43441390991211,
+        "y": 88.44795989990234,
+        "z": 72.08904322981834
+      },
+      "materials": [
+        {
+          "index": 0,
+          "slot": "M_ValleyFlora",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/M_ValleyFlora.M_ValleyFlora"
+        }
+      ],
+      "export": {
+        "ok": true,
+        "errors": [],
+        "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_ValleyStrawberry.glb",
+        "bytes": 2962284
+      }
+    }
+  },
+  "proceduralTrees": [
+    {
+      "actorName": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264715714",
+      "actorLocationCm": {
+        "x": -1720.0,
+        "y": 680.0,
+        "z": -10.0
+      },
+      "actorRotationDeg": {
+        "pitch": 0.0,
+        "yaw": 0.0,
+        "roll": 0.0
+      },
+      "actorScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "localPivot": "actor root / dynamic mesh component origin",
+      "dynamicTrunk": {
+        "assetPath": "/Game/ExtractedTrees/SM_FirstStepsTree_01_Trunk.SM_FirstStepsTree_01_Trunk",
+        "vertices": 1384,
+        "triangles": 2736,
+        "boundsMinCm": {
+          "x": -609.6753540939659,
+          "y": -714.0215635994213,
+          "z": -247.59285950329135
+        },
+        "boundsMaxCm": {
+          "x": 790.8745789063179,
+          "y": 493.2487558994141,
+          "z": 3908.4991822520374
+        },
+        "boundsDimensionsCm": {
+          "x": 1400.5499330002838,
+          "y": 1207.2703194988353,
+          "z": 4156.092041755329
+        },
+        "sourceComponentMaterials": [
+          {
+            "index": 0,
+            "slot": "MI_Forest_RootBark_0",
+            "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+          }
+        ],
+        "exportFile": "Meshes/TreeParts/SM_FirstStepsTree_01_Trunk.glb",
+        "export": {
+          "ok": true,
+          "errors": [],
+          "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_FirstStepsTree_01_Trunk.glb",
+          "bytes": 116908
+        }
+      },
+      "components": [
+        {
+          "component": "CrownMesh",
+          "mesh": "SM_Forest_CanopyCrown",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyCrown.SM_Forest_CanopyCrown",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 3680.0
+          },
+          "relativeRotationDeg": {
+            "pitch": 0.0,
+            "yaw": -159.0,
+            "roll": -0.0
+          },
+          "relativeScale": {
+            "x": 1.95,
+            "y": 1.95,
+            "z": 1.95
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 1585.0283203125,
+            "y": 1639.362548828125,
+            "z": 736.5140991210938
+          }
+        },
+        {
+          "component": "BoughMeshA",
+          "mesh": "SM_Forest_CanopyBough_A",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_A.SM_Forest_CanopyBough_A",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 2418.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -6.000000000000002,
+            "yaw": -60.999999999999986,
+            "roll": -7.995185164540172e-16
+          },
+          "relativeScale": {
+            "x": 1.8524999999999998,
+            "y": 1.8524999999999998,
+            "z": 1.8524999999999998
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 920.9089050292969,
+            "y": 972.7040824890137,
+            "z": 326.61353302001953
+          }
+        },
+        {
+          "component": "BoughMeshB",
+          "mesh": "SM_Forest_CanopyBough_B",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_B.SM_Forest_CanopyBough_B",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 3042.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -4.0,
+            "yaw": 84.00000000000001,
+            "roll": -3.9854015897965574e-16
+          },
+          "relativeScale": {
+            "x": 1.755,
+            "y": 1.755,
+            "z": 1.755
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 647.7835998535156,
+            "y": 910.7652320861816,
+            "z": 448.2970733642578
+          }
+        }
+      ],
+      "outputFile": "Meshes/SM_FirstSteps_Tree_01.glb",
+      "materialIndexMap": [
+        {
+          "index": 0,
+          "portableMaterialName": "MI_Forest_RootBark",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+          "sourceSlots": [
+            "DynamicMeshComponent: MI_Forest_RootBark_0",
+            "SM_Forest_CanopyCrown: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_A: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_B: MI_Forest_RootBark"
+          ]
+        },
+        {
+          "index": 1,
+          "portableMaterialName": "MI_Forest_StrawberryLeaf",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+          "sourceSlots": [
+            "SM_Forest_CanopyCrown: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_A: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_B: MI_Forest_StrawberryLeaf"
+          ]
+        }
+      ],
+      "bakedInBlender": {
+        "file": "Meshes/SM_FirstSteps_Tree_01.glb",
+        "blenderObject": "SM_FirstSteps_Tree_01",
+        "pivot": "actor origin (0,0,0), original Unreal actor translation omitted",
+        "dimensionsMeters": {
+          "x": 33.293357849121094,
+          "y": 32.87437438964844,
+          "z": 50.82352066040039
+        },
+        "boundsLocalMeters": {
+          "min": {
+            "x": -16.439912796020508,
+            "y": -16.50345230102539,
+            "z": -2.475928544998169
+          },
+          "max": {
+            "x": 16.853445053100586,
+            "y": 16.370922088623047,
+            "z": 48.347591400146484
+          }
+        },
+        "vertexCount": 9512,
+        "triangleCount": 16750,
+        "materialIndexMap": [
+          {
+            "index": 0,
+            "portableMaterialName": "MI_Forest_RootBark",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+            "source": "DynamicMesh trunk and slot 0 on Crown/Bough static meshes"
+          },
+          {
+            "index": 1,
+            "portableMaterialName": "MI_Forest_StrawberryLeaf",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+            "source": "slot 1 on Crown/Bough static meshes"
+          }
+        ]
+      }
+    },
+    {
+      "actorName": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264856717",
+      "actorLocationCm": {
+        "x": -1580.0,
+        "y": 2480.0,
+        "z": -10.0
+      },
+      "actorRotationDeg": {
+        "pitch": 0.0,
+        "yaw": 0.0,
+        "roll": 0.0
+      },
+      "actorScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "localPivot": "actor root / dynamic mesh component origin",
+      "dynamicTrunk": {
+        "assetPath": "/Game/ExtractedTrees/SM_FirstStepsTree_02_Trunk.SM_FirstStepsTree_02_Trunk",
+        "vertices": 1384,
+        "triangles": 2736,
+        "boundsMinCm": {
+          "x": -555.9487864191153,
+          "y": -649.2967152214475,
+          "z": -262.66035583339465
+        },
+        "boundsMaxCm": {
+          "x": 751.3365434528773,
+          "y": 836.9547638146851,
+          "z": 4508.0938830675095
+        },
+        "boundsDimensionsCm": {
+          "x": 1307.2853298719926,
+          "y": 1486.2514790361324,
+          "z": 4770.754238900904
+        },
+        "sourceComponentMaterials": [
+          {
+            "index": 0,
+            "slot": "MI_Forest_RootBark_0",
+            "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+          }
+        ],
+        "exportFile": "Meshes/TreeParts/SM_FirstStepsTree_02_Trunk.glb",
+        "export": {
+          "ok": true,
+          "errors": [],
+          "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_FirstStepsTree_02_Trunk.glb",
+          "bytes": 118828
+        }
+      },
+      "components": [
+        {
+          "component": "CrownMesh",
+          "mesh": "SM_Forest_CanopyCrown",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyCrown.SM_Forest_CanopyCrown",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 4280.0
+          },
+          "relativeRotationDeg": {
+            "pitch": 0.0,
+            "yaw": -21.000000000000036,
+            "roll": -0.0
+          },
+          "relativeScale": {
+            "x": 2.2,
+            "y": 2.2,
+            "z": 2.2
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 1585.0283203125,
+            "y": 1639.362548828125,
+            "z": 736.5140991210938
+          }
+        },
+        {
+          "component": "BoughMeshA",
+          "mesh": "SM_Forest_CanopyBough_A",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_A.SM_Forest_CanopyBough_A",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 2790.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -6.000000000000003,
+            "yaw": -119.00000000000003,
+            "roll": 3.997592582270086e-16
+          },
+          "relativeScale": {
+            "x": 2.09,
+            "y": 2.09,
+            "z": 2.09
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 920.9089050292969,
+            "y": 972.7040824890137,
+            "z": 326.61353302001953
+          }
+        },
+        {
+          "component": "BoughMeshB",
+          "mesh": "SM_Forest_CanopyBough_B",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_B.SM_Forest_CanopyBough_B",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 3510.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -3.999999999999999,
+            "yaw": 26.0,
+            "roll": 9.963503974491393e-17
+          },
+          "relativeScale": {
+            "x": 1.9800000000000002,
+            "y": 1.9800000000000002,
+            "z": 1.9800000000000002
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 647.7835998535156,
+            "y": 910.7652320861816,
+            "z": 448.2970733642578
+          }
+        }
+      ],
+      "outputFile": "Meshes/SM_FirstSteps_Tree_02.glb",
+      "materialIndexMap": [
+        {
+          "index": 0,
+          "portableMaterialName": "MI_Forest_RootBark",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+          "sourceSlots": [
+            "DynamicMeshComponent: MI_Forest_RootBark_0",
+            "SM_Forest_CanopyCrown: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_A: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_B: MI_Forest_RootBark"
+          ]
+        },
+        {
+          "index": 1,
+          "portableMaterialName": "MI_Forest_StrawberryLeaf",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+          "sourceSlots": [
+            "SM_Forest_CanopyCrown: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_A: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_B: MI_Forest_StrawberryLeaf"
+          ]
+        }
+      ],
+      "bakedInBlender": {
+        "file": "Meshes/SM_FirstSteps_Tree_02.glb",
+        "blenderObject": "SM_FirstSteps_Tree_02",
+        "pivot": "actor origin (0,0,0), original Unreal actor translation omitted",
+        "dimensionsMeters": {
+          "x": 34.99159622192383,
+          "y": 34.09740447998047,
+          "z": 58.45465087890625
+        },
+        "boundsLocalMeters": {
+          "min": {
+            "x": -17.794803619384766,
+            "y": -16.10215950012207,
+            "z": -2.626603603363037
+          },
+          "max": {
+            "x": 17.196792602539062,
+            "y": 17.9952449798584,
+            "z": 55.82804870605469
+          }
+        },
+        "vertexCount": 9552,
+        "triangleCount": 16750,
+        "materialIndexMap": [
+          {
+            "index": 0,
+            "portableMaterialName": "MI_Forest_RootBark",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+            "source": "DynamicMesh trunk and slot 0 on Crown/Bough static meshes"
+          },
+          {
+            "index": 1,
+            "portableMaterialName": "MI_Forest_StrawberryLeaf",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+            "source": "slot 1 on Crown/Bough static meshes"
+          }
+        ]
+      }
+    },
+    {
+      "actorName": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264923718",
+      "actorLocationCm": {
+        "x": -680.0,
+        "y": 3450.0,
+        "z": -10.0
+      },
+      "actorRotationDeg": {
+        "pitch": 0.0,
+        "yaw": 0.0,
+        "roll": 0.0
+      },
+      "actorScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "localPivot": "actor root / dynamic mesh component origin",
+      "dynamicTrunk": {
+        "assetPath": "/Game/ExtractedTrees/SM_FirstStepsTree_03_Trunk.SM_FirstStepsTree_03_Trunk",
+        "vertices": 1262,
+        "triangles": 2496,
+        "boundsMinCm": {
+          "x": -741.912621988379,
+          "y": -390.38128771619955,
+          "z": -242.2202992958145
+        },
+        "boundsMaxCm": {
+          "x": 588.954197013056,
+          "y": 696.5166503714254,
+          "z": 3956.248777489315
+        },
+        "boundsDimensionsCm": {
+          "x": 1330.866819001435,
+          "y": 1086.8979380876249,
+          "z": 4198.46907678513
+        },
+        "sourceComponentMaterials": [
+          {
+            "index": 0,
+            "slot": "MI_Forest_RootBark_0",
+            "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+          }
+        ],
+        "exportFile": "Meshes/TreeParts/SM_FirstStepsTree_03_Trunk.glb",
+        "export": {
+          "ok": true,
+          "errors": [],
+          "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_FirstStepsTree_03_Trunk.glb",
+          "bytes": 107500
+        }
+      },
+      "components": [
+        {
+          "component": "CrownMesh",
+          "mesh": "SM_Forest_CanopyCrown",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyCrown.SM_Forest_CanopyCrown",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 3730.0
+          },
+          "relativeRotationDeg": {
+            "pitch": 0.0,
+            "yaw": -57.00000000000004,
+            "roll": -0.0
+          },
+          "relativeScale": {
+            "x": 1.9,
+            "y": 1.9,
+            "z": 1.9
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 1585.0283203125,
+            "y": 1639.362548828125,
+            "z": 736.5140991210938
+          }
+        },
+        {
+          "component": "BoughMeshA",
+          "mesh": "SM_Forest_CanopyBough_A",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_A.SM_Forest_CanopyBough_A",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 2449.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -6.000000000000002,
+            "yaw": 157.0,
+            "roll": -0.0
+          },
+          "relativeScale": {
+            "x": 1.805,
+            "y": 1.805,
+            "z": 1.805
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 920.9089050292969,
+            "y": 972.7040824890137,
+            "z": 326.61353302001953
+          }
+        },
+        {
+          "component": "BoughMeshB",
+          "mesh": "SM_Forest_CanopyBough_B",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_B.SM_Forest_CanopyBough_B",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 3081.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -3.999999999999999,
+            "yaw": -58.00000000000003,
+            "roll": -0.0
+          },
+          "relativeScale": {
+            "x": 1.71,
+            "y": 1.71,
+            "z": 1.71
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 647.7835998535156,
+            "y": 910.7652320861816,
+            "z": 448.2970733642578
+          }
+        }
+      ],
+      "outputFile": "Meshes/SM_FirstSteps_Tree_03.glb",
+      "materialIndexMap": [
+        {
+          "index": 0,
+          "portableMaterialName": "MI_Forest_RootBark",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+          "sourceSlots": [
+            "DynamicMeshComponent: MI_Forest_RootBark_0",
+            "SM_Forest_CanopyCrown: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_A: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_B: MI_Forest_RootBark"
+          ]
+        },
+        {
+          "index": 1,
+          "portableMaterialName": "MI_Forest_StrawberryLeaf",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+          "sourceSlots": [
+            "SM_Forest_CanopyCrown: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_A: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_B: MI_Forest_StrawberryLeaf"
+          ]
+        }
+      ],
+      "bakedInBlender": {
+        "file": "Meshes/SM_FirstSteps_Tree_03.glb",
+        "blenderObject": "SM_FirstSteps_Tree_03",
+        "pivot": "actor origin (0,0,0), original Unreal actor translation omitted",
+        "dimensionsMeters": {
+          "x": 31.565723419189453,
+          "y": 30.329713821411133,
+          "z": 50.97370147705078
+        },
+        "boundsLocalMeters": {
+          "min": {
+            "x": -16.43683624267578,
+            "y": -16.449966430664062,
+            "z": -2.4222030639648438
+          },
+          "max": {
+            "x": 15.128887176513672,
+            "y": 13.87974739074707,
+            "z": 48.55149841308594
+          }
+        },
+        "vertexCount": 9346,
+        "triangleCount": 16510,
+        "materialIndexMap": [
+          {
+            "index": 0,
+            "portableMaterialName": "MI_Forest_RootBark",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+            "source": "DynamicMesh trunk and slot 0 on Crown/Bough static meshes"
+          },
+          {
+            "index": 1,
+            "portableMaterialName": "MI_Forest_StrawberryLeaf",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+            "source": "slot 1 on Crown/Bough static meshes"
+          }
+        ]
+      }
+    },
+    {
+      "actorName": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264810716",
+      "actorLocationCm": {
+        "x": 640.0,
+        "y": 3150.0,
+        "z": -10.0
+      },
+      "actorRotationDeg": {
+        "pitch": 0.0,
+        "yaw": 0.0,
+        "roll": 0.0
+      },
+      "actorScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "localPivot": "actor root / dynamic mesh component origin",
+      "dynamicTrunk": {
+        "assetPath": "/Game/ExtractedTrees/SM_FirstStepsTree_04_Trunk.SM_FirstStepsTree_04_Trunk",
+        "vertices": 1262,
+        "triangles": 2496,
+        "boundsMinCm": {
+          "x": -557.689988985007,
+          "y": -370.8576311938499,
+          "z": -232.20705444251294
+        },
+        "boundsMaxCm": {
+          "x": 540.1786011039303,
+          "y": 690.3666222390335,
+          "z": 3708.7882479454183
+        },
+        "boundsDimensionsCm": {
+          "x": 1097.8685900889373,
+          "y": 1061.2242534328834,
+          "z": 3940.995302387931
+        },
+        "sourceComponentMaterials": [
+          {
+            "index": 0,
+            "slot": "MI_Forest_RootBark_0",
+            "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+          }
+        ],
+        "exportFile": "Meshes/TreeParts/SM_FirstStepsTree_04_Trunk.glb",
+        "export": {
+          "ok": true,
+          "errors": [],
+          "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_FirstStepsTree_04_Trunk.glb",
+          "bytes": 106728
+        }
+      },
+      "components": [
+        {
+          "component": "CrownMesh",
+          "mesh": "SM_Forest_CanopyCrown",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyCrown.SM_Forest_CanopyCrown",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 3480.0
+          },
+          "relativeRotationDeg": {
+            "pitch": 0.0,
+            "yaw": 129.0,
+            "roll": -0.0
+          },
+          "relativeScale": {
+            "x": 1.85,
+            "y": 1.85,
+            "z": 1.85
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 1585.0283203125,
+            "y": 1639.362548828125,
+            "z": 736.5140991210938
+          }
+        },
+        {
+          "component": "BoughMeshA",
+          "mesh": "SM_Forest_CanopyBough_A",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_A.SM_Forest_CanopyBough_A",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 2294.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -6.000000000000002,
+            "yaw": 131.0,
+            "roll": 3.997592582270086e-16
+          },
+          "relativeScale": {
+            "x": 1.7575,
+            "y": 1.7575,
+            "z": 1.7575
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 920.9089050292969,
+            "y": 972.7040824890137,
+            "z": 326.61353302001953
+          }
+        },
+        {
+          "component": "BoughMeshB",
+          "mesh": "SM_Forest_CanopyBough_B",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_B.SM_Forest_CanopyBough_B",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 2886.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -3.999999999999999,
+            "yaw": -84.00000000000003,
+            "roll": -3.9854015897965574e-16
+          },
+          "relativeScale": {
+            "x": 1.665,
+            "y": 1.665,
+            "z": 1.665
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 647.7835998535156,
+            "y": 910.7652320861816,
+            "z": 448.2970733642578
+          }
+        }
+      ],
+      "outputFile": "Meshes/SM_FirstSteps_Tree_04.glb",
+      "materialIndexMap": [
+        {
+          "index": 0,
+          "portableMaterialName": "MI_Forest_RootBark",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+          "sourceSlots": [
+            "DynamicMeshComponent: MI_Forest_RootBark_0",
+            "SM_Forest_CanopyCrown: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_A: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_B: MI_Forest_RootBark"
+          ]
+        },
+        {
+          "index": 1,
+          "portableMaterialName": "MI_Forest_StrawberryLeaf",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+          "sourceSlots": [
+            "SM_Forest_CanopyCrown: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_A: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_B: MI_Forest_StrawberryLeaf"
+          ]
+        }
+      ],
+      "bakedInBlender": {
+        "file": "Meshes/SM_FirstSteps_Tree_04.glb",
+        "blenderObject": "SM_FirstSteps_Tree_04",
+        "pivot": "actor origin (0,0,0), original Unreal actor translation omitted",
+        "dimensionsMeters": {
+          "x": 30.795957565307617,
+          "y": 29.235244750976562,
+          "z": 48.077476501464844
+        },
+        "boundsLocalMeters": {
+          "min": {
+            "x": -14.880629539489746,
+            "y": -13.387406349182129,
+            "z": -2.322070598602295
+          },
+          "max": {
+            "x": 15.915328025817871,
+            "y": 15.84783935546875,
+            "z": 45.75540542602539
+          }
+        },
+        "vertexCount": 9330,
+        "triangleCount": 16510,
+        "materialIndexMap": [
+          {
+            "index": 0,
+            "portableMaterialName": "MI_Forest_RootBark",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+            "source": "DynamicMesh trunk and slot 0 on Crown/Bough static meshes"
+          },
+          {
+            "index": 1,
+            "portableMaterialName": "MI_Forest_StrawberryLeaf",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+            "source": "slot 1 on Crown/Bough static meshes"
+          }
+        ]
+      }
+    },
+    {
+      "actorName": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264760715",
+      "actorLocationCm": {
+        "x": 1520.0,
+        "y": 2280.0,
+        "z": -10.0
+      },
+      "actorRotationDeg": {
+        "pitch": 0.0,
+        "yaw": 0.0,
+        "roll": 0.0
+      },
+      "actorScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "localPivot": "actor root / dynamic mesh component origin",
+      "dynamicTrunk": {
+        "assetPath": "/Game/ExtractedTrees/SM_FirstStepsTree_05_Trunk.SM_FirstStepsTree_05_Trunk",
+        "vertices": 1506,
+        "triangles": 2976,
+        "boundsMinCm": {
+          "x": -660.9735454621956,
+          "y": -932.9734798187715,
+          "z": -278.05452204792374
+        },
+        "boundsMaxCm": {
+          "x": 806.5403923566972,
+          "y": 547.6488924573448,
+          "z": 4614.323908286273
+        },
+        "boundsDimensionsCm": {
+          "x": 1467.5139378188928,
+          "y": 1480.6223722761163,
+          "z": 4892.378430334196
+        },
+        "sourceComponentMaterials": [
+          {
+            "index": 0,
+            "slot": "MI_Forest_RootBark_0",
+            "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+          }
+        ],
+        "exportFile": "Meshes/TreeParts/SM_FirstStepsTree_05_Trunk.glb",
+        "export": {
+          "ok": true,
+          "errors": [],
+          "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_FirstStepsTree_05_Trunk.glb",
+          "bytes": 131164
+        }
+      },
+      "components": [
+        {
+          "component": "CrownMesh",
+          "mesh": "SM_Forest_CanopyCrown",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyCrown.SM_Forest_CanopyCrown",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 4380.0
+          },
+          "relativeRotationDeg": {
+            "pitch": 0.0,
+            "yaw": 33.00000000000001,
+            "roll": -0.0
+          },
+          "relativeScale": {
+            "x": 2.25,
+            "y": 2.25,
+            "z": 2.25
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 1585.0283203125,
+            "y": 1639.362548828125,
+            "z": 736.5140991210938
+          }
+        },
+        {
+          "component": "BoughMeshA",
+          "mesh": "SM_Forest_CanopyBough_A",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_A.SM_Forest_CanopyBough_A",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 2852.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -6.000000000000002,
+            "yaw": -173.00000000000003,
+            "roll": -0.0
+          },
+          "relativeScale": {
+            "x": 2.1374999999999997,
+            "y": 2.1374999999999997,
+            "z": 2.1374999999999997
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 920.9089050292969,
+            "y": 972.7040824890137,
+            "z": 326.61353302001953
+          }
+        },
+        {
+          "component": "BoughMeshB",
+          "mesh": "SM_Forest_CanopyBough_B",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_B.SM_Forest_CanopyBough_B",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 3588.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -3.999999999999999,
+            "yaw": -28.000000000000004,
+            "roll": -0.0
+          },
+          "relativeScale": {
+            "x": 2.025,
+            "y": 2.025,
+            "z": 2.025
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 647.7835998535156,
+            "y": 910.7652320861816,
+            "z": 448.2970733642578
+          }
+        }
+      ],
+      "outputFile": "Meshes/SM_FirstSteps_Tree_05.glb",
+      "materialIndexMap": [
+        {
+          "index": 0,
+          "portableMaterialName": "MI_Forest_RootBark",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+          "sourceSlots": [
+            "DynamicMeshComponent: MI_Forest_RootBark_0",
+            "SM_Forest_CanopyCrown: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_A: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_B: MI_Forest_RootBark"
+          ]
+        },
+        {
+          "index": 1,
+          "portableMaterialName": "MI_Forest_StrawberryLeaf",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+          "sourceSlots": [
+            "SM_Forest_CanopyCrown: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_A: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_B: MI_Forest_StrawberryLeaf"
+          ]
+        }
+      ],
+      "bakedInBlender": {
+        "file": "Meshes/SM_FirstSteps_Tree_05.glb",
+        "blenderObject": "SM_FirstSteps_Tree_05",
+        "pivot": "actor origin (0,0,0), original Unreal actor translation omitted",
+        "dimensionsMeters": {
+          "x": 35.91676330566406,
+          "y": 39.74303436279297,
+          "z": 59.904685974121094
+        },
+        "boundsLocalMeters": {
+          "min": {
+            "x": -19.480222702026367,
+            "y": -20.278358459472656,
+            "z": -2.780545234680176
+          },
+          "max": {
+            "x": 16.436542510986328,
+            "y": 19.464675903320312,
+            "z": 57.124141693115234
+          }
+        },
+        "vertexCount": 9779,
+        "triangleCount": 16990,
+        "materialIndexMap": [
+          {
+            "index": 0,
+            "portableMaterialName": "MI_Forest_RootBark",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+            "source": "DynamicMesh trunk and slot 0 on Crown/Bough static meshes"
+          },
+          {
+            "index": 1,
+            "portableMaterialName": "MI_Forest_StrawberryLeaf",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+            "source": "slot 1 on Crown/Bough static meshes"
+          }
+        ]
+      }
+    },
+    {
+      "actorName": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264662713",
+      "actorLocationCm": {
+        "x": 2230.0,
+        "y": 270.0,
+        "z": -10.0
+      },
+      "actorRotationDeg": {
+        "pitch": 0.0,
+        "yaw": 0.0,
+        "roll": 0.0
+      },
+      "actorScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "localPivot": "actor root / dynamic mesh component origin",
+      "dynamicTrunk": {
+        "assetPath": "/Game/ExtractedTrees/SM_FirstStepsTree_06_Trunk.SM_FirstStepsTree_06_Trunk",
+        "vertices": 1506,
+        "triangles": 2976,
+        "boundsMinCm": {
+          "x": -958.8689070164274,
+          "y": -725.8892504902193,
+          "z": -293.8297606960077
+        },
+        "boundsMaxCm": {
+          "x": 677.1489159524599,
+          "y": 593.4625530916921,
+          "z": 4408.389454448208
+        },
+        "boundsDimensionsCm": {
+          "x": 1636.0178229688872,
+          "y": 1319.3518035819116,
+          "z": 4702.219215144216
+        },
+        "sourceComponentMaterials": [
+          {
+            "index": 0,
+            "slot": "MI_Forest_RootBark_0",
+            "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+          }
+        ],
+        "exportFile": "Meshes/TreeParts/SM_FirstStepsTree_06_Trunk.glb",
+        "export": {
+          "ok": true,
+          "errors": [],
+          "file": "C:/Users/count/Documents/Parkour-Art-Archive/UnrealExtract/Meshes/TreeParts/SM_FirstStepsTree_06_Trunk.glb",
+          "bytes": 128188
+        }
+      },
+      "components": [
+        {
+          "component": "CrownMesh",
+          "mesh": "SM_Forest_CanopyCrown",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyCrown.SM_Forest_CanopyCrown",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 4180.0
+          },
+          "relativeRotationDeg": {
+            "pitch": 0.0,
+            "yaw": -123.00000000000001,
+            "roll": -0.0
+          },
+          "relativeScale": {
+            "x": 2.15,
+            "y": 2.15,
+            "z": 2.15
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 1585.0283203125,
+            "y": 1639.362548828125,
+            "z": 736.5140991210938
+          }
+        },
+        {
+          "component": "BoughMeshA",
+          "mesh": "SM_Forest_CanopyBough_A",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_A.SM_Forest_CanopyBough_A",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 2728.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -6.000000000000002,
+            "yaw": 23.000000000000007,
+            "roll": -0.0
+          },
+          "relativeScale": {
+            "x": 2.0425,
+            "y": 2.0425,
+            "z": 2.0425
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 920.9089050292969,
+            "y": 972.7040824890137,
+            "z": 326.61353302001953
+          }
+        },
+        {
+          "component": "BoughMeshB",
+          "mesh": "SM_Forest_CanopyBough_B",
+          "assetPath": "/Game/Parkour/Environment/Forest/Meshes/SM_Forest_CanopyBough_B.SM_Forest_CanopyBough_B",
+          "relativeLocationCm": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 3432.0
+          },
+          "relativeRotationDeg": {
+            "pitch": -3.9999999999999987,
+            "yaw": 168.0,
+            "roll": -4.9817519872456967e-17
+          },
+          "relativeScale": {
+            "x": 1.935,
+            "y": 1.935,
+            "z": 1.935
+          },
+          "materials": [
+            {
+              "index": 0,
+              "slot": "MI_Forest_RootBark",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+            },
+            {
+              "index": 1,
+              "slot": "MI_Forest_StrawberryLeaf",
+              "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+            }
+          ],
+          "boundsCm": {
+            "x": 647.7835998535156,
+            "y": 910.7652320861816,
+            "z": 448.2970733642578
+          }
+        }
+      ],
+      "outputFile": "Meshes/SM_FirstSteps_Tree_06.glb",
+      "materialIndexMap": [
+        {
+          "index": 0,
+          "portableMaterialName": "MI_Forest_RootBark",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+          "sourceSlots": [
+            "DynamicMeshComponent: MI_Forest_RootBark_0",
+            "SM_Forest_CanopyCrown: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_A: MI_Forest_RootBark",
+            "SM_Forest_CanopyBough_B: MI_Forest_RootBark"
+          ]
+        },
+        {
+          "index": 1,
+          "portableMaterialName": "MI_Forest_StrawberryLeaf",
+          "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+          "sourceSlots": [
+            "SM_Forest_CanopyCrown: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_A: MI_Forest_StrawberryLeaf",
+            "SM_Forest_CanopyBough_B: MI_Forest_StrawberryLeaf"
+          ]
+        }
+      ],
+      "bakedInBlender": {
+        "file": "Meshes/SM_FirstSteps_Tree_06.glb",
+        "blenderObject": "SM_FirstSteps_Tree_06",
+        "pivot": "actor origin (0,0,0), original Unreal actor translation omitted",
+        "dimensionsMeters": {
+          "x": 33.864498138427734,
+          "y": 36.15568923950195,
+          "z": 57.47025680541992
+        },
+        "boundsLocalMeters": {
+          "min": {
+            "x": -17.227882385253906,
+            "y": -17.917890548706055,
+            "z": -2.938297748565674
+          },
+          "max": {
+            "x": 16.636615753173828,
+            "y": 18.2377986907959,
+            "z": 54.531959533691406
+          }
+        },
+        "vertexCount": 9717,
+        "triangleCount": 16990,
+        "materialIndexMap": [
+          {
+            "index": 0,
+            "portableMaterialName": "MI_Forest_RootBark",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark",
+            "source": "DynamicMesh trunk and slot 0 on Crown/Bough static meshes"
+          },
+          {
+            "index": 1,
+            "portableMaterialName": "MI_Forest_StrawberryLeaf",
+            "unrealMaterialAsset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf",
+            "source": "slot 1 on Crown/Bough static meshes"
+          }
+        ]
+      }
+    }
+  ],
+  "foliagePresets": [
+    {
+      "name": "FT_Bells",
+      "assetPath": "/Game/Parkour/Environment/ValleyDressing/FT_Bells.FT_Bells",
+      "class": "FoliageType_InstancedStaticMesh",
+      "mesh": "/Game/Parkour/Environment/ValleyFlora/SM_Crossing_ArchingBellflowers.SM_Crossing_ArchingBellflowers",
+      "alignToNormal": true,
+      "alignMaxAngleDeg": 0.0,
+      "randomYaw": true,
+      "randomPitchAngleDeg": 0.0,
+      "scaleX": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleY": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleZ": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "zOffset": {
+        "min": 0.0,
+        "max": 0.0
+      },
+      "height": {
+        "min": -262144.0,
+        "max": 262144.0
+      },
+      "radius": 0.0,
+      "density": 100.0,
+      "mobility": "<ComponentMobility.STATIC: 0>",
+      "collisionWithWorld": false
+    },
+    {
+      "name": "FT_Clover",
+      "assetPath": "/Game/Parkour/Environment/ValleyDressing/FT_Clover.FT_Clover",
+      "class": "FoliageType_InstancedStaticMesh",
+      "mesh": "/Game/Parkour/Environment/ValleyUnderstory/SM_Painted_Clover.SM_Painted_Clover",
+      "alignToNormal": true,
+      "alignMaxAngleDeg": 0.0,
+      "randomYaw": true,
+      "randomPitchAngleDeg": 0.0,
+      "scaleX": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleY": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleZ": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "zOffset": {
+        "min": 0.0,
+        "max": 0.0
+      },
+      "height": {
+        "min": -262144.0,
+        "max": 262144.0
+      },
+      "radius": 0.0,
+      "density": 100.0,
+      "mobility": "<ComponentMobility.STATIC: 0>",
+      "collisionWithWorld": false
+    },
+    {
+      "name": "FT_MossPillows",
+      "assetPath": "/Game/Parkour/Environment/ValleyDressing/FT_MossPillows.FT_MossPillows",
+      "class": "FoliageType_InstancedStaticMesh",
+      "mesh": "/Game/Parkour/Environment/ValleyUnderstory/SM_BirchTrail_PlushMoss.SM_BirchTrail_PlushMoss",
+      "alignToNormal": true,
+      "alignMaxAngleDeg": 0.0,
+      "randomYaw": true,
+      "randomPitchAngleDeg": 0.0,
+      "scaleX": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleY": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleZ": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "zOffset": {
+        "min": 0.0,
+        "max": 0.0
+      },
+      "height": {
+        "min": -262144.0,
+        "max": 262144.0
+      },
+      "radius": 0.0,
+      "density": 100.0,
+      "mobility": "<ComponentMobility.STATIC: 0>",
+      "collisionWithWorld": false
+    },
+    {
+      "name": "FT_Pebbles",
+      "assetPath": "/Game/Parkour/Environment/ValleyDressing/FT_Pebbles.FT_Pebbles",
+      "class": "FoliageType_InstancedStaticMesh",
+      "mesh": "/Game/Parkour/Environment/ValleyUnderstory/SM_Painted_Pebbles.SM_Painted_Pebbles",
+      "alignToNormal": true,
+      "alignMaxAngleDeg": 0.0,
+      "randomYaw": true,
+      "randomPitchAngleDeg": 0.0,
+      "scaleX": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleY": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleZ": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "zOffset": {
+        "min": 0.0,
+        "max": 0.0
+      },
+      "height": {
+        "min": -262144.0,
+        "max": 262144.0
+      },
+      "radius": 0.0,
+      "density": 100.0,
+      "mobility": "<ComponentMobility.STATIC: 0>",
+      "collisionWithWorld": false
+    },
+    {
+      "name": "FT_Shrubs",
+      "assetPath": "/Game/Parkour/Environment/ValleyDressing/FT_Shrubs.FT_Shrubs",
+      "class": "FoliageType_InstancedStaticMesh",
+      "mesh": "/Game/Parkour/Environment/ValleyUnderstory/SM_Painted_Shrub.SM_Painted_Shrub",
+      "alignToNormal": true,
+      "alignMaxAngleDeg": 0.0,
+      "randomYaw": true,
+      "randomPitchAngleDeg": 0.0,
+      "scaleX": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleY": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleZ": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "zOffset": {
+        "min": 0.0,
+        "max": 0.0
+      },
+      "height": {
+        "min": -262144.0,
+        "max": 262144.0
+      },
+      "radius": 0.0,
+      "density": 100.0,
+      "mobility": "<ComponentMobility.STATIC: 0>",
+      "collisionWithWorld": false
+    },
+    {
+      "name": "FT_Strawberries",
+      "assetPath": "/Game/Parkour/Environment/ValleyDressing/FT_Strawberries.FT_Strawberries",
+      "class": "FoliageType_InstancedStaticMesh",
+      "mesh": "/Game/Parkour/Environment/ValleyFlora/SM_Crossing_DimpledStrawberry.SM_Crossing_DimpledStrawberry",
+      "alignToNormal": true,
+      "alignMaxAngleDeg": 0.0,
+      "randomYaw": true,
+      "randomPitchAngleDeg": 0.0,
+      "scaleX": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleY": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleZ": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "zOffset": {
+        "min": 0.0,
+        "max": 0.0
+      },
+      "height": {
+        "min": -262144.0,
+        "max": 262144.0
+      },
+      "radius": 0.0,
+      "density": 100.0,
+      "mobility": "<ComponentMobility.STATIC: 0>",
+      "collisionWithWorld": false
+    },
+    {
+      "name": "FT_Violets",
+      "assetPath": "/Game/Parkour/Environment/ValleyDressing/FT_Violets.FT_Violets",
+      "class": "FoliageType_InstancedStaticMesh",
+      "mesh": "/Game/Parkour/Environment/ValleyUnderstory/SM_Painted_Violets.SM_Painted_Violets",
+      "alignToNormal": true,
+      "alignMaxAngleDeg": 0.0,
+      "randomYaw": true,
+      "randomPitchAngleDeg": 0.0,
+      "scaleX": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleY": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleZ": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "zOffset": {
+        "min": 0.0,
+        "max": 0.0
+      },
+      "height": {
+        "min": -262144.0,
+        "max": 262144.0
+      },
+      "radius": 0.0,
+      "density": 100.0,
+      "mobility": "<ComponentMobility.STATIC: 0>",
+      "collisionWithWorld": false
+    },
+    {
+      "name": "FT_Wildflowers",
+      "assetPath": "/Game/Parkour/Environment/ValleyDressing/FT_Wildflowers.FT_Wildflowers",
+      "class": "FoliageType_InstancedStaticMesh",
+      "mesh": "/Game/Parkour/Environment/ValleyUnderstory/SM_Painted_MixedBlooms.SM_Painted_MixedBlooms",
+      "alignToNormal": true,
+      "alignMaxAngleDeg": 0.0,
+      "randomYaw": true,
+      "randomPitchAngleDeg": 0.0,
+      "scaleX": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleY": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleZ": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "zOffset": {
+        "min": 0.0,
+        "max": 0.0
+      },
+      "height": {
+        "min": -262144.0,
+        "max": 262144.0
+      },
+      "radius": 0.0,
+      "density": 100.0,
+      "mobility": "<ComponentMobility.STATIC: 0>",
+      "collisionWithWorld": false
+    },
+    {
+      "name": "FT_WoodlandBlooms",
+      "assetPath": "/Game/Parkour/Environment/ValleyDressing/FT_WoodlandBlooms.FT_WoodlandBlooms",
+      "class": "FoliageType_InstancedStaticMesh",
+      "mesh": "/Game/Parkour/Environment/ValleyUnderstory/SM_Painted_WoodlandBlooms.SM_Painted_WoodlandBlooms",
+      "alignToNormal": true,
+      "alignMaxAngleDeg": 0.0,
+      "randomYaw": true,
+      "randomPitchAngleDeg": 0.0,
+      "scaleX": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleY": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "scaleZ": {
+        "min": 1.0,
+        "max": 1.0
+      },
+      "zOffset": {
+        "min": 0.0,
+        "max": 0.0
+      },
+      "height": {
+        "min": -262144.0,
+        "max": 262144.0
+      },
+      "radius": 0.0,
+      "density": 100.0,
+      "mobility": "<ComponentMobility.STATIC: 0>",
+      "collisionWithWorld": false
+    }
+  ],
+  "materials": {
+    "M_BankClover": {
+      "assetPath": "/Game/Parkour/Environment/CloverBank/M_BankClover.M_BankClover",
+      "class": "Material",
+      "parent": null,
+      "scalarParameters": [],
+      "vectorParameters": [],
+      "textures": []
+    },
+    "M_BankSatinGrass": {
+      "assetPath": "/Game/Parkour/Environment/CloverBank/M_BankSatinGrass.M_BankSatinGrass",
+      "class": "Material",
+      "parent": null,
+      "scalarParameters": [],
+      "vectorParameters": [],
+      "textures": []
+    },
+    "M_Bellflower_PetalFolds": {
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/M_Bellflower_PetalFolds.M_Bellflower_PetalFolds",
+      "class": "Material",
+      "parent": null,
+      "scalarParameters": [
+        {
+          "name": "SeasonSensitivity",
+          "value": 0.6499999761581421,
+          "overridden": null,
+          "source": "/Game/Parkour/Environment/ValleyFlora/M_Bellflower_PetalFolds.M_Bellflower_PetalFolds"
+        },
+        {
+          "name": "SubsurfaceStrength",
+          "value": 1.149999976158142,
+          "overridden": null,
+          "source": "/Game/Parkour/Environment/ValleyFlora/M_Bellflower_PetalFolds.M_Bellflower_PetalFolds"
+        },
+        {
+          "name": "LeafRoughness",
+          "value": 0.36000001430511475,
+          "overridden": null,
+          "source": "/Game/Parkour/Environment/ValleyFlora/M_Bellflower_PetalFolds.M_Bellflower_PetalFolds"
+        },
+        {
+          "name": "WindAmplitude",
+          "value": 2.0,
+          "overridden": null,
+          "source": "/Game/Parkour/Environment/ValleyFlora/M_Bellflower_PetalFolds.M_Bellflower_PetalFolds"
+        }
+      ],
+      "vectorParameters": [
+        {
+          "name": "LeafColor",
+          "value": {
+            "r": 0.2800000011920929,
+            "g": 0.5799999833106995,
+            "b": 0.10000000149011612,
+            "a": 1.0
+          },
+          "overridden": null,
+          "source": "/Game/Parkour/Environment/ValleyFlora/M_Bellflower_PetalFolds.M_Bellflower_PetalFolds"
+        },
+        {
+          "name": "AutumnShiftColor",
+          "value": {
+            "r": 0.8500000238418579,
+            "g": 0.47999998927116394,
+            "b": 0.07999999821186066,
+            "a": 1.0
+          },
+          "overridden": null,
+          "source": "/Game/Parkour/Environment/ValleyFlora/M_Bellflower_PetalFolds.M_Bellflower_PetalFolds"
+        },
+        {
+          "name": "SubsurfaceTint",
+          "value": {
+            "r": 0.7200000286102295,
+            "g": 0.9200000166893005,
+            "b": 0.18000000715255737,
+            "a": 1.0
+          },
+          "overridden": null,
+          "source": "/Game/Parkour/Environment/ValleyFlora/M_Bellflower_PetalFolds.M_Bellflower_PetalFolds"
+        }
+      ],
+      "textures": []
+    },
+    "MI_Bellflower_FlutedLavender": {
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_FlutedLavender.MI_Bellflower_FlutedLavender",
+      "class": "MaterialInstanceConstant",
+      "parent": "/Game/Parkour/Environment/ValleyFlora/M_Bellflower_PetalFolds.M_Bellflower_PetalFolds",
+      "scalarParameters": [
+        {
+          "name": "SeasonSensitivity",
+          "value": 0.0,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98100) {}>"
+        },
+        {
+          "name": "SubsurfaceStrength",
+          "value": 0.30000001192092896,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC97F80) {}>"
+        },
+        {
+          "name": "LeafRoughness",
+          "value": 0.46000000834465027,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AE48580) {}>"
+        },
+        {
+          "name": "WindAmplitude",
+          "value": 1.7999999523162842,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AE48A40) {}>"
+        }
+      ],
+      "vectorParameters": [
+        {
+          "name": "LeafColor",
+          "value": {
+            "r": 0.38999998569488525,
+            "g": 0.20000000298023224,
+            "b": 0.7200000286102295,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC980A0) {}>"
+        },
+        {
+          "name": "AutumnShiftColor",
+          "value": {
+            "r": 0.8500000238418579,
+            "g": 0.47999998927116394,
+            "b": 0.07999999821186066,
+            "a": 1.0
+          },
+          "overridden": false,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC981F0) {}>"
+        },
+        {
+          "name": "SubsurfaceTint",
+          "value": {
+            "r": 0.5299999713897705,
+            "g": 0.3100000023841858,
+            "b": 0.7799999713897705,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98490) {}>"
+        }
+      ],
+      "textures": []
+    },
+    "MI_Bellflower_Lavender": {
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Lavender.MI_Bellflower_Lavender",
+      "class": "MaterialInstanceConstant",
+      "parent": "/Game/Parkour/Environment/Forest/Materials/M_Forest_Foliage.M_Forest_Foliage",
+      "scalarParameters": [
+        {
+          "name": "SeasonSensitivity",
+          "value": 0.0,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98CA0) {}>"
+        },
+        {
+          "name": "SubsurfaceStrength",
+          "value": 0.30000001192092896,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98850) {}>"
+        },
+        {
+          "name": "LeafRoughness",
+          "value": 0.46000000834465027,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC984F0) {}>"
+        },
+        {
+          "name": "WindAmplitude",
+          "value": 1.7999999523162842,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98880) {}>"
+        }
+      ],
+      "vectorParameters": [
+        {
+          "name": "LeafColor",
+          "value": {
+            "r": 0.38999998569488525,
+            "g": 0.20000000298023224,
+            "b": 0.7200000286102295,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98DF0) {}>"
+        },
+        {
+          "name": "AutumnShiftColor",
+          "value": {
+            "r": 0.8500000238418579,
+            "g": 0.47999998927116394,
+            "b": 0.07999999821186066,
+            "a": 1.0
+          },
+          "overridden": false,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98DC0) {}>"
+        },
+        {
+          "name": "SubsurfaceTint",
+          "value": {
+            "r": 0.5299999713897705,
+            "g": 0.3100000023841858,
+            "b": 0.7799999713897705,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98E20) {}>"
+        }
+      ],
+      "textures": []
+    },
+    "MI_Bellflower_Stem": {
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Stem.MI_Bellflower_Stem",
+      "class": "MaterialInstanceConstant",
+      "parent": "/Game/Parkour/Environment/Forest/Materials/M_Forest_Foliage.M_Forest_Foliage",
+      "scalarParameters": [
+        {
+          "name": "SeasonSensitivity",
+          "value": 0.0,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC986A0) {}>"
+        },
+        {
+          "name": "SubsurfaceStrength",
+          "value": 0.30000001192092896,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98B50) {}>"
+        },
+        {
+          "name": "LeafRoughness",
+          "value": 0.3400000035762787,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98E50) {}>"
+        },
+        {
+          "name": "WindAmplitude",
+          "value": 2.4000000953674316,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98520) {}>"
+        }
+      ],
+      "vectorParameters": [
+        {
+          "name": "LeafColor",
+          "value": {
+            "r": 0.10000000149011612,
+            "g": 0.20999999344348907,
+            "b": 0.04399999976158142,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98130) {}>"
+        },
+        {
+          "name": "AutumnShiftColor",
+          "value": {
+            "r": 0.8500000238418579,
+            "g": 0.47999998927116394,
+            "b": 0.07999999821186066,
+            "a": 1.0
+          },
+          "overridden": false,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC97A70) {}>"
+        },
+        {
+          "name": "SubsurfaceTint",
+          "value": {
+            "r": 0.23000000417232513,
+            "g": 0.3100000023841858,
+            "b": 0.06400000303983688,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98D00) {}>"
+        }
+      ],
+      "textures": []
+    },
+    "MI_CrossingStrawberry_Flesh": {
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/MI_CrossingStrawberry_Flesh.MI_CrossingStrawberry_Flesh",
+      "class": "MaterialInstanceConstant",
+      "parent": "/Game/Parkour/Environment/Forest/Materials/M_Forest_Foliage.M_Forest_Foliage",
+      "scalarParameters": [
+        {
+          "name": "SeasonSensitivity",
+          "value": 0.0,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC97D40) {}>"
+        },
+        {
+          "name": "SubsurfaceStrength",
+          "value": 0.30000001192092896,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98190) {}>"
+        },
+        {
+          "name": "LeafRoughness",
+          "value": 0.5600000023841858,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98220) {}>"
+        },
+        {
+          "name": "WindAmplitude",
+          "value": 2.4000000953674316,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC987F0) {}>"
+        }
+      ],
+      "vectorParameters": [
+        {
+          "name": "LeafColor",
+          "value": {
+            "r": 0.6200000047683716,
+            "g": 0.02800000086426735,
+            "b": 0.023000000044703484,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC989D0) {}>"
+        },
+        {
+          "name": "AutumnShiftColor",
+          "value": {
+            "r": 0.8500000238418579,
+            "g": 0.47999998927116394,
+            "b": 0.07999999821186066,
+            "a": 1.0
+          },
+          "overridden": false,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98790) {}>"
+        },
+        {
+          "name": "SubsurfaceTint",
+          "value": {
+            "r": 0.7200000286102295,
+            "g": 0.04699999839067459,
+            "b": 0.02500000037252903,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98670) {}>"
+        }
+      ],
+      "textures": []
+    },
+    "MI_CrossingStrawberry_Leaf": {
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/MI_CrossingStrawberry_Leaf.MI_CrossingStrawberry_Leaf",
+      "class": "MaterialInstanceConstant",
+      "parent": "/Game/Parkour/Environment/CloverBank/M_BotanicalBroadleaf.M_BotanicalBroadleaf",
+      "scalarParameters": [
+        {
+          "name": "SeasonSensitivity",
+          "value": 0.0,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC982B0) {}>"
+        },
+        {
+          "name": "SubsurfaceStrength",
+          "value": 0.30000001192092896,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AE48880) {}>"
+        },
+        {
+          "name": "LeafRoughness",
+          "value": 0.7099999785423279,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AE48140) {}>"
+        },
+        {
+          "name": "WindAmplitude",
+          "value": 2.4000000953674316,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AE48480) {}>"
+        }
+      ],
+      "vectorParameters": [
+        {
+          "name": "LeafColor",
+          "value": {
+            "r": 0.06400000303983688,
+            "g": 0.20000000298023224,
+            "b": 0.06199999898672104,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98C40) {}>"
+        },
+        {
+          "name": "AutumnShiftColor",
+          "value": {
+            "r": 0.8500000238418579,
+            "g": 0.47999998927116394,
+            "b": 0.07999999821186066,
+            "a": 1.0
+          },
+          "overridden": false,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98D30) {}>"
+        },
+        {
+          "name": "SubsurfaceTint",
+          "value": {
+            "r": 0.18000000715255737,
+            "g": 0.30000001192092896,
+            "b": 0.07500000298023224,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98AF0) {}>"
+        }
+      ],
+      "textures": []
+    },
+    "MI_CrossingStrawberry_Seed": {
+      "assetPath": "/Game/Parkour/Environment/ValleyFlora/MI_CrossingStrawberry_Seed.MI_CrossingStrawberry_Seed",
+      "class": "MaterialInstanceConstant",
+      "parent": "/Game/Parkour/Environment/Forest/Materials/M_Forest_Foliage.M_Forest_Foliage",
+      "scalarParameters": [
+        {
+          "name": "SeasonSensitivity",
+          "value": 0.0,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98E50) {}>"
+        },
+        {
+          "name": "SubsurfaceStrength",
+          "value": 0.30000001192092896,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98910) {}>"
+        },
+        {
+          "name": "LeafRoughness",
+          "value": 0.7099999785423279,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98D60) {}>"
+        },
+        {
+          "name": "WindAmplitude",
+          "value": 2.4000000953674316,
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC96120) {}>"
+        }
+      ],
+      "vectorParameters": [
+        {
+          "name": "LeafColor",
+          "value": {
+            "r": 0.7799999713897705,
+            "g": 0.4399999976158142,
+            "b": 0.11599999666213989,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98010) {}>"
+        },
+        {
+          "name": "AutumnShiftColor",
+          "value": {
+            "r": 0.8500000238418579,
+            "g": 0.47999998927116394,
+            "b": 0.07999999821186066,
+            "a": 1.0
+          },
+          "overridden": false,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98010) {}>"
+        },
+        {
+          "name": "SubsurfaceTint",
+          "value": {
+            "r": 0.8399999737739563,
+            "g": 0.5,
+            "b": 0.17000000178813934,
+            "a": 1.0
+          },
+          "overridden": true,
+          "source": "<Struct 'SoftObjectPath' (0x0000022C0AC98070) {}>"
+        }
+      ],
+      "textures": []
+    }
+  },
+  "meshSlotMaps": [
+    {
+      "mesh": "SM_FirstSteps_RiverGravel",
+      "file": "Meshes/SM_FirstSteps_RiverGravel.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "Material_0",
+          "asset": "/Game/Parkour/Environment/ValleyGround/M_ValleyCreekGravel.M_ValleyCreekGravel"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_Forest_MossTerrain_Solid",
+      "file": "Meshes/SM_Forest_MossTerrain_Solid.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_MossBank",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_MossBank.MI_Forest_MossBank"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_Forest_CanopyCrown",
+      "file": "Meshes/TreeParts/SM_Forest_CanopyCrown.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        },
+        {
+          "index": 1,
+          "slot": "MI_Forest_StrawberryLeaf",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_Forest_CanopyBough_A",
+      "file": "Meshes/TreeParts/SM_Forest_CanopyBough_A.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        },
+        {
+          "index": 1,
+          "slot": "MI_Forest_StrawberryLeaf",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_Forest_CanopyBough_B",
+      "file": "Meshes/TreeParts/SM_Forest_CanopyBough_B.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        },
+        {
+          "index": 1,
+          "slot": "MI_Forest_StrawberryLeaf",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_StrawberryLeaf.MI_Forest_StrawberryLeaf"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_BankArchTuft",
+      "file": "Meshes/TreeParts/SM_BankArchTuft.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "WorldGridMaterial",
+          "asset": "/Game/Parkour/Environment/CloverBank/M_BankSatinGrass.M_BankSatinGrass"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_BankClover",
+      "file": "Meshes/TreeParts/SM_BankClover.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "WorldGridMaterial",
+          "asset": "/Game/Parkour/Environment/CloverBank/M_BankClover.M_BankClover"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_BankSatinGrass",
+      "file": "Meshes/TreeParts/SM_BankSatinGrass.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "WorldGridMaterial",
+          "asset": "/Game/Parkour/Environment/CloverBank/M_BankSatinGrass.M_BankSatinGrass"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_Crossing_ArchingBellflowers",
+      "file": "Meshes/TreeParts/SM_Crossing_ArchingBellflowers.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "Stem",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Stem.MI_Bellflower_Stem"
+        },
+        {
+          "index": 1,
+          "slot": "Lavender",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_FlutedLavender.MI_Bellflower_FlutedLavender"
+        },
+        {
+          "index": 2,
+          "slot": "Lining",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_PinkPetal.MI_Forest_PinkPetal"
+        },
+        {
+          "index": 3,
+          "slot": "Pollen",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_BlossomCenter.MI_Forest_BlossomCenter"
+        },
+        {
+          "index": 4,
+          "slot": "Leaf",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_CrossingStrawberry_Leaf.MI_CrossingStrawberry_Leaf"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_Crossing_DimpledStrawberry",
+      "file": "Meshes/TreeParts/SM_Crossing_DimpledStrawberry.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "Stalk",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Stem.MI_Bellflower_Stem"
+        },
+        {
+          "index": 1,
+          "slot": "Flesh",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_CrossingStrawberry_Flesh.MI_CrossingStrawberry_Flesh"
+        },
+        {
+          "index": 2,
+          "slot": "Seed",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_CrossingStrawberry_Seed.MI_CrossingStrawberry_Seed"
+        },
+        {
+          "index": 3,
+          "slot": "Leaf",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_CrossingStrawberry_Leaf.MI_CrossingStrawberry_Leaf"
+        },
+        {
+          "index": 4,
+          "slot": "Vein",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Stem.MI_Bellflower_Stem"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_Valley_MixedBellflowerCluster",
+      "file": "Meshes/TreeParts/SM_Valley_MixedBellflowerCluster.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "Stem",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Stem.MI_Bellflower_Stem"
+        },
+        {
+          "index": 1,
+          "slot": "Lavender",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/MI_Bellflower_Lavender.MI_Bellflower_Lavender"
+        },
+        {
+          "index": 2,
+          "slot": "Lining",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_PinkPetal.MI_Forest_PinkPetal"
+        },
+        {
+          "index": 3,
+          "slot": "Pollen",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_BlossomCenter.MI_Forest_BlossomCenter"
+        },
+        {
+          "index": 4,
+          "slot": "MI_Forest_Clover",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_Clover.MI_Forest_Clover"
+        },
+        {
+          "index": 5,
+          "slot": "MI_Forest_BlossomWhite",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_BlossomWhite.MI_Forest_BlossomWhite"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_ValleyBellflowers",
+      "file": "Meshes/TreeParts/SM_ValleyBellflowers.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "M_ValleyFlora",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/M_ValleyFlora.M_ValleyFlora"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_ValleyLeafShrub",
+      "file": "Meshes/TreeParts/SM_ValleyLeafShrub.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "M_ValleyFlora",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/M_ValleyFlora.M_ValleyFlora"
+        }
+      ]
+    },
+    {
+      "mesh": "SM_ValleyStrawberry",
+      "file": "Meshes/TreeParts/SM_ValleyStrawberry.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "M_ValleyFlora",
+          "asset": "/Game/Parkour/Environment/ValleyFlora/M_ValleyFlora.M_ValleyFlora"
+        }
+      ]
+    },
+    {
+      "mesh": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264715714",
+      "file": "Meshes/TreeParts/SM_FirstStepsTree_01_Trunk.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        }
+      ]
+    },
+    {
+      "mesh": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264856717",
+      "file": "Meshes/TreeParts/SM_FirstStepsTree_02_Trunk.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        }
+      ]
+    },
+    {
+      "mesh": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264923718",
+      "file": "Meshes/TreeParts/SM_FirstStepsTree_03_Trunk.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        }
+      ]
+    },
+    {
+      "mesh": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264810716",
+      "file": "Meshes/TreeParts/SM_FirstStepsTree_04_Trunk.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        }
+      ]
+    },
+    {
+      "mesh": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264760715",
+      "file": "Meshes/TreeParts/SM_FirstStepsTree_05_Trunk.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        }
+      ]
+    },
+    {
+      "mesh": "BP_ProceduralForestTree_C_UAID_C87F549ECD7B031803_1264662713",
+      "file": "Meshes/TreeParts/SM_FirstStepsTree_06_Trunk.glb",
+      "slots": [
+        {
+          "index": 0,
+          "slot": "MI_Forest_RootBark",
+          "asset": "/Game/Parkour/Environment/Forest/Materials/MI_Forest_RootBark.MI_Forest_RootBark"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Exports generated from an isolated Unreal project copy; original project untouched.",
+    "Mesh dimensions and transforms are recorded in Unreal centimeters; GLB uses the glTF meter convention.",
+    "Final tree pivots are the BP_ProceduralForestTree actor origins."
+  ]
+}

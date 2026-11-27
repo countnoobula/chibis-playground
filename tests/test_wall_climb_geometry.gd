@@ -1,6 +1,6 @@
 extends SceneTree
 
-const WALL_GEOMETRY = preload("res://scripts/climbing/wall_climb_geometry.gd")
+const WALL_GEOMETRY = preload("res://features/runner/climbing/wall_climb_geometry.gd")
 
 var _failures: int = 0
 
@@ -52,7 +52,7 @@ func _initialize() -> void:
 	blocker.queue_free()
 	await physics_frame
 
-	var wall_scene: PackedScene = load("res://scenes/stations/dynamic_climbing_wall.tscn")
+	var wall_scene: PackedScene = load("res://levels/rooftop_gym/stations/dynamic_climbing_wall.tscn")
 	if wall_scene != null:
 		var authored_wall := wall_scene.instantiate() as Node3D
 		authored_wall.position.x = 5.0

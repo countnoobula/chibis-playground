@@ -3,9 +3,9 @@ extends SceneTree
 ## Direction-only tower gap audit. Run directly with the project's Godot console:
 ## Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/tower_gap_coverage.gd
 
-const TOWER_SCENE := preload("res://scenes/stations/rooftop_climb_tower.tscn")
-const RUNNER_SCENE := preload("res://scenes/character/chibi_runner.tscn")
-const MOTION := preload("res://scripts/climbing/wall_climb_motion.gd")
+const TOWER_SCENE := preload("res://levels/rooftop_gym/stations/rooftop_climb_tower.tscn")
+const RUNNER_SCENE := preload("res://features/runner/chibi_runner.tscn")
+const MOTION := preload("res://features/runner/climbing/wall_climb_motion.gd")
 
 const ROUTE_FRAME_LIMIT := 1800
 const SIDE_ROUTE_FRAME_LIMIT := 900

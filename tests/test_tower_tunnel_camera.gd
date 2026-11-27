@@ -4,7 +4,7 @@ extends SceneTree
 ## Run with the Godot 4.7 console executable using --headless --path <project> --script
 ## res://tests/test_tower_tunnel_camera.gd
 
-const GYM_SCENE := "res://scenes/gym/rooftop_parkour_gym.tscn"
+const GYM_SCENE := "res://levels/rooftop_gym/rooftop_parkour_gym.tscn"
 const CAMERA_ARM_MAX := 1.70
 const TUNNEL_CROWN_PROBE := Vector3(31.3, 1.50, -35.95)
 const TUNNEL_MIDPOINT := Vector3(31.3, -0.05, -35.95)

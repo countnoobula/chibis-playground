@@ -1,8 +1,8 @@
 extends SceneTree
 
-const TOWER_SCENE := preload("res://scenes/stations/rooftop_climb_tower.tscn")
-const RUNNER_SCENE := preload("res://scenes/character/chibi_runner.tscn")
-const MOTION := preload("res://scripts/climbing/wall_climb_motion.gd")
+const TOWER_SCENE := preload("res://levels/rooftop_gym/stations/rooftop_climb_tower.tscn")
+const RUNNER_SCENE := preload("res://features/runner/chibi_runner.tscn")
+const MOTION := preload("res://features/runner/climbing/wall_climb_motion.gd")
 
 const SUMMIT_INPUT_LIMIT := 1800
 const LAP_INPUT_LIMIT := 1800

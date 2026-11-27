@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ChibiScarfLayout" load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/character/chibi_scarf_layout.gd" id="1_layout"]
+[ext_resource type="Script" path="res://features/runner/chibi_scarf_layout.gd" id="1_layout"]
 
 [resource]
 script = ExtResource("1_layout")

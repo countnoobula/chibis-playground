@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://features/water/examples/rocky_basin.gd" id="1"]
+[ext_resource type="PackedScene" path="res://features/water/water_body_3d.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://features/runner/chibi_runner.tscn" id="3"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyPaint"]
+sky_top_color = Color(0.37, 0.68, 0.73, 1)
+sky_horizon_color = Color(0.92, 0.87, 0.69, 1)
+ground_horizon_color = Color(0.92, 0.87, 0.69, 1)
+ground_bottom_color = Color(0.42, 0.51, 0.39, 1)
+sun_angle_max = 13.0
+sun_curve = 0.12
+
+[sub_resource type="Sky" id="BasinSky"]
+sky_material = SubResource("SkyPaint")
+
+[sub_resource type="Environment" id="Daylight"]
+background_mode = 2
+sky = SubResource("BasinSky")
+ambient_light_source = 2
+ambient_light_color = Color(0.76, 0.87, 0.79, 1)
+ambient_light_energy = 0.42
+tonemap_mode = 3
+tonemap_exposure = 0.86
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.73, 0.83, 0.74, 1)
+fog_density = 0.15
+fog_sky_affect = 0.0
+fog_depth_begin = 19.0
+fog_depth_end = 44.0
+
+[node name="RockyBasin" type="Node3D"]
+script = ExtResource("1")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Daylight")
+
+[node name="SunLight" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.77, -0.54, 0)
+light_color = Color(1, 0.9, 0.73, 1)
+light_energy = 0.98
+shadow_enabled = true
+shadow_blur = 1.7
+directional_shadow_max_distance = 36.0
+
+[node name="WaterBody3D" parent="." instance=ExtResource("2")]
+position = Vector3(0, 0.72, 0)
+outline = PackedVector2Array(-4.8, 5.7, -6.8, 3.9, -8.1, 0.5, -7.5, -4.75, -4.4, -7.2, -1.4, -7.7, 2.1, -6.9, 5.7, -7.8, 8.1, -4.5, 7.8, -0.25, 6, 2.4, 5, 4.9, 2.15, 5.7, 0.5, 5.35, -1.4, 6.3)
+max_depth = 2.9
+
+[node name="ChibiRunner" parent="." instance=ExtResource("3")]
+position = Vector3(0, 1.8, 9.0)

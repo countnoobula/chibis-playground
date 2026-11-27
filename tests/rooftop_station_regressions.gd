@@ -25,7 +25,6 @@ func run(tree: SceneTree, gym: Node3D, chibi: ParkourController, check: Callable
 	await _test_sloth_line_approach_and_block()
 	await _test_zip_line_approach_and_side_rejection()
 	await _test_swing_approach_and_side_rejection()
-	await _test_low_rope_net_mount_and_dismount()
 
 	_chibi.chibi_input.clear_touch_input()
 	_chibi.reset_for_respawn(OPEN_DECK)
@@ -281,27 +280,6 @@ func _test_swing_grip_contact(swing: ParkourRopeSwing) -> void:
 	skeleton.skeleton_updated.disconnect(sample_contact)
 	_check.call(samples[0] > 0 and samples[1] < 0.035 and samples[2] > 0.23,
 		"The swing keeps both hands on its grips and the head clear of the rope (hand %.3f m, head %.3f m)" % [samples[1], samples[2]])
-
-
-func _test_low_rope_net_mount_and_dismount() -> void:
-	var net := _gym.get_node("Zone3_ClimbingPlaza/Climb_RopeNet") as ClimbingStation
-	_reset(net.to_global(Vector3(0.0, 0.04, 0.80)))
-	_chibi.chibi_input.set_touch_move(Vector2.UP)
-	var mounted := await _move_until_state("Climbing", 60)
-	_chibi.chibi_input.set_touch_move(Vector2.ZERO)
-	await _ticks(10)
-	var low_net_clearance := mounted and _chibi.global_position.y >= 0.0 and _chibi.global_position.y < 0.70
-	var collision_stays_enabled := mounted and _chibi.get_collision_mask_value(1)
-	_chibi.chibi_input.set_touch_jump(true)
-	await _ticks(1)
-	_chibi.chibi_input.set_touch_jump(false)
-	_chibi.chibi_input.set_touch_move(Vector2.DOWN)
-	await _ticks(8)
-	var cleared_panel := _chibi.current_state == "Locomotion" and _chibi._active_climb_station == null \
-		and not _chibi.pose_mod.climb_active and net.to_local(_chibi.global_position).z > 0.30
-	_chibi.chibi_input.set_touch_move(Vector2.ZERO)
-	_check.call(low_net_clearance and collision_stays_enabled and cleared_panel,
-		"The low rope net keeps deck clearance and world collision through jump dismount")
 
 
 func _move_until_state(state: String, frame_limit: int) -> bool:

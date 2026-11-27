@@ -7,6 +7,8 @@ extends SceneTree
 var _passed: int = 0
 var _failed: int = 0
 
+const LEVEL_PROGRESS_PROVIDER := preload("res://ui/hud/journal_level_progress_provider.gd")
+
 
 func _init() -> void:
 	call_deferred("_run_all")
@@ -27,7 +29,6 @@ func _run_all() -> void:
 	_assert_true(Engine.physics_ticks_per_second == 60, "Parkour physics tests run at 60 ticks per second")
 	_test_chibi_assets()
 	_test_two_bone_ik()
-	_test_climbing_net_solver()
 	_test_rope_swing_solver()
 	_test_running_wind_ribbon()
 	await _test_touch_hud()
@@ -165,6 +166,27 @@ func _test_touch_hud() -> void:
 	for tab in ["Gear", "Map", "Journal", "Options"]:
 		await _tap_journal_button(journal, tab + "TabButton")
 	_assert_true(paused and hud.menu_open, "All four journal tabs are accessible while gameplay is paused")
+	await _tap_journal_button(journal, "JournalTabButton")
+	var journal_area := journal.find_child("JournalAreaLabel", true, false) as Label
+	var berry_count := journal.find_child("BerryCountLabel", true, false) as Label
+	_assert_true(journal_area.text == "Area unavailable" and berry_count.text == "0 / 0 collected",
+		"The journal preview shows a safe empty state when no level provider is bound")
+	await _tap_journal_button(journal, "OptionsTabButton")
+	var level_progress := LEVEL_PROGRESS_PROVIDER.new("Preview Garden")
+	hud.bind_journal_level_progress(level_progress)
+	await _tap_journal_button(journal, "JournalTabButton")
+	_assert_true(journal_area.text == "Preview Garden" and berry_count.text == "0 / 0 collected",
+		"The journal displays area and progress from its explicitly bound provider")
+	level_progress.register_strawberry()
+	await process_frame
+	_assert_true(berry_count.text == "0 / 1 collected" and journal.find_child("BerryStamp1", true, false) != null,
+		"A late strawberry registration updates an open journal")
+	level_progress.collect_strawberry()
+	level_progress.register_strawberry()
+	await process_frame
+	_assert_true(berry_count.text == "1 / 2 collected" and journal.find_child("BerryStamp2", true, false) != null,
+		"Collection and later pickups keep the open journal progress synchronized")
+	await _tap_journal_button(journal, "OptionsTabButton")
 	await _tap_journal_button(journal, "GraphicsSectionButton")
 	var ultra := journal.find_child("QualityUltraButton", true, false) as Button
 	_assert_true(ultra != null and ultra.is_visible_in_tree(), "Graphics index opens the quality presets")
@@ -344,11 +366,6 @@ func _test_chibi_assets() -> void:
 	_assert_true(frozen_clips.is_empty(), "ALL 36 animations have live bone rotation motion (frozen=%s)" % [str(frozen_clips)])
 	inst.free()
 
-	var route_txt := FileAccess.get_file_as_string("res://assets/stations/wall_route.json")
-	var route = JSON.parse_string(route_txt)
-	_assert_true(route is Dictionary and route.get("bands", []).size() == 8 and route.get("toe_chips", []).size() == 28, "wall_route.json has 8 bands and 28 toe chips")
-
-
 func _test_two_bone_ik() -> void:
 	var upper := Transform3D(Basis.IDENTITY, Vector3(0.0, 1.0, 0.0))
 	var lower := Transform3D(Basis.IDENTITY, Vector3(0.0, 0.7, 0.0))
@@ -364,40 +381,6 @@ func _test_two_bone_ik() -> void:
 	var far_res := TwoBoneIK.solve_chain(upper, lower, tip, far_target, Vector3.BACK, true, 0.05)
 	var far_tip: Vector3 = (far_res["tip"] as Transform3D).origin
 	_assert_true(far_tip.is_finite() and far_tip.distance_to(upper.origin) <= 0.66, "TwoBoneIK beyond-reach clamps cleanly with protraction")
-
-
-func _test_climbing_net_solver() -> void:
-	var net := ClimbingNetSolver.new()
-	net.initialize()
-	var corners := [0, 5, 17 * 6, 17 * 6 + 5]
-	var center_before := net.sample_offset(Vector3(0.0, 1.36, 0.19))
-
-	for _step in 60:
-		net.load_point(Vector3(-0.10, 1.50, 0.19), Vector3(0.0, -24.0, 21.5))
-		net.load_point(Vector3(0.10, 1.50, 0.19), Vector3(0.0, -24.0, 21.5))
-		net.advance(1.0 / 60.0)
-
-	var offsets := net.get_packed_offsets()
-	_assert_true(offsets.size() == 108, "ClimbingNetSolver produces 108 particle offsets")
-	var all_finite := true
-	var clearance_ok := true
-	for i in ClimbingNetSolver.COUNT:
-		if not offsets[i].is_finite():
-			all_finite = false
-		if net.pinned[i] == 0:
-			if net.position[i].z < 0.039 or net.position[i].y < 0.029:
-				clearance_ok = false
-	_assert_true(all_finite, "ClimbingNetSolver all 108 offsets finite after load")
-	_assert_true(clearance_ok, "ClimbingNetSolver backing & floor clearance constraints hold")
-
-	for ci in corners:
-		_assert_true(net.position[ci].distance_to(net.rest[ci] + ClimbingNetSolver.idle_offset(net.rest[ci])) < 1e-4, "Net corner %d stays pinned" % ci)
-
-	var center_after := net.sample_offset(Vector3(0.0, 1.36, 0.19))
-	_assert_true(
-		center_after.z > center_before.z + 0.05 and center_after.y < -0.05,
-		"ClimbingNetSolver bows outward (+Z: %.3f->%.3f) while hanging below rest (-Y: %.3f) under climber load" % [center_before.z, center_after.z, center_after.y]
-	)
 
 
 func _test_rope_swing_solver() -> void:
@@ -417,7 +400,7 @@ func _test_rope_swing_solver() -> void:
 
 
 func _test_full_gym_and_physics() -> void:
-	var gym_ps := load("res://scenes/gym/rooftop_parkour_gym.tscn") as PackedScene
+	var gym_ps := load("res://levels/rooftop_gym/rooftop_parkour_gym.tscn") as PackedScene
 	_assert_true(gym_ps != null, "rooftop_parkour_gym.tscn loads cleanly")
 	var gym := gym_ps.instantiate()
 	root.add_child(gym)
@@ -585,11 +568,11 @@ func _test_full_gym_and_physics() -> void:
 		await _test_parkour_line_keyboard(chibi, sloth_line)
 		await _test_parkour_line_keyboard(chibi, zip_line)
 
-	# Verify ClimbingWall & ClimbingNet instantiated cleanly
+	# Verify the Zone 3 wall remains and the removed rooftop net is absent.
 	var cwall := gym.get_node_or_null("Zone3_ClimbingPlaza/Climb_HandholdWall") as Node3D
-	var cnet := gym.get_node_or_null("Zone3_ClimbingPlaza/Climb_RopeNet") as ClimbingStation
 	_assert_true(cwall != null and cwall.is_in_group("climbable_wall"), "Collision-based climbing wall active in Zone 3")
-	_assert_true(cnet != null and cnet.is_rope_net and cnet.net_solver != null, "ClimbingNet station + Verlet solver active in Zone 3")
+	_assert_true(gym.get_node_or_null("Zone3_ClimbingPlaza/Climb_RopeNet") == null,
+		"Removed rope net station is absent from Zone 3")
 	if cwall != null:
 		await preload("res://tests/dynamic_wall_checks.gd").new().run(self, chibi, cwall, _assert_true)
 
@@ -702,7 +685,7 @@ func _test_full_gym_and_physics() -> void:
 	await preload("res://tests/rooftop_station_regressions.gd").new().run(self, gym, chibi, _assert_true)
 	await preload("res://tests/balance_footing_regression.gd").new().run(self, _assert_true, gym, chibi, skel)
 	await preload("res://tests/scarf_glide_regressions.gd").new().run(self, gym, chibi, _assert_true)
-	await _test_automatic_ledge_and_net(gym, chibi)
+	await _test_automatic_ledge(chibi)
 	await preload("res://tests/rooftop_ledge_vault_regressions.gd").new().run(self, gym, chibi, _assert_true)
 	await preload("res://tests/wind_tunnel_regressions.gd").new().run(self, gym, chibi, _assert_true)
 	await preload("res://tests/wind_assisted_glide_regressions.gd").new().run(self, gym, chibi, _assert_true)
@@ -714,8 +697,12 @@ func _test_full_gym_and_physics() -> void:
 
 func _test_contextual_pickup(gym: Node3D, chibi: ParkourController) -> void:
 	var item := gym.get_node("Zone1_FlowAndSlides/StrawberryPickup") as Node3D
+	var level_progress := chibi.touch_hud.journal_level_progress_provider
 	_assert_true(gym.get("strawberries_total") == 1 and gym.get("strawberries_collected") == 0,
 		"The Journal starts with the rooftop strawberry available")
+	_assert_true(level_progress != null and level_progress.get_area_name() == "Rooftop Parkour Gym"
+		and level_progress.get_berry_progress() == Vector2i(0, 1),
+		"The rooftop explicitly binds its area and starting progress to the HUD")
 	var button := chibi.touch_hud.get_node("HUDRoot/TouchRoot/Pickup") as Control
 	chibi.touch_hud.set_touch_visible(true)
 	var point := button.get_global_rect().get_center()
@@ -744,7 +731,7 @@ func _test_contextual_pickup(gym: Node3D, chibi: ParkourController) -> void:
 	_assert_true(not is_instance_valid(item) and not button.visible and chibi.current_state == "Locomotion",
 		"Tapping the strawberry collects it, hides the circle, and preserves locomotion")
 
-	var second_item := preload("res://scenes/items/strawberry_pickup.tscn").instantiate() as Node3D
+	var second_item := preload("res://features/items/strawberry_pickup.tscn").instantiate() as Node3D
 	gym.add_child(second_item)
 	second_item.global_position = approach + Vector3(0.65, 0.32, 0.0)
 	await _wait_physics_frames(3)
@@ -760,12 +747,14 @@ func _test_contextual_pickup(gym: Node3D, chibi: ParkourController) -> void:
 	_assert_true(not is_instance_valid(second_item) and not button.visible, "The desktop pickup key collects a reachable item")
 	_assert_true(gym.get("strawberries_total") == 2 and gym.get("strawberries_collected") == 2,
 		"The Journal counts both the original and newly added strawberry")
+	_assert_true(level_progress.get_berry_progress() == Vector2i(2, 2),
+		"Late rooftop pickups update the level provider consumed by the Journal")
 	chibi.touch_hud.set_touch_visible(false)
 	chibi.reset_for_respawn(Vector3(0, 0.1, 6))
 	await _wait_physics_frames(4)
 
 
-func _test_automatic_ledge_and_net(gym: Node3D, chibi: ParkourController) -> void:
+func _test_automatic_ledge(chibi: ParkourController) -> void:
 	chibi.reset_for_respawn(Vector3(-24.0, 0.035, 3.73))
 	chibi.rotation.y = 0.0
 	chibi.camera_ctrl.yaw = 0.0
@@ -783,17 +772,6 @@ func _test_automatic_ledge_and_net(gym: Node3D, chibi: ParkourController) -> voi
 		if mantled and chibi.current_state == "Locomotion":
 			break
 	_assert_true(caught and mantled and chibi.global_position.y > 1.6, "Jump with forward movement catches and climbs the ledge")
-
-	var net := gym.get_node("Zone3_ClimbingPlaza/Climb_RopeNet") as Node3D
-	chibi.chibi_input.set_touch_move(Vector2.ZERO)
-	chibi.reset_for_respawn(net.to_global(Vector3(0.0, 0.04, 0.80)))
-	await _wait_physics_frames(7)
-	chibi.chibi_input.set_touch_move(Vector2.UP)
-	for _tick in 32:
-		await _wait_physics_frames(1)
-		if chibi.current_state == "Climbing":
-			break
-	_assert_true(chibi.current_state == "Climbing" and not chibi.is_wall_climbing(), "Walking into the rope net starts climbing")
 	chibi.chibi_input.clear_touch_input()
 	chibi.reset_for_respawn(Vector3(0, 0.1, 6))
 	await _wait_physics_frames(4)

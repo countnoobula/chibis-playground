@@ -1,6 +1,6 @@
 extends RefCounted
 
-const Motion := preload("res://scripts/climbing/wall_climb_motion.gd")
+const Motion := preload("res://features/runner/climbing/wall_climb_motion.gd")
 
 var _tree: SceneTree
 var _runner: ParkourController

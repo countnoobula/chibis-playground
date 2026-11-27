@@ -1,6 +1,6 @@
 extends SceneTree
 
-const GYM_SCENE := "res://scenes/gym/rooftop_parkour_gym.tscn"
+const GYM_SCENE := "res://levels/rooftop_gym/rooftop_parkour_gym.tscn"
 
 var _gym: RooftopGymController
 var _runner: ParkourController

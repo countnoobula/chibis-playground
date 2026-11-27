@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://levels/rooftop_gym/stations/rooftop_wind_tunnel.gd" id="1_wind_tunnel"]
+
+[node name="RooftopWindTunnel" type="Node3D"]
+script = ExtResource("1_wind_tunnel")

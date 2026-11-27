@@ -11,13 +11,13 @@ config_version=5
 [application]
 
 config/name="Chibi"
-run/main_scene="res://scenes/menu/main_menu.tscn"
+run/main_scene="res://ui/menu/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
 [autoload]
 
-GameSettings="*res://scripts/settings/game_settings.gd"
+GameSettings="*res://settings/game_settings.gd"
 PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
 
 [display]

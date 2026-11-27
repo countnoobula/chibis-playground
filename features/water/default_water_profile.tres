@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WaterProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://features/water/water_profile.gd" id="1_profile"]
+
+[resource]
+script = ExtResource("1_profile")
+underwater_color = Color(0.055, 0.405, 0.47, 1)
+visibility_distance = 10.0
+shallow_color = Color(0.48, 0.94, 0.88, 1)
+deep_color = Color(0.035, 0.51, 0.62, 1)
+foam_color = Color(0.96, 1, 0.93, 1)
+surface_opacity = 0.33
+wave_height = 0.008
+refraction_strength = 0.005
+shoreline_width = 0.34
+caustic_color = Color(1, 0.77, 0.39, 1)
+caustic_strength = 0.62
+caustic_scale = 1.8
+caustic_speed = 0.22
+caustic_shore_fade = 0.7
+ripple_color = Color(0.78, 1, 0.95, 0.74)
+bubble_color = Color(0.76, 1, 0.99, 0.88)
+bubble_rise_speed = 1.25
