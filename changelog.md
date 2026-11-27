@@ -44,6 +44,10 @@ Add each active target here with its owner, status, and a short description. Che
 
 ## Chibi movement and animation
 
+### 2026-11-27
+
+- Rebuilt the scarf canopy as a deeper continuous arch with a real thickened shell, a cream binding, a shaded underside, and a subtle weave. The canopy spreads across first, then fills out with air. The crown and edges respond more strongly to descent and banking while the four corners stay anchored in Chibi's hands.
+
 ### 2026-11-26
 
 - A fresh Jump, Ctrl, or C folds the scarf while it is opening or fully open. Ordinary gravity resumes from Chibi's current velocity as her hands release into the fall and the wind wisps fade. The cancel consumes the press, and a new airtime re-arms glide.
@@ -118,6 +122,10 @@ Add each active target here with its owner, status, and a short description. Che
 - The integrated Godot headless suite passed all 254 checks.
 
 ## Verification
+
+### 2026-11-27
+
+- Verified the 2,848-triangle imported canopy and its four grip anchors. Rooftop opening, steering, cancel, and landing were replayed from chase and side views on Windows D3D12 Mobile with the local wind tunnel changes present.
 
 ### 2026-11-26
 

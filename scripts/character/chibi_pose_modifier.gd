@@ -1157,11 +1157,11 @@ func _apply_scarf_hand_ik(
 		if phase == &"deploy":
 			hand_open = smoothstep(0.0, 0.76, open_amount) if side == 0 \
 				else smoothstep(0.18, 1.0, open_amount)
-		var lateral := lerpf(0.12, 0.295, hand_open)
-		var height := lerpf(0.535, 0.70, hand_open)
+		var lateral := lerpf(0.12, 0.325, hand_open)
+		var height := lerpf(0.535, 0.73, hand_open)
 		var forward := lerpf(0.035, 0.105, hand_open)
 		# A bank lets the outside hand float a little higher while the inside hand follows.
-		height -= side_sign * bank * 0.014 * hand_open
+		height -= side_sign * bank * 0.024 * hand_open
 		var target := runner_body.global_position \
 			+ actor_basis.x * (side_sign * lateral) \
 			+ actor_basis.y * height \

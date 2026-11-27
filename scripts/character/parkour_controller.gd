@@ -561,7 +561,7 @@ func can_deploy_scarf() -> bool:
 		return false
 	var capsule_height := _current_half_height() * 2.0
 	# Allow the cloth to pass over both hands and inflate above the capsule.
-	var clearance_size := Vector3(1.9, maxf(config.scarf_glide_headroom, 0.01), 0.85)
+	var clearance_size := Vector3(1.9, maxf(config.scarf_glide_headroom, 0.01), 1.30)
 	if _scarf_glide_clearance.size != clearance_size:
 		_scarf_glide_clearance.size = clearance_size
 	var overhead_clearance := PhysicsShapeQueryParameters3D.new()
