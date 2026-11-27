@@ -642,6 +642,8 @@ func _test_full_gym_and_physics() -> void:
 	await preload("res://tests/balance_footing_regression.gd").new().run(self, _assert_true, gym, chibi, skel)
 	await preload("res://tests/scarf_glide_regressions.gd").new().run(self, gym, chibi, _assert_true)
 	await _test_automatic_ledge_and_net(gym, chibi)
+	await preload("res://tests/wind_tunnel_regressions.gd").new().run(self, gym, chibi, _assert_true)
+	await preload("res://tests/wind_assisted_glide_regressions.gd").new().run(self, gym, chibi, _assert_true)
 
 	gym.queue_free()
 	await process_frame

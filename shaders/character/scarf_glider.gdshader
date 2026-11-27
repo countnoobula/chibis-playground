@@ -1,6 +1,7 @@
 shader_type spatial;
 
-render_mode blend_mix, depth_prepass_alpha, cull_back, diffuse_lambert_wrap, specular_disabled;
+// Depth writes keep the near and far faces of the thick shell from sorting over each other.
+render_mode blend_mix, depth_draw_always, cull_back, diffuse_lambert_wrap, specular_disabled;
 
 uniform sampler2D chibi_scarf_print : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D chibi_scarf_weave : source_color, filter_linear, repeat_disable;
@@ -15,17 +16,29 @@ uniform float gust = 0.0;
 uniform float planar_airflow : hint_range(0.0, 1.0) = 0.0;
 uniform float descent_airflow : hint_range(0.0, 1.0) = 0.0;
 uniform float airflow_side : hint_range(-1.0, 1.0) = 0.0;
+uniform float wind_load : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 wind_direction = vec3(0.0);
 uniform float cloth_tension : hint_range(0.0, 1.0) = 0.0;
 uniform float deployment_catch : hint_range(0.0, 1.0) = 0.0;
 
+varying float outer_face;
+
 void vertex() {
 	float inflated = clamp(deploy_amount, 0.0, 1.0);
-	VERTEX = mix(collapse_center, VERTEX, inflated);
+	outer_face = smoothstep(-0.32, 0.48, NORMAL.y);
 
 	// Each weight belongs to one actual corner. The four weights are authored
 	// in the export mesh, so only the gathered ends follow Chibi's hands.
 	float pin_weight = clamp(COLOR.r + COLOR.g + COLOR.b + COLOR.a, 0.0, 1.0);
 	float free_cloth = 1.0 - pin_weight;
+	// Spread the span first. The deeper bell follows as air fills the open sheet.
+	// The pin vertices still use the exact linear collapse that the grip solver uses.
+	vec3 spread = vec3(
+		smoothstep(0.0, 0.84, inflated),
+		inflated,
+		smoothstep(0.13, 1.0, inflated)
+	);
+	VERTEX = collapse_center + (VERTEX - collapse_center) * mix(vec3(inflated), spread, free_cloth);
 	VERTEX += scarf_pin_delta[0] * COLOR.r;
 	VERTEX += scarf_pin_delta[1] * COLOR.g;
 	VERTEX += scarf_pin_delta[2] * COLOR.b;
@@ -37,12 +50,15 @@ void vertex() {
 	float hem_edge = smoothstep(0.60, 0.94, abs(side));
 	float planar = clamp(planar_airflow, 0.0, 1.0);
 	float descent = clamp(descent_airflow, 0.0, 1.0);
+	float wind = clamp(wind_load, 0.0, 1.0);
 	float tension = clamp(cloth_tension, 0.0, 1.0);
 	float phase = gust + airflow_side * UV.y * 1.7;
 	float ripple_a = sin(TIME * 3.1 + UV.y * 19.0 + side * 2.2 + phase);
 	float ripple_b = sin(TIME * 4.3 - UV.y * 12.5 + side * 4.1 + phase * 0.72);
 	float hem_ripples = (ripple_a * 0.64 + ripple_b * 0.36) * hem_edge
-		* (0.008 + planar * 0.007 + descent * 0.008) * tension;
+		* (0.008 + planar * 0.007 + descent * 0.008 + wind * 0.015) * tension;
+	float wind_hem_wave = sin(TIME * 5.1 + UV.y * 23.0 + side * 3.5 + phase * 1.3);
+	hem_ripples += wind_hem_wave * hem_edge * wind * 0.014 * tension;
 	// Lift the free middle of each hem in local Y. Both UV.y ends taper out
 	// around the gathered corners, while the outer-x mask stays clear of the print.
 	float hem_span = smoothstep(0.08, 0.22, UV.y)
@@ -50,19 +66,29 @@ void vertex() {
 	float hem_lift_wave = sin(TIME * 2.8 + UV.y * 13.0 + side * 1.2 + phase) * 0.70
 		+ sin(TIME * 4.5 - UV.y * 8.0 + side * 3.1 + phase * 0.65) * 0.30;
 	float hem_lift = hem_lift_wave * hem_edge * hem_span
-		* (0.010 + planar * 0.008 + descent * 0.018) * tension;
+		* (0.014 + planar * 0.013 + descent * 0.025 + wind * 0.017) * tension;
 	float body_gate = 0.30 + abs(side) * 0.42;
 	float body_wave = sin(TIME * 2.0 + UV.y * 7.2 + UV.x * 1.8 + phase)
-		* (0.002 + planar * 0.003 + descent * 0.002) * body_gate * tension;
+		* (0.002 + planar * 0.003 + descent * 0.002 + wind * 0.004) * body_gate * tension;
 	float breathing = sin(TIME * 0.82 + UV.y * 2.3 + gust * 0.48)
 		* 0.004 * (0.65 + abs(side) * 0.35) * tension;
 	float opening_catch = deployment_catch * (0.008 + descent * 0.004)
 		* (0.76 + 0.24 * sin(TIME * 8.0 + UV.y * 3.2 + gust));
 	VERTEX.z += (hem_ripples + body_wave + breathing + opening_catch) * inflated * free_cloth;
 
+	// Pressure moves the broad crown as one piece and leaves the print readable.
+	float canopy_center = sin(PI * clamp(UV.x, 0.0, 1.0))
+		* sin(PI * clamp(UV.y, 0.0, 1.0));
+	float belly_pulse = 0.72 + 0.28 * sin(TIME * 2.7 + UV.y * 5.0 + phase);
+	float pressure = 0.018 + descent * 0.042 + planar * 0.026 + wind * 0.048;
+	float belly = canopy_center * (pressure * belly_pulse * tension + deployment_catch * 0.055);
+	VERTEX.y += belly * inflated * free_cloth;
+	VERTEX.x += wind_direction.x * canopy_center * wind * 0.024 * inflated * free_cloth;
+	VERTEX.z += wind_direction.z * canopy_center * wind * 0.030 * inflated * free_cloth;
+
 	// A steering turn lifts the hem on its bank side, then relaxes with tension.
 	float turn_side = max(clamp(bank, -1.0, 1.0) * side, 0.0);
-	float turn_lift = turn_side * hem_edge * (0.003 + planar * 0.004 + descent * 0.003)
+	float turn_lift = turn_side * hem_edge * (0.028 + planar * 0.024 + descent * 0.012 + wind * 0.014)
 		* tension;
 	VERTEX.y += (hem_lift + turn_lift) * inflated * free_cloth;
 	VERTEX.x += (VERTEX.y - collapse_center.y) * clamp(bank, -1.0, 1.0)
@@ -72,12 +98,25 @@ void vertex() {
 void fragment() {
 	float hem = texture(chibi_scarf_weave, vec2(clamp(UV.x, 0.0, 1.0), 0.5)).g;
 	vec3 fabric = mix(peach_cloth.rgb, cream_hem.rgb, smoothstep(0.17, 0.43, hem));
-	vec2 print_uv = (UV - vec2(0.344, 0.146)) * vec2(3.205128, 1.569859);
+	vec2 print_uv = (UV - vec2(0.306, 0.30)) * vec2(2.577, 1.90);
 	vec4 print_mark = texture(chibi_scarf_print, print_uv);
 	float in_print = step(0.0, print_uv.x) * step(print_uv.x, 1.0)
 		* step(0.0, print_uv.y) * step(print_uv.y, 1.0);
-	ALBEDO = mix(fabric, print_mark.rgb, print_mark.a * in_print * 0.78);
-	ROUGHNESS = 0.9;
-	EMISSION = ALBEDO * 0.14;
+	fabric = mix(fabric, print_mark.rgb, print_mark.a * in_print * 0.88);
+	vec2 edge_uv = min(UV, vec2(1.0) - UV);
+	float edge = min(edge_uv.x * 1.45, edge_uv.y);
+	float binding = 1.0 - smoothstep(0.008, 0.023, edge);
+	float stitch = 1.0 - smoothstep(0.002, 0.007, abs(edge - 0.027));
+	fabric = mix(fabric, cream_hem.rgb, binding * 0.87 + stitch * 0.22);
+
+	// Fade the weave below pixel scale so the cloth does not shimmer in motion.
+	vec2 weave = UV * vec2(92.0, 66.0);
+	float footprint = max(fwidth(weave.x), fwidth(weave.y));
+	float weave_weight = 1.0 - smoothstep(0.23, 0.56, footprint);
+	float yarn = sin(TAU * weave.x) * sin(TAU * weave.y);
+	vec3 underside = mix(vec3(0.72, 0.67, 0.61), vec3(1.0), outer_face);
+	ALBEDO = fabric * underside * (1.0 + 0.047 * yarn * weave_weight);
+	ROUGHNESS = 0.88;
+	EMISSION = ALBEDO * 0.10;
 	ALPHA = clamp(canopy_alpha, 0.0, 1.0);
 }

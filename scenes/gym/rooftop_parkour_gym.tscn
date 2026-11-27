@@ -22,6 +22,8 @@
 [ext_resource type="Script" path="res://scripts/character/parkour_controller.gd" id="20_rvh20"]
 [ext_resource type="Script" path="res://scripts/character/parkour_config.gd" id="21_1i2iw"]
 [ext_resource type="Script" path="res://scripts/gym/tower_fall_meter.gd" id="22_pk840"]
+[ext_resource type="PackedScene" path="res://scenes/stations/rooftop_wind_tunnel.tscn" id="23_wind"]
+[ext_resource type="PackedScene" path="res://scenes/stations/rooftop_wind_launch_perch.tscn" id="24_wind_launch"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_1wgbk"]
 seed = 4137
@@ -2401,6 +2403,12 @@ script = ExtResource("16_cww0b")
 [node name="ClimbTower" type="Node3D" parent="." unique_id=711301955 instance=ExtResource("17_wwikr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.5, 0, -28.2)
 script = ExtResource("18_kb0j8")
+
+[node name="WindTunnel" type="Node3D" parent="." unique_id=1649026802 instance=ExtResource("23_wind")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 15)
+
+[node name="WindLaunchPerch" type="Node3D" parent="." unique_id=1884486234 instance=ExtResource("24_wind_launch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.9, 0, 19.45)
 
 [node name="Sign_Zone1" type="Label3D" parent="." unique_id=474364077]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 3.2, 1.5)

@@ -3,6 +3,10 @@ extends SkeletonModifier3D
 
 const GROUND_PELVIS_COMPRESSION_MAX := 0.025
 const GROUND_LEG_PROTRACTION_MAX := 0.018
+const SCARF_LANDING_CONTACT_START_WEIGHT := 0.40
+const SCARF_LANDING_CONTACT_FULL_WEIGHT := 0.92
+const SCARF_LANDING_CONTACT_RAMP := 0.05
+const SCARF_LANDING_TOE_OFF_START := 0.80
 const BALANCE_PELVIS_COMPRESSION_MAX := 0.090
 const GROUND_TARGET_AHEAD_MIN := 0.120
 const GROUND_TARGET_AHEAD_MAX := 0.130
@@ -11,6 +15,9 @@ const WALL_CLIMB_POSE_BLEND_RATE := 16.0
 const SWIM_POSE_BLEND_RATE := 15.0
 const SWIM_SCULL_RATE := 1.8
 const TOWER_HANGING_IDLE_RESET_BLEND := 0.04
+const WIND_POSE_BLEND_RATE := 9.0
+const WIND_RECOIL_BLEND_RATE := 12.0
+const WIND_SUPPORT_WEIGHT_THRESHOLD := 0.55
 
 ## Post-AnimationTree SkeletonModifier3D porting:
 ## 1. ChibiLedgeAnimInstance.cpp: per-hand 2-stage FindGrip raycast, LedgeShimmy alternating lift arc,
@@ -66,6 +73,8 @@ class GroundFootContact:
 	var step_emitted: bool = false
 	var gait_contact_active: bool = false
 	var stance_was_active: bool = false
+	var landing_promotion: bool = false
+	var landing_promotion_elapsed: float = 0.0
 	var blocked_until_swing: bool = false
 	var weight: float = 0.0
 	var releasing: bool = false
@@ -100,6 +109,8 @@ class GroundFootContact:
 		step_emitted = false
 		gait_contact_active = false
 		stance_was_active = false
+		landing_promotion = false
+		landing_promotion_elapsed = 0.0
 		blocked_until_swing = false
 		weight = 0.0
 		releasing = false
@@ -185,9 +196,12 @@ var _ball_bones: PackedInt32Array = PackedInt32Array([-1, -1])
 var _ground_feet: Array[GroundFootContact] = []
 var _ground_actual_sole_world: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
 var _ground_actual_valid: Array[bool] = [false, false]
+var _wind_support_side := -1
+var _scarf_landing_support_side := -1
 var _root_bone: int = -1
 var _pelvis_bone: int = -1
 var _spine_bone: int = -1
+var _clavicle_bones := PackedInt32Array([-1, -1])
 var _neck_bone: int = -1
 var _head_bone: int = -1
 var _wall_neck_bind_offset := Basis.IDENTITY
@@ -213,6 +227,11 @@ var _swim_dive := 0.0
 var _swim_rise := 0.0
 var _swim_glide := 0.0
 var _swim_scull_phase := 0.0
+var wind_pose_brace_blend := 0.0
+var wind_pose_recoil_blend := 0.0
+var _wind_pose_phase := 0.0
+var _wind_pose_direction := Vector3.ZERO
+var _last_wind_reset_serial := -1
 
 
 func _ready() -> void:
@@ -228,6 +247,8 @@ func _init_bones() -> void:
 	_root_bone = skel.find_bone("root")
 	_pelvis_bone = skel.find_bone("pelvis")
 	_spine_bone = skel.find_bone("spine_01")
+	_clavicle_bones[0] = skel.find_bone("clavicle_l")
+	_clavicle_bones[1] = skel.find_bone("clavicle_r")
 	_neck_bone = skel.find_bone("neck_01")
 	_head_bone = skel.find_bone("head")
 	if runner_body != null:
@@ -706,6 +727,76 @@ func update_ledge_targets(delta: float) -> void:
 		arm.wrist_world = frame.origin + (nrm * 0.0278 - fwd * 0.0342) * scale_val
 
 
+## Capture the naturally leading reachable boot when a dry scarf glide lands into a run.
+## The controller aligns that side's strike phase, then update_ground_targets promotes
+## this anchor through only its matched stance.
+func begin_scarf_landing_contact(travel: Vector3) -> int:
+	_scarf_landing_support_side = -1
+	if runner_body == null or not runner_body.scarf_glide_touchdown \
+		or parkour_state != "Locomotion" or not _can_use_ground_contacts():
+		return -1
+	if not _bones_ready:
+		_init_bones()
+	var skel := get_skeleton()
+	if skel == null or not _bones_ready:
+		return -1
+	if _ground_feet.size() != 2:
+		_ground_feet = [GroundFootContact.new(), GroundFootContact.new()]
+	reset_ground_contacts()
+
+	var travel_direction := travel
+	travel_direction.y = 0.0
+	if travel_direction.length_squared() < 0.0025:
+		travel_direction = runner_body.get_real_velocity() - runner_body.get_platform_velocity()
+		travel_direction.y = 0.0
+	if travel_direction.length_squared() < 0.0025:
+		travel_direction = -runner_body.global_basis.z
+		travel_direction.y = 0.0
+	travel_direction = travel_direction.normalized()
+
+	var chosen_side := -1
+	var best_lead := -INF
+	for side in 2:
+		_capture_ground_foot(skel, side)
+		var foot := _ground_feet[side]
+		if not foot.anchored or (foot.support != null and not is_instance_valid(foot.support)):
+			continue
+		# Test reach at the intended planted load, then fall back to the un-biased
+		# ground projection if the usual stride lead pushes this first contact too far.
+		foot.weight = SCARF_LANDING_CONTACT_FULL_WEIGHT
+		if not _ground_foot_reachable(skel, side, foot):
+			_clear_ground_foot(side)
+			_capture_ground_foot(skel, side, false)
+			foot = _ground_feet[side]
+			if not foot.anchored or (foot.support != null and not is_instance_valid(foot.support)):
+				continue
+			foot.weight = SCARF_LANDING_CONTACT_FULL_WEIGHT
+			if not _ground_foot_reachable(skel, side, foot):
+				_clear_ground_foot(side)
+				continue
+		var target_ankle := foot.sole_world() - foot.ankle_to_sole_world()
+		var lead := (target_ankle - runner_body.global_position).dot(travel_direction)
+		if lead > best_lead:
+			best_lead = lead
+			chosen_side = side
+
+	if chosen_side < 0:
+		reset_ground_contacts()
+		return -1
+	for side in 2:
+		if side != chosen_side:
+			_clear_ground_foot(side)
+	var support := _ground_feet[chosen_side]
+	support.landing_promotion = true
+	support.landing_promotion_elapsed = 0.0
+	support.weight = SCARF_LANDING_CONTACT_START_WEIGHT
+	support.step_emitted = false
+	support.blocked_until_swing = false
+	_scarf_landing_support_side = chosen_side
+	_wind_support_side = -1
+	return chosen_side
+
+
 ## Called once after CharacterBody3D movement on the physics tick. Contact points are
 ## stored in support-local space so a moving floor carries a planted sole with it.
 func update_ground_targets(delta: float) -> void:
@@ -731,6 +822,25 @@ func update_ground_targets(delta: float) -> void:
 	var gait_weight := clampf(anim_ctrl.get_ground_gait_weight(), 0.0, 1.0)
 	var pivot_weight := clampf(runner_body.ground_pivot_weight, 0.0, 1.0)
 	var pivot_side := runner_body.ground_pivot_side
+	var landing_support_active := _scarf_landing_support_side >= 0 \
+		and _scarf_landing_support_side < _ground_feet.size() \
+		and _ground_feet[_scarf_landing_support_side].landing_promotion \
+		and _ground_feet[_scarf_landing_support_side].anchored \
+		and runner_body.scarf_glide_touchdown
+	if not landing_support_active:
+		_scarf_landing_support_side = -1
+	var raw_wind_support := maxf(runner_body.wind_brace_weight, runner_body.wind_recoil_weight)
+	var wind_support_requested := not landing_support_active \
+		and (raw_wind_support >= WIND_SUPPORT_WEIGHT_THRESHOLD or wind_pose_recoil_blend >= 0.18)
+	if landing_support_active:
+		# The first landing shoe owns its strike; wind brace may choose a support
+		# after that shoe reaches toe-off and releases its anchor.
+		_wind_support_side = -1
+	if wind_support_requested and _wind_support_side < 0:
+		_wind_support_side = _choose_wind_support_side(phase, gait_weight, contact_duration)
+		_ground_feet[_wind_support_side].blocked_until_swing = false
+		if not _ground_feet[_wind_support_side].anchored:
+			_capture_ground_foot(skel, _wind_support_side)
 
 	for side in 2:
 		var foot := _ground_feet[side]
@@ -741,9 +851,54 @@ func update_ground_targets(delta: float) -> void:
 		# Curves show contact starting ~0.02 cycle before each measured strike.
 		var strike_phase := ChibiAnimController.LEFT_STRIKE_PHASE if side == 0 else ChibiAnimController.RIGHT_STRIKE_PHASE
 		var cycle_phase := fposmod(phase - strike_phase + 0.025, 1.0)
-		var stance_active := gait_weight > 0.04 and contact_duration > 0.005 and cycle_phase < contact_duration
+		var landing_contact_active := side == _scarf_landing_support_side \
+			and foot.landing_promotion and runner_body.scarf_glide_touchdown
+		# The chosen strike is already aligned in physics. It can plant before
+		# AnimationTree presents its first gait sample at a lower render rate.
+		var stance_active := (landing_contact_active or gait_weight > 0.04) \
+			and contact_duration > 0.005 and cycle_phase < contact_duration
 		foot.gait_contact_active = stance_active
+		var landing_contact_weight := 0.0
+		if landing_contact_active:
+			if stance_active:
+				foot.landing_promotion_elapsed += delta
+				var stance_fraction := cycle_phase / contact_duration
+				var time_ramp := smoothstep(
+					0.0, SCARF_LANDING_CONTACT_RAMP, foot.landing_promotion_elapsed
+				)
+				# A faster gait needs to finish the plant before its earlier toe-off.
+				var ramp := maxf(time_ramp, smoothstep(0.23, 0.50, stance_fraction))
+				var toe_off := 1.0 - smoothstep(SCARF_LANDING_TOE_OFF_START, 1.0, stance_fraction)
+				landing_contact_weight = lerpf(
+					SCARF_LANDING_CONTACT_START_WEIGHT,
+					SCARF_LANDING_CONTACT_FULL_WEIGHT,
+					ramp
+				) * toe_off
+			else:
+				# Normal stance teardown below drops the anchor at toe-off.
+				foot.landing_promotion = false
+				foot.landing_promotion_elapsed = 0.0
+				_scarf_landing_support_side = -1
+				landing_contact_active = false
+		if landing_contact_active and foot.anchored and stance_active \
+			and foot.landing_promotion_elapsed >= SCARF_LANDING_CONTACT_RAMP * 0.8:
+			# Validate against the promoted load while the real IK weight ramps up.
+			# A partial weight alone can make a reachable, early-strike ankle look too long.
+			var sampled_weight := foot.weight
+			foot.weight = SCARF_LANDING_CONTACT_FULL_WEIGHT
+			var landing_reachable := _ground_foot_reachable(skel, side, foot)
+			foot.weight = sampled_weight
+			if not landing_reachable:
+				_clear_ground_foot(side)
+				_scarf_landing_support_side = -1
+				landing_contact_active = false
+				landing_contact_weight = 0.0
 		var pivot_active := pivot_side == side and pivot_weight > 0.001
+		if _wind_support_side == side and not wind_support_requested:
+			if not stance_active and not pivot_active and foot.anchored and not foot.releasing:
+				_start_ground_foot_release(side)
+			_wind_support_side = -1
+		var wind_support_active := wind_support_requested and _wind_support_side == side
 		if not stance_active:
 			foot.blocked_until_swing = false
 		elif not foot.stance_was_active:
@@ -751,30 +906,45 @@ func update_ground_targets(delta: float) -> void:
 		foot.stance_was_active = stance_active
 
 		if foot.releasing:
-			var blocked := foot.blocked_until_swing and stance_active
-			foot.release_elapsed += delta
-			foot.weight = foot.release_start_weight * (1.0 - smoothstep(0.0, 0.055, foot.release_elapsed))
-			if foot.weight <= 0.005:
-				_clear_ground_foot(side)
-				foot = _ground_feet[side]
-				foot.blocked_until_swing = blocked
-				foot.stance_was_active = stance_active
-			if foot.releasing:
-				continue
+			if wind_support_active and foot.anchored:
+				foot.releasing = false
+				foot.release_elapsed = 0.0
+			else:
+				var blocked := foot.blocked_until_swing and stance_active
+				foot.release_elapsed += delta
+				foot.weight = foot.release_start_weight * (1.0 - smoothstep(0.0, 0.055, foot.release_elapsed))
+				if foot.weight <= 0.005:
+					_clear_ground_foot(side)
+					foot = _ground_feet[side]
+					foot.blocked_until_swing = blocked
+					foot.stance_was_active = stance_active
+				if foot.releasing:
+					continue
 
-		var wants_contact := pivot_active or stance_active
+		wind_support_active = wind_support_requested and _wind_support_side == side
+		var wants_contact := pivot_active or stance_active or wind_support_active or landing_contact_active
 		if not wants_contact:
 			if foot.anchored:
 				_clear_ground_foot(side)
 			continue
 
-		if not foot.anchored and not foot.blocked_until_swing:
+		if wind_support_active and not foot.anchored and not foot.releasing:
+			foot.blocked_until_swing = false
+			_capture_ground_foot(skel, side)
+			foot = _ground_feet[side]
+		if not foot.anchored and not foot.blocked_until_swing and not wind_support_active:
 			_capture_ground_foot(skel, side)
 
 		if not foot.anchored:
 			continue
 		var stance_weight := _ground_stance_weight(cycle_phase, contact_duration) * gait_weight if stance_active else 0.0
-		foot.weight = maxf(stance_weight, pivot_weight if pivot_active else 0.0)
+		foot.weight = maxf(
+			stance_weight,
+			maxf(
+				pivot_weight if pivot_active else 0.0,
+				maxf(1.0 if wind_support_active else 0.0, landing_contact_weight)
+			)
+		)
 		if pivot_active and foot.weight >= 0.80 and not _ground_foot_reachable(skel, side, foot):
 			foot.blocked_until_swing = stance_active
 			_start_ground_foot_release(side)
@@ -783,9 +953,30 @@ func update_ground_targets(delta: float) -> void:
 func reset_ground_contacts() -> void:
 	if _ground_feet.size() != 2:
 		_ground_feet = [GroundFootContact.new(), GroundFootContact.new()]
+	_wind_support_side = -1
+	_scarf_landing_support_side = -1
 	for side in 2:
 		_clear_ground_foot(side)
 		_ground_actual_valid[side] = false
+
+
+func _choose_wind_support_side(phase: float, gait_weight: float, contact_duration: float) -> int:
+	for side in 2:
+		var foot := _ground_feet[side]
+		if foot.planted and foot.weight >= 0.85:
+			return side
+	if absf(_ground_feet[0].weight - _ground_feet[1].weight) > 0.04:
+		return 0 if _ground_feet[0].weight > _ground_feet[1].weight else 1
+	var stance: Array[bool] = [false, false]
+	if gait_weight > 0.04 and contact_duration > 0.005:
+		for side in 2:
+			var strike_phase := ChibiAnimController.LEFT_STRIKE_PHASE if side == 0 \
+				else ChibiAnimController.RIGHT_STRIKE_PHASE
+			var cycle_phase := fposmod(phase - strike_phase + 0.025, 1.0)
+			stance[side] = cycle_phase < contact_duration
+	if stance[0] != stance[1]:
+		return 0 if stance[0] else 1
+	return 0 if fposmod(phase, 1.0) < 0.5 else 1
 
 
 ## Minimal observable contact API for focused runtime drift sampling.
@@ -836,7 +1027,7 @@ func _ground_stance_weight(cycle_phase: float, contact_duration: float) -> float
 	return clampf(minf(plant_in, toe_out), 0.0, 1.0)
 
 
-func _capture_ground_foot(skel: Skeleton3D, side: int) -> void:
+func _capture_ground_foot(skel: Skeleton3D, side: int, apply_forward_bias: bool = true) -> void:
 	var bones := _leg_bones[side]
 	var skel_world := skel.get_global_transform_interpolated()
 	var ankle_world := skel_world * skel.get_bone_global_pose(bones[2])
@@ -850,7 +1041,7 @@ func _capture_ground_foot(skel: Skeleton3D, side: int) -> void:
 	var travel := runner_body.get_real_velocity() - runner_body.get_platform_velocity()
 	travel.y = 0.0
 	var travel_speed := travel.length()
-	if travel_speed > 1.5:
+	if apply_forward_bias and travel_speed > 1.5:
 		var travel_dir := travel / travel_speed
 		var hip_world := skel_world * skel.get_bone_global_pose(bones[0])
 		var ankle_to_sole := sole_world - ankle_world.origin
@@ -994,6 +1185,7 @@ func _process_modification_with_delta(_delta: float) -> void:
 	var skel := get_skeleton()
 	if skel == null or not _bones_ready:
 		return
+	_advance_wind_pose(_delta)
 
 	if dive_gear != null and runner_body != null:
 		var depth := 0.0
@@ -1039,12 +1231,16 @@ func _process_modification_with_delta(_delta: float) -> void:
 
 	if _ledge_weight > 0.001 and (_arms[0].active or _arms[1].active):
 		_apply_ledge_ik(skel)
+	if wind_pose_brace_blend > 0.001 or wind_pose_recoil_blend > 0.001:
+		_apply_wind_brace_pose(skel)
 	if runner_body != null and runner_body.has_balance_footing():
 		_balance_weight = move_toward(_balance_weight, 1.0, maxf(_delta, 0.0) * 18.0)
 		_apply_balance_foot_ik(skel)
 	else:
 		_balance_weight = 0.0
 		_apply_ground_foot_ik(skel)
+	if wind_pose_brace_blend > 0.001 or wind_pose_recoil_blend > 0.001:
+		_apply_wind_recoil_leg_pose(skel)
 	if _wade_weight > 0.002 and runner_body != null:
 		_apply_wade_arms(skel, _delta)
 	if _swim_pose_weight > 0.002 and runner_body != null \
@@ -1054,6 +1250,227 @@ func _process_modification_with_delta(_delta: float) -> void:
 		and (parkour_state == "Locomotion" or parkour_state == "PoolSwim"):
 		_apply_dive_gear_gesture(skel)
 	_apply_scarf_glide_pose(skel, _delta)
+
+
+func _advance_wind_pose(delta: float) -> void:
+	if runner_body == null:
+		wind_pose_brace_blend = 0.0
+		wind_pose_recoil_blend = 0.0
+		_last_wind_reset_serial = -1
+		_wind_pose_direction = Vector3.ZERO
+		return
+	if _last_wind_reset_serial != runner_body.wind_reset_serial:
+		_last_wind_reset_serial = runner_body.wind_reset_serial
+		wind_pose_brace_blend = 0.0
+		wind_pose_recoil_blend = 0.0
+		_wind_pose_phase = 0.0
+		_wind_pose_direction = Vector3.ZERO
+		return
+
+	var can_brace := parkour_state == "Locomotion" \
+		and runner_body.current_state == "Locomotion" \
+		and runner_body.is_on_floor() \
+		and runner_body.scarf_glide_phase == &"stowed" \
+		and _scarf_pose_blend <= 0.005 \
+		and _wade_weight <= 0.002 \
+		and _swim_pose_weight <= 0.002 \
+		and (dive_gear == null or dive_gear.gesture_weight <= 0.001) \
+		and not climb_active and _wall_pose_blend <= 0.005 \
+		and not slide_dive_active \
+		and not (_ledge_weight > 0.001 and (_arms[0].active or _arms[1].active))
+	var brace_target := clampf(runner_body.wind_brace_weight, 0.0, 1.0) if can_brace else 0.0
+	var recoil_target := clampf(runner_body.wind_recoil_weight, 0.0, 1.0) if can_brace else 0.0
+	var safe_delta := maxf(delta, 0.0)
+	wind_pose_brace_blend = lerpf(
+		wind_pose_brace_blend,
+		brace_target,
+		1.0 - exp(-WIND_POSE_BLEND_RATE * safe_delta)
+	)
+	wind_pose_recoil_blend = lerpf(
+		wind_pose_recoil_blend,
+		recoil_target,
+		1.0 - exp(-WIND_RECOIL_BLEND_RATE * safe_delta)
+	)
+	if runner_body.wind_velocity.length_squared() > 0.0001:
+		var target_direction := runner_body.wind_velocity.normalized()
+		if _wind_pose_direction.length_squared() <= 0.0001:
+			_wind_pose_direction = target_direction
+		else:
+			_wind_pose_direction = _wind_pose_direction.slerp(
+				target_direction,
+				1.0 - exp(-WIND_POSE_BLEND_RATE * safe_delta)
+			).normalized()
+	elif wind_pose_brace_blend <= 0.001 and wind_pose_recoil_blend <= 0.001:
+		_wind_pose_direction = Vector3.ZERO
+	if wind_pose_brace_blend > 0.001 or wind_pose_recoil_blend > 0.001:
+		_wind_pose_phase = fposmod(_wind_pose_phase + safe_delta * 4.2, TAU)
+	else:
+		_wind_pose_phase = 0.0
+
+
+func _apply_wind_brace_pose(skel: Skeleton3D) -> void:
+	if runner_body == null or parkour_state != "Locomotion" or not runner_body.is_on_floor() \
+		or (wind_pose_brace_blend <= 0.001 and wind_pose_recoil_blend <= 0.001):
+		return
+	var actor_transform := runner_body.get_global_transform_interpolated()
+	var actor_basis := actor_transform.basis.orthonormalized()
+	var actor_forward := -actor_basis.z.normalized()
+	if _wind_pose_direction.length_squared() < 0.0001:
+		return
+	var wind_direction := _wind_pose_direction
+	var local_wind := actor_basis.inverse() * wind_direction
+	var brace := clampf(wind_pose_brace_blend, 0.0, 1.0)
+	var recoil := clampf(wind_pose_recoil_blend, 0.0, 1.0)
+	var phase_sway := sin(_wind_pose_phase) * brace
+	var skeleton_world := skel.get_global_transform_interpolated()
+	var skeleton_inverse := skeleton_world.affine_inverse()
+
+	# Load through the hips, then let the chest yield as recoil takes over. Wind pose
+	# runs before foot IK below so the existing world-space support anchor can solve
+	# again after this crouch and keep the supporting shoe planted.
+	if _pelvis_bone >= 0:
+		var pelvis_world := skeleton_world * skel.get_bone_global_pose(_pelvis_bone)
+		var pelvis_roll := deg_to_rad((-1.8 * brace - 2.8 * recoil) * local_wind.x)
+		pelvis_world.basis = (
+			Basis(Quaternion(actor_forward, pelvis_roll)) * pelvis_world.basis
+		).orthonormalized()
+		pelvis_world.origin += wind_direction * (0.006 * brace + 0.026 * recoil) \
+			- Vector3.UP * (0.014 * brace + 0.026 * recoil)
+		skel.set_bone_global_pose(_pelvis_bone, skeleton_inverse * pelvis_world)
+
+	# The steady lean loads her right palm; only a strong loss of progress throws her
+	# chest downwind. Local wind components keep lateral gusts from flipping the pose.
+	if _spine_bone >= 0:
+		var spine_world := skeleton_world * skel.get_bone_global_pose(_spine_bone)
+		var headwind := maxf(local_wind.z, 0.22)
+		var pitch := deg_to_rad((-8.0 * brace + 16.0 * recoil) * headwind)
+		var roll := deg_to_rad((-3.8 * brace - 6.5 * recoil) * local_wind.x)
+		var lean := Basis(Quaternion(actor_basis.x, pitch)) \
+			* Basis(Quaternion(actor_forward, roll + phase_sway * deg_to_rad(1.6)))
+		spine_world.basis = (lean * spine_world.basis).orthonormalized()
+		spine_world.origin += wind_direction * (0.018 * brace + 0.075 * recoil)
+		skel.set_bone_global_pose(_spine_bone, skeleton_inverse * spine_world)
+
+	# The right shoulder reaches into the gust; the other shoulder rocks to balance.
+	for side in 2:
+		var clavicle_bone := _clavicle_bones[side]
+		if clavicle_bone < 0:
+			continue
+		var side_sign := 1.0 if side == 1 else -1.0
+		var clavicle_world := skeleton_world * skel.get_bone_global_pose(clavicle_bone)
+		var shoulder_push := deg_to_rad((-4.5 * brace - 3.0 * recoil) if side == 1 else (2.8 * brace + 2.0 * recoil))
+		var shoulder_sway := deg_to_rad(side_sign * phase_sway * 2.0 - local_wind.x * 2.4 * recoil)
+		clavicle_world.basis = (
+			Basis(Quaternion(actor_basis.x, shoulder_push))
+			* Basis(Quaternion(actor_forward, shoulder_sway))
+			* clavicle_world.basis
+		).orthonormalized()
+		clavicle_world.origin += wind_direction * (0.004 * brace + 0.014 * recoil)
+		skel.set_bone_global_pose(clavicle_bone, skeleton_inverse * clavicle_world)
+
+	# Solve only the right arm. Its palm faces upwind, and the left arm remains in gait.
+	var arm := _arms[1]
+	if arm.bones[2] >= 0:
+		var upper := skeleton_world * skel.get_bone_global_pose(arm.bones[0])
+		var elbow := skeleton_world * skel.get_bone_global_pose(arm.bones[1])
+		var wrist := skeleton_world * skel.get_bone_global_pose(arm.bones[2])
+		var shoulder_side := (actor_basis.inverse() * (upper.origin - actor_transform.origin)).x
+		var side_sign := signf(shoulder_side)
+		if is_zero_approx(side_sign):
+			side_sign = -1.0
+		var hand_weight := maxf(smoothstep(0.0, 0.42, brace), recoil * 0.68)
+		var target := actor_transform.origin \
+			+ actor_basis.x * (side_sign * 0.16) \
+			+ actor_basis.y * 0.74 \
+			- wind_direction * (0.32 + 0.09 * brace + 0.05 * recoil)
+		var upper_segment := elbow.origin - upper.origin
+		var lower_segment := wrist.origin - elbow.origin
+		var reach := upper_segment.length() + lower_segment.length()
+		var extension := clampf(upper.origin.distance_to(target) - reach + 0.012, 0.0, 0.065)
+		var reach_elbow := elbow
+		reach_elbow.origin += upper_segment.normalized() * (extension * 0.48)
+		var reach_wrist := wrist
+		reach_wrist.origin += reach_elbow.origin - elbow.origin + lower_segment.normalized() * (extension * 0.52)
+		var pole := actor_basis * Vector3(side_sign * 0.62, -0.24, 0.50)
+		var solved := TwoBoneIK.solve_chain(upper, reach_elbow, reach_wrist, target, pole, true, 0.04)
+		var hand: Transform3D = solved["tip"]
+		var fingers := (
+			actor_basis.y * 0.82
+			- wind_direction * 0.20
+			+ actor_basis.x * (side_sign * 0.06)
+		).normalized()
+		var palm_back := (-wind_direction + actor_basis.y * 0.10).normalized()
+		hand.basis = TwoBoneIK.basis_from_forward_up(fingers, palm_back) * arm.rest_basis.inverse()
+		skel.set_bone_global_pose(
+			arm.bones[0],
+			skeleton_inverse * _blend_world_pose(upper, solved["upper"] as Transform3D, hand_weight)
+		)
+		skel.set_bone_global_pose(
+			arm.bones[1],
+			skeleton_inverse * _blend_world_pose(elbow, solved["lower"] as Transform3D, hand_weight)
+		)
+		skel.set_bone_global_pose(arm.bones[2], skeleton_inverse * _blend_world_pose(wrist, hand, hand_weight))
+
+
+
+func _apply_wind_recoil_leg_pose(skel: Skeleton3D) -> void:
+	if runner_body == null or parkour_state != "Locomotion" or not runner_body.is_on_floor():
+		return
+	var recoil := clampf(wind_pose_recoil_blend, 0.0, 1.0)
+	if recoil <= 0.001 or _wind_pose_direction.length_squared() < 0.0001:
+		return
+	var actor_transform := runner_body.get_global_transform_interpolated()
+	var actor_basis := actor_transform.basis.orthonormalized()
+	var wind_direction := _wind_pose_direction
+	# Let the planted shoe retain its world anchor. Only the less-loaded leg trails
+	# behind, then the smoothed recoil weight lets it recover with the next stride.
+	var free_side := 0
+	if _wind_support_side >= 0:
+		free_side = 1 - _wind_support_side
+	else:
+		var left_load := _ground_feet[0].weight + (1.0 if _ground_feet[0].planted else 0.0)
+		var right_load := _ground_feet[1].weight + (1.0 if _ground_feet[1].planted else 0.0)
+		free_side = 0 if left_load <= right_load else 1
+	var free_foot := _ground_feet[free_side]
+	var free_leg_weight := recoil
+	if free_foot.planted or free_leg_weight <= 0.001:
+		return
+	var skel_world := skel.get_global_transform_interpolated()
+	var skel_inverse := skel_world.affine_inverse()
+	var leg_bones := _leg_bones[free_side]
+	var chain := [
+		skel_world * skel.get_bone_global_pose(leg_bones[0]),
+		skel_world * skel.get_bone_global_pose(leg_bones[1]),
+		skel_world * skel.get_bone_global_pose(leg_bones[2]),
+	]
+	var side_sign := -1.0 if free_side == 0 else 1.0
+	var ankle_from_hip := (chain[2] as Transform3D).origin - (chain[0] as Transform3D).origin
+	var ankle_downwind := ankle_from_hip.dot(wind_direction)
+	var ankle_height := ankle_from_hip.dot(Vector3.UP)
+	var ankle_lateral := ankle_from_hip \
+		- wind_direction * ankle_downwind \
+		- Vector3.UP * ankle_height
+	var trailing_distance := maxf(ankle_downwind, 0.12 + 0.12 * recoil)
+	var trailing_ankle := (chain[0] as Transform3D).origin \
+		+ ankle_lateral \
+		+ wind_direction * trailing_distance \
+		+ Vector3.UP * (ankle_height + 0.045 + 0.050 * recoil)
+	var pole := (actor_basis * Vector3(side_sign * 0.58, -0.20, 0.64)).normalized()
+	var solved := TwoBoneIK.solve_chain(
+		chain[0], chain[1], chain[2], trailing_ankle, pole, true, 0.035
+	)
+	skel.set_bone_global_pose(
+		leg_bones[0],
+		skel_inverse * _blend_world_pose(chain[0], solved["upper"] as Transform3D, free_leg_weight)
+	)
+	skel.set_bone_global_pose(
+		leg_bones[1],
+		skel_inverse * _blend_world_pose(chain[1], solved["lower"] as Transform3D, free_leg_weight)
+	)
+	skel.set_bone_global_pose(
+		leg_bones[2],
+		skel_inverse * _blend_world_pose(chain[2], solved["tip"] as Transform3D, free_leg_weight)
+	)
 
 
 func _apply_scarf_glide_pose(skel: Skeleton3D, delta: float) -> void:
@@ -1073,6 +1490,15 @@ func _apply_scarf_glide_pose(skel: Skeleton3D, delta: float) -> void:
 		or (_ledge_weight > 0.001 and (_arms[0].active or _arms[1].active)) \
 		or _wade_weight > 0.002 or _swim_pose_weight > 0.002 \
 		or (dive_gear != null and dive_gear.gesture_weight > 0.001)
+	var touchdown_wrap := runner_body != null \
+		and runner_body.scarf_glide_touchdown \
+		and phase == &"stow" \
+		and not other_hands_own_pose
+	var scarf_wind_load := 0.0
+	var scarf_wind_velocity := Vector3.ZERO
+	if not other_hands_own_pose and runner_body != null and phase in [&"deploy", &"glide"]:
+		scarf_wind_load = clampf(runner_body.scarf_wind_load, 0.0, 1.0)
+		scarf_wind_velocity = runner_body.scarf_wind_velocity
 
 	if other_hands_own_pose:
 		# A catch, climb, swim stroke, or dive gesture takes the wrists immediately.
@@ -1117,12 +1543,71 @@ func _apply_scarf_glide_pose(skel: Skeleton3D, delta: float) -> void:
 			_scarf_motion_phase = fposmod(_scarf_motion_phase + maxf(delta, 0.0) * 2.1, TAU)
 			var leg_weight := _scarf_body_weight \
 				if runner_body != null and not runner_body.is_on_floor() else 0.0
-			_apply_scarf_glide_body_pose(skel, _scarf_body_weight, bank, local_velocity, leg_weight)
+			# On a dry scarf landing, let each boot's real ground anchor take over
+			# its glide pose as that foot loads. The other leg can finish the next step.
+			if touchdown_wrap and runner_body.is_on_floor():
+				leg_weight = _scarf_body_weight
+			_apply_scarf_glide_body_pose(
+				skel, _scarf_body_weight, bank, local_velocity, leg_weight, touchdown_wrap
+			)
 		if _scarf_pose_blend > 0.001:
-			_apply_scarf_hand_ik(skel, _scarf_pose_open, _scarf_pose_blend, phase, progress, stow_open, bank)
+			_apply_scarf_wind_load_pose(skel, scarf_wind_load, scarf_wind_velocity)
+			_apply_scarf_hand_ik(
+				skel, _scarf_pose_open, _scarf_pose_blend, phase, progress, stow_open, bank
+			)
 
-	scarf_glider.update_pose(phase, progress, stow_open, bank, delta, local_velocity)
+	scarf_glider.update_pose(
+		phase, progress, stow_open, bank, delta, local_velocity,
+		scarf_wind_load, scarf_wind_velocity, touchdown_wrap
+	)
 	scarf_glider.update_hand_pins()
+
+
+func _apply_scarf_wind_load_pose(
+	skel: Skeleton3D, wind_load: float, wind_velocity_world: Vector3
+) -> void:
+	if runner_body == null or wind_load <= 0.001 or wind_velocity_world.length_squared() <= 0.0001:
+		return
+	var actor_basis := runner_body.get_global_transform_interpolated().basis.orthonormalized()
+	var actor_forward := -actor_basis.z.normalized()
+	var flow_direction := wind_velocity_world.normalized()
+	var flow_local := actor_basis.inverse() * flow_direction
+	var headwind := maxf(flow_local.z, 0.0)
+	var lateral := clampf(flow_local.x, -1.0, 1.0)
+	var skeleton_world := skel.get_global_transform_interpolated()
+	var skeleton_inverse := skeleton_world.affine_inverse()
+
+	# The deployed canopy loads both shoulders. Flow direction tilts the chest and
+	# pulls the crosswind shoulder a touch farther; the hand IK below then re-pins
+	# all four cloth corners to the hands after this shoulder movement.
+	if _spine_bone >= 0:
+		var spine_world := skeleton_world * skel.get_bone_global_pose(_spine_bone)
+		var pitch := deg_to_rad(-2.6 * wind_load * headwind)
+		var roll := deg_to_rad(2.8 * wind_load * lateral)
+		spine_world.basis = (
+			Basis(Quaternion(actor_basis.x, pitch))
+			* Basis(Quaternion(actor_forward, roll))
+			* spine_world.basis
+		).orthonormalized()
+		spine_world.origin += flow_direction * (0.009 * wind_load)
+		skel.set_bone_global_pose(_spine_bone, skeleton_inverse * spine_world)
+
+	for side in 2:
+		var clavicle_bone := _clavicle_bones[side]
+		if clavicle_bone < 0:
+			continue
+		var side_sign := 1.0 if side == 1 else -1.0
+		var clavicle_world := skeleton_world * skel.get_bone_global_pose(clavicle_bone)
+		var shrug := deg_to_rad(1.8 * wind_load + 1.0 * absf(lateral) * wind_load)
+		var tug_roll := deg_to_rad(side_sign * lateral * 3.0 * wind_load)
+		clavicle_world.basis = (
+			Basis(Quaternion(actor_basis.x, -shrug))
+			* Basis(Quaternion(actor_forward, tug_roll))
+			* clavicle_world.basis
+		).orthonormalized()
+		clavicle_world.origin += flow_direction * (0.008 * wind_load) \
+			+ actor_basis.x * (side_sign * lateral * 0.006 * wind_load)
+		skel.set_bone_global_pose(clavicle_bone, skeleton_inverse * clavicle_world)
 
 
 func _apply_scarf_hand_ik(
@@ -1139,8 +1624,11 @@ func _apply_scarf_hand_ik(
 			continue
 		var hand_weight := weight
 		if phase == &"stow":
-			var hand_release_start := 0.79 if side == 1 else 0.86
-			hand_weight *= 1.0 - smoothstep(hand_release_start, 1.0, progress)
+			if runner_body != null and runner_body.scarf_glide_touchdown:
+				hand_weight *= 1.0 - ChibiScarfGlider.touchdown_hand_release(progress, side)
+			else:
+				var hand_release_start := 0.79 if side == 1 else 0.86
+				hand_weight *= 1.0 - smoothstep(hand_release_start, 1.0, progress)
 		elif phase == &"cancel":
 			# Both hands release into the fall as the fold reaches the collar.
 			hand_weight *= 1.0 - smoothstep(0.45, 1.0, progress)
@@ -1157,11 +1645,11 @@ func _apply_scarf_hand_ik(
 		if phase == &"deploy":
 			hand_open = smoothstep(0.0, 0.76, open_amount) if side == 0 \
 				else smoothstep(0.18, 1.0, open_amount)
-		var lateral := lerpf(0.12, 0.295, hand_open)
-		var height := lerpf(0.535, 0.70, hand_open)
+		var lateral := lerpf(0.12, 0.325, hand_open)
+		var height := lerpf(0.535, 0.73, hand_open)
 		var forward := lerpf(0.035, 0.105, hand_open)
 		# A bank lets the outside hand float a little higher while the inside hand follows.
-		height -= side_sign * bank * 0.014 * hand_open
+		height -= side_sign * bank * 0.024 * hand_open
 		var target := runner_body.global_position \
 			+ actor_basis.x * (side_sign * lateral) \
 			+ actor_basis.y * height \
@@ -1194,7 +1682,8 @@ func _apply_scarf_hand_ik(
 
 
 func _apply_scarf_glide_body_pose(
-	skel: Skeleton3D, weight: float, bank: float, local_velocity: Vector3, leg_weight: float
+	skel: Skeleton3D, weight: float, bank: float, local_velocity: Vector3,
+	leg_weight: float, touchdown: bool
 ) -> void:
 	if runner_body == null:
 		return
@@ -1223,6 +1712,12 @@ func _apply_scarf_glide_body_pose(
 	if leg_weight <= 0.001:
 		return
 	for side in 2:
+		var side_leg_weight := leg_weight
+		if touchdown and runner_body.is_on_floor():
+			var support_weight := _ground_contact_weight(side)
+			side_leg_weight *= 1.0 - smoothstep(0.08, 0.92, support_weight)
+		if side_leg_weight <= 0.001:
+			continue
 		var thigh_bone := _leg_bones[side][0]
 		var calf_bone := _leg_bones[side][1]
 		var foot_bone := _leg_bones[side][2]
@@ -1235,16 +1730,27 @@ func _apply_scarf_glide_body_pose(
 		var foot_delta := -2.0 * forward_ratio
 		skel.set_bone_pose_rotation(
 			thigh_bone,
-			(thigh_pose * Quaternion(Vector3.RIGHT, deg_to_rad(thigh_delta) * leg_weight)).normalized()
+			(thigh_pose * Quaternion(Vector3.RIGHT, deg_to_rad(thigh_delta) * side_leg_weight)).normalized()
 		)
 		skel.set_bone_pose_rotation(
 			calf_bone,
-			(calf_pose * Quaternion(Vector3.RIGHT, deg_to_rad(calf_delta) * leg_weight)).normalized()
+			(calf_pose * Quaternion(Vector3.RIGHT, deg_to_rad(calf_delta) * side_leg_weight)).normalized()
 		)
 		skel.set_bone_pose_rotation(
 			foot_bone,
-			(foot_pose * Quaternion(Vector3.RIGHT, deg_to_rad(foot_delta) * leg_weight)).normalized()
+			(foot_pose * Quaternion(Vector3.RIGHT, deg_to_rad(foot_delta) * side_leg_weight)).normalized()
 		)
+
+
+func _ground_contact_weight(side: int) -> float:
+	if side < 0 or side >= _ground_feet.size():
+		return 0.0
+	var foot := _ground_feet[side]
+	if not foot.anchored or not _ground_actual_valid[side] \
+		or (foot.support != null and not is_instance_valid(foot.support)):
+		return 0.0
+	return clampf(foot.weight, 0.0, 1.0)
+
 
 func _apply_dive_gear_gesture(skel: Skeleton3D) -> void:
 	var weight := dive_gear.gesture_weight

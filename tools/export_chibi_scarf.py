@@ -1,8 +1,8 @@
-"""Export the approved low-poly scarf canopy and its packed print for Godot.
+"""Bake the gameplay scarf canopy, hand pins, and approved cloth artwork for Godot.
 
 Run with Blender 5.3:
   blender --background --python tools/export_chibi_scarf.py
-The approved concept blend is opened read-only and is never saved.
+The concept blend supplies the posed grips and artwork and is never saved.
 """
 
 import math
@@ -22,10 +22,19 @@ CANOPY_OBJECT = "Scarf • two gathered ends"
 ARMATURE_OBJECT = "Chibi • glide pose"
 PRINT_IMAGE = "Strawberry Hollow • unbacked scarf print • 4096 px"
 TRIANGLE_BUDGET = 3000
-DECIMATE_RATIO = 0.05
+SPAN_STEPS = 30
+DEPTH_STEPS = 22
 PRINT_SIZE = 1024
 WEAVE_SIZE = 256
 PIN_RADIUS = 0.11
+# Hand-local points in the concept rig's Blender coordinate system. The corner
+# order matches the pin channels used by ChibiScarfGlider and the shader.
+GRIP_OFFSETS = (
+    ("hand_l", (-0.0485, 0.1070, 0.0169), (1, 1)),
+    ("hand_l", (0.0201, 0.0924, -0.0033), (1, -1)),
+    ("hand_r", (-0.0179, 0.0902, -0.0054), (-1, -1)),
+    ("hand_r", (0.0459, 0.1073, 0.0225), (-1, 1)),
+)
 
 
 def godot_vector(value):
@@ -68,71 +77,108 @@ def make_runtime_material():
     return material
 
 
-def make_pin_layout(obj, source_armature):
-    hands = []
-    for bone_name in ("hand_l", "hand_r"):
-        bone_pose = source_armature.matrix_world @ source_armature.pose.bones[bone_name].matrix
-        bone_inv = bone_pose.inverted()
-        # On each mitt, select two separated cloth corners along the cross-grip axis.
-        # This reproduces the concept's two real ends entering each hand ring.
-        candidates = []
-        for vertex in obj.data.vertices:
-            point_world = obj.matrix_world @ vertex.co
-            hand_local = bone_inv @ point_world
-            if 0.045 <= hand_local.y <= 0.155 and abs(hand_local.z) <= 0.040:
-                candidates.append((vertex.index, hand_local.copy(), point_world.copy()))
-        if len(candidates) < 2:
-            raise RuntimeError(f"Could not find the two gathered cloth corners at {bone_name}.")
-
-        desired_offsets = (Vector((-0.045, 0.105, 0.0)), Vector((0.030, 0.105, 0.0)))
-        chosen = []
-        used = set()
-        for desired in desired_offsets:
-            ranked = sorted(candidates, key=lambda candidate: (candidate[1] - desired).length_squared)
-            selected = next((item for item in ranked if item[0] not in used), ranked[0])
-            chosen.append(selected)
-            used.add(selected[0])
-        for index, hand_local, point_world in chosen:
-            hands.append({
-                "bone": bone_name,
-                "vertex": index,
-                "source_point": point_world.copy(),
-                "bone_local": hand_local.copy(),
-            })
-    return hands
+def make_pin_layout(armature):
+    pins = []
+    for bone_name, offset, corner in GRIP_OFFSETS:
+        hand_local = Vector(offset)
+        pose = armature.matrix_world @ armature.pose.bones[bone_name].matrix
+        col = SPAN_STEPS if corner[0] > 0 else 0
+        row = DEPTH_STEPS if corner[1] > 0 else 0
+        pins.append({
+            "bone": bone_name,
+            "vertex": row * (SPAN_STEPS + 1) + col,
+            "source_point": pose @ hand_local,
+            "bone_local": hand_local,
+        })
+    return pins
 
 
-def paint_pin_weights(obj, pins):
-    attribute = obj.data.color_attributes.get("ScarfCornerPins")
-    if attribute is not None:
-        obj.data.color_attributes.remove(attribute)
-    attribute = obj.data.color_attributes.new(
-        name="ScarfCornerPins", type="FLOAT_COLOR", domain="POINT"
+def canopy_point(u, v, grips):
+    """A broad crown curves into both rims, then drapes into the four grips."""
+    grip = grips[(1 if u >= 0.0 else -1, 1 if v >= 0.0 else -1)]
+    gathered = abs(u) ** 2.25 * abs(v) ** 2.05
+    crown = Vector((
+        1.12 * u * (1.0 - 0.07 * v * v),
+        0.63 * v + 0.025 * u * u,
+        1.44 + 0.35 * (1.0 - u * u) + 0.18 * (1.0 - v * v) + 0.055 * v,
+    ))
+    point = crown.lerp(grip, gathered)
+    # Keep the middle taut. Only the gathered quarters carry small sewn-in folds.
+    folds = 0.033 * math.sin(math.pi * gathered) ** 2
+    angle = math.atan2(1.0 - abs(v), 1.0 - abs(u))
+    point.z += folds * math.sin(angle * 16.0 + 0.4 * v)
+    return point
+
+
+def make_canopy(pins):
+    grips = {spec[2]: pin["source_point"] for spec, pin in zip(GRIP_OFFSETS, pins)}
+    columns = SPAN_STEPS + 1
+    outer = []
+    inner = []
+    for row in range(DEPTH_STEPS + 1):
+        for col in range(SPAN_STEPS + 1):
+            u, v = 2.0 * col / SPAN_STEPS - 1.0, 2.0 * row / DEPTH_STEPS - 1.0
+            point = canopy_point(u, v, grips)
+            tangent_u = canopy_point(min(1.0, u + 0.002), v, grips) - canopy_point(max(-1.0, u - 0.002), v, grips)
+            tangent_v = canopy_point(u, min(1.0, v + 0.002), grips) - canopy_point(u, max(-1.0, v - 0.002), grips)
+            normal = tangent_u.cross(tangent_v).normalized()
+            edge = max(abs(u), abs(v)) ** 8
+            gather = (abs(u) * abs(v)) ** 3
+            thickness = 0.004 + (0.016 + 0.023 * edge) * (1.0 - gather)
+            outer.append(point)
+            inner.append(point - normal * thickness)
+
+    surface_size = len(outer)
+    faces = []
+    for row in range(DEPTH_STEPS):
+        for col in range(SPAN_STEPS):
+            a = row * columns + col
+            quad = (a, a + 1, a + columns + 1, a + columns)
+            faces.append(quad)
+            faces.append(tuple(surface_size + index for index in reversed(quad)))
+    rim = (
+        list(range(columns))
+        + [row * columns + SPAN_STEPS for row in range(1, DEPTH_STEPS + 1)]
+        + [DEPTH_STEPS * columns + col for col in range(SPAN_STEPS - 1, -1, -1)]
+        + [row * columns for row in range(DEPTH_STEPS - 1, 0, -1)]
     )
-    mesh_world = obj.matrix_world
-    pin_points = [mesh_world.inverted() @ pin["source_point"] for pin in pins]
+    for a, b in zip(rim, rim[1:] + rim[:1]):
+        faces.append((b, a, a + surface_size, b + surface_size))
+
+    mesh = bpy.data.meshes.new("Chibi Scarf Canopy (Mobile)")
+    mesh.from_pydata(outer + inner, [], faces)
+    mesh.update()
+    mesh.materials.append(make_runtime_material())
+    uv = mesh.uv_layers.new(name="Canopy UV")
+    for face in mesh.polygons:
+        face.use_smooth = True
+        for loop_index in face.loop_indices:
+            index = mesh.loops[loop_index].vertex_index % surface_size
+            row, col = divmod(index, columns)
+            uv.data[loop_index].uv = (col / SPAN_STEPS, row / DEPTH_STEPS)
+
+    attribute = mesh.color_attributes.new(name="ScarfCornerPins", type="FLOAT_COLOR", domain="POINT")
+    pin_points = [pin["source_point"] for pin in pins]
     pin_vertex_indices = {pin["vertex"]: i for i, pin in enumerate(pins)}
     radius_sq = PIN_RADIUS * PIN_RADIUS
-    for vertex in obj.data.vertices:
-        if vertex.index in pin_vertex_indices:
+    for index, point in enumerate(outer):
+        if index in pin_vertex_indices:
             exact = [0.0, 0.0, 0.0, 0.0]
-            exact[pin_vertex_indices[vertex.index]] = 1.0
-            attribute.data[vertex.index].color = exact
-            continue
-        point = vertex.co
-        raw = []
-        for pin_point in pin_points:
-            dist_sq = (point - pin_point).length_squared
-            # Soft neighboring weights preserve a smooth cloth transition.
-            raw.append(math.exp(-dist_sq / max(2.0 * radius_sq, 1.0e-8)))
-        total = sum(raw)
-        if total > 1.0:
-            raw = [weight / total for weight in raw]
-        attribute.data[vertex.index].color = (raw[0], raw[1], raw[2], raw[3])
-    if hasattr(obj.data.color_attributes, "active_color"):
-        obj.data.color_attributes.active_color = attribute
-    if hasattr(obj.data.color_attributes, "render_color_index"):
-        obj.data.color_attributes.render_color_index = list(obj.data.color_attributes).index(attribute)
+            exact[pin_vertex_indices[index]] = 1.0
+            weights = exact
+        else:
+            raw = [math.exp(-(point - pin).length_squared / (2.0 * radius_sq)) for pin in pin_points]
+            total = max(1.0, sum(raw))
+            weights = [value / total for value in raw]
+        # Both sides travel with the same hand so the shell cannot split at a pinch.
+        attribute.data[index].color = weights
+        attribute.data[index + surface_size].color = weights
+    mesh.color_attributes.active_color = attribute
+    mesh.color_attributes.render_color_index = 0
+    canopy = bpy.data.objects.new("Chibi Scarf Canopy", mesh)
+    bpy.context.scene.collection.objects.link(canopy)
+    return canopy
+
 
 def export():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -149,45 +195,8 @@ def export():
     save_packed_print()
     save_weave_lookup(original_material)
 
-    mesh = source.data.copy()
-    mesh.name = "Chibi Scarf Canopy (Mobile)"
-    canopy = bpy.data.objects.new("Chibi Scarf Canopy", mesh)
-    bpy.context.scene.collection.objects.link(canopy)
-    canopy.matrix_world = source.matrix_world.copy()
-    canopy.data.materials.clear()
-    canopy.data.materials.append(make_runtime_material())
-
-    bpy.context.view_layer.objects.active = canopy
-    canopy.select_set(True)
-    for selected in bpy.context.selected_objects:
-        if selected != canopy:
-            selected.select_set(False)
-
-    # Apply the concept's thin shell before reducing the generated cloth tessellation.
-    shell = canopy.modifiers.new("Mobile cloth shell", "SOLIDIFY")
-    source_shell = next((modifier for modifier in source.modifiers if modifier.type == "SOLIDIFY"), None)
-    shell.thickness = source_shell.thickness if source_shell else 0.003
-    shell.offset = source_shell.offset if source_shell else 0.0
-    shell.use_rim = True
-    bpy.ops.object.modifier_apply(modifier=shell.name)
-
-    # Collapse the high-resolution cloth simulation surface while preserving its UVs.
-    decimate = canopy.modifiers.new("Mobile cloth reduction", "DECIMATE")
-    decimate.ratio = DECIMATE_RATIO
-    decimate.use_collapse_triangulate = True
-    bpy.ops.object.modifier_apply(modifier=decimate.name)
-
-    canopy.data.calc_loop_triangles()
-    triangles_before_pins = len(canopy.data.loop_triangles)
-    if triangles_before_pins > TRIANGLE_BUDGET:
-        retry = canopy.modifiers.new("Mobile cloth reduction (budget)", "DECIMATE")
-        retry.ratio = TRIANGLE_BUDGET / float(triangles_before_pins)
-        retry.use_collapse_triangulate = True
-        bpy.ops.object.modifier_apply(modifier=retry.name)
-        canopy.data.calc_loop_triangles()
-
-    pins = make_pin_layout(canopy, armature)
-    paint_pin_weights(canopy, pins)
+    pins = make_pin_layout(armature)
+    canopy = make_canopy(pins)
     canopy.data.calc_loop_triangles()
     triangle_count = len(canopy.data.loop_triangles)
     if triangle_count > TRIANGLE_BUDGET:
@@ -213,9 +222,6 @@ def export():
         export_cameras=False,
         export_lights=False,
     )
-
-    def resource_vector(values):
-        return "Vector3(%s, %s, %s)" % tuple(f"{float(value):.9g}" for value in values)
 
     points = ", ".join(f"{value:.9g}" for pin in pins for value in godot_vector(pin["source_point"]))
     offsets = ", ".join(f"{value:.9g}" for pin in pins for value in godot_vector(pin["bone_local"]))

@@ -18,6 +18,8 @@ var _pending_zone := -1
 
 func _ready() -> void:
 	_player = get_node_or_null(player_path) as ParkourController
+	if _player != null:
+		_player.wind_tunnel = get_node_or_null("WindTunnel") as RooftopWindTunnel
 
 
 func _physics_process(_delta: float) -> void:

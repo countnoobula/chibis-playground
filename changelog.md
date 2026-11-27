@@ -29,6 +29,12 @@ Add each active target here with its owner, status, and a short description. Che
 ### 2026-11-26
 
 - Approved [Scarf in the Sky](concept_art/Menus/scarf-in-the-sky-v7.png) as the Strawberry Hollow main menu concept. The canopy uses the posed 3D scarf as a shape reference, with a continuous sheet, overlapping hems, and gathered hand grips.
+- Turned the Scarf in the Sky canopy to match Chibi’s three-quarter glide. Visually checked the near underside and foreshortened far grip in `concept_art/Menus/scarf-in-the-sky-v6.png`.
+- Restored the original woven fabric texture on the peach canopy. Visually checked the weave, open underside, and smooth silhouette in `concept_art/Menus/scarf-in-the-sky-v5.png`.
+- Smoothed the Scarf in the Sky canopy into a single taut curve. Visually checked the open underside and sky gap on `concept_art/Menus/scarf-in-the-sky-v4.png`.
+- Opened the scarf canopy in the Scarf in the Sky title-screen concept so its underside and the gap above Chibi are visible. Visually checked `concept_art/Menus/scarf-in-the-sky-v3.png` at full size.
+- Updated five menu concepts with the petal lantern design. Revised the Scarf in the Sky mockup so Chibi holds a single billowing scarf canopy directly in her hands. Visually checked the revised artwork and saved it as versioned PNGs in `concept_art/Menus`.
+- Generated and visually checked three Strawberry Hollow title screens and three pause-menu concepts. The six widescreen mockups and their prompts are in `concept_art/Menus`.
 - Removed the dark rounded backing from the scarf’s strawberry print, packed the transparent 4096 × 4096 texture into the Blender file, and rerendered both views.
 - Rendered Chibi gliding with her peach scarf, with two cloth corners gathered in each hand and the Strawberry Hollow print overhead. Verified the direct hand contact and fitted the existing goggles and strap to her head bone in the Blender scene.
 - Shaped the hand-held parachute like a pink gingham picnic blanket with four inward-curled corners. Updated the posed render and close-up, and verified the four mesh folds, steering loops, and packed logo in Blender.
@@ -37,6 +43,12 @@ Add each active target here with its owner, status, and a short description. Che
 - Refreshed ten concept images with Chibi's current short chestnut bob and single ahoge, including the Selfie, Scuba Mask, HUD, First Steps maps, and character moodboard scenes. Verified that all ten Godot 4.7.2 texture imports matched their source PNGs.
 
 ## Rooftop gym
+
+### 2026-11-27
+
+- Added a 2.35 m warm-white launch perch with a mint-trimmed ramp and a peach step-off marker beside the tunnel entrance. The rooftop builder includes the perch, and the ground lane stays clear for running and sliding.
+- Added soft ivory and mint gust ribbons through the lane. Local wisps split around Chibi’s palm and shoes and sweep along the open scarf. Cleared the mast nearest the launch to give the chase camera a view of the canopy.
+- Added an open-air wind tunnel on the dry deck southeast of spawn. Mint arrows mark the airflow, and ivory streamers, drifting streaks, and a quiet spatial wind loop follow the same 4.2-second gust cycle. The rooftop scene builder includes the lane.
 
 ### 2026-11-26
 
@@ -57,6 +69,16 @@ Add each active target here with its owner, status, and a short description. Che
 - Beveled the tower’s warm-white masonry and wrapped each grip’s upper lip in a pastel tile. Layered the window reveals, softened the base with a mint trim band, and added warm fill on the shaded faces. A quiet breeze plays near the tower, with spatial hand, shoe, and cloth sounds on catches, braces, and transfers.
 
 ## Chibi movement and animation
+
+### 2026-11-27
+
+- Rebuilt the scarf canopy as a deeper continuous arch with a real thickened shell, a cream binding, a shaded underside, and a subtle weave. The canopy spreads across first, then fills out with air. The crown and edges respond more strongly to descent, banking, and tunnel wind while the four corners stay anchored in Chibi's hands.
+- Chibi carries her speed from scarf glide into the first running step. The gait starts at touchdown with the leading reachable boot, a short landing compression, and a support that releases at toe-off. Near-stationary landings keep a soft two-foot settle.
+- The canopy gathers while all four corners are still in Chibi’s hands. The throwing hand starts to swing back first as the fabric transfers to the collar, and the loose end trails into the running stride. Partial openings use a smaller gather. Jump can take Chibi into a fresh hop before the wrap finishes.
+- The tunnel catches Chibi’s scarf as it opens. The canopy billows downwind and its hems flutter with the gust while all four corners stay in her hands. Chibi can steer across or against the airflow, and she keeps coasting as the load fades at the edge. The assisted carry earns no Flow.
+- Deepened the headwind brace with bent knees and a stronger reach into the palm. At the gust peak her shoulders rock back, the supporting shoe stays planted, and the free boot trails downwind before the stride recovers.
+- Chibi braces into the headwind with her right palm forward. At the gust peak she gives ground, keeps one shoe planted, and trails her free ankle downwind. Both scarf tails flutter with the gust.
+- Tailwinds add up to 12% of current running speed. Flow scores the runner’s own effort. Slides stay low after button release, turn into the airflow, and carry momentum into a jump or through an exit. Sideways steering can take Chibi out of the lane.
 
 ### 2026-11-26
 
@@ -132,6 +154,17 @@ Add each active target here with its owner, status, and a short description. Che
 - The integrated Godot headless suite passed all 254 checks.
 
 ## Verification
+
+### 2026-11-27
+
+- The canopy pass retained all 288 Godot headless checks. Verified the four exact grip anchors on the imported 2,848-triangle mesh and replayed opening, steering, and landing from the chase and side views on Windows D3D12 Mobile. Peak-wind replays at 30 and 60 FPS showed full cloth load, and the touch cancel returned to free fall.
+- Passed 288 integrated Godot 4.7.2 headless checks, including eight new checks for gait entry, first-shoe contact, cloth transfer, partial wraps, and hopping during a wrap.
+- Compared the same rooftop inputs before and after at 30 and 60 render FPS in gameplay and side views on Windows D3D12 Mobile at 1280×720. The replays covered the wind perch, gentle steering, a neutral landing, a turn, and a quick hop. At 40% stick, Chibi kept her 1.76 m/s approach speed and entered the gait on touchdown, removing a 14-tick pause. The largest sampled wrist movement in that replay dropped from 13.9 cm to 8.1 cm per frame at 60 FPS.
+- Passed 280 integrated Godot 4.7.2 headless checks, including nine new checks for the walk-off launch, canopy pins, steering, Flow, side exit, touchdown, Drop, and respawn. Neutral glide measured 1.00 m/s of downwind carry in the lull and 3.00 m/s at the peak. The side-exit check retained 1.98 m/s of carry.
+- Matched gameplay and side-view replays at 30 and 60 render FPS on Windows D3D12 Mobile at 1280×720. The replays reproduced the ramp launch, loaded steering, landing wrap, and 0.80 m/s peak blowback. Regenerated a rooftop scene to a temporary path and confirmed the builder placed the perch correctly.
+- A separate forced headless shutdown reported a resource cleanup warning for the tower wind audio loop. The integrated suite and rendered replays exited cleanly.
+- The wind tunnel passed all 17 focused checks and all 271 integrated Godot 4.7.2 headless checks. The live rig checks covered palm reach, shoe contact, trailing ankle position, and scarf reset on respawn.
+- Matching gameplay and side-view replays on Windows D3D12 Mobile reproduced the same movement and slide transitions at 30 and 60 render FPS. Full upwind input measured 2.93 m/s forward in the lull and 0.80 m/s backward at the peak.
 
 ### 2026-11-26
 
