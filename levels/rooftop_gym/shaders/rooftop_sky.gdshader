@@ -1,6 +1,7 @@
 shader_type sky;
-render_mode use_half_res_pass, disable_fog;
+render_mode use_quarter_res_pass, disable_fog;
 
+global uniform float rooftop_cloud_phase;
 uniform sampler3D cloud_noise : filter_linear, repeat_enable;
 uniform vec3 sun_direction = vec3(-0.754, 0.391, -0.528);
 uniform vec4 mint_sky : source_color = vec4(0.51, 0.72, 0.74, 1.0);
@@ -19,7 +20,6 @@ const vec3 BANK_ORIGINS[6] = vec3[](
 const vec3 BANK_EXTENT = vec3(5.25, 2.19, 2.85);
 const vec3 BANK_BOUNDS_OFFSET = vec3(0.0, 1.16, 0.0);
 const int VIEW_STEPS = 28;
-const float WIND_CYCLE_SECONDS = 300.0;
 
 vec3 atmosphere(vec3 ray) {
 	float above_horizon = smoothstep(-0.032, 0.245, ray.y);
@@ -176,11 +176,10 @@ vec3 render_clouds(vec3 ray, float wind_phase) {
 void sky() {
 	if (AT_CUBEMAP_PASS) {
 		COLOR = atmosphere(EYEDIR);
-	} else if (AT_HALF_RES_PASS) {
+	} else if (AT_QUARTER_RES_PASS) {
 		// Composite RGB here so the visible sky does not rely on subpass alpha.
-		// A 300-second cycle returns to the same phase at Godot's TIME rollover.
-		COLOR = render_clouds(EYEDIR, TIME * TAU / WIND_CYCLE_SECONDS);
+		COLOR = render_clouds(EYEDIR, rooftop_cloud_phase);
 	} else {
-		COLOR = HALF_RES_COLOR.rgb;
+		COLOR = QUARTER_RES_COLOR.rgb;
 	}
 }

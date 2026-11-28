@@ -6,6 +6,7 @@ const RunnerWindField3D := preload("res://features/runner/wind_field_3d.gd")
 ## Handles quick zone teleports (keys 1-5) and fall-out-of-world safety respawn in the gym.
 
 const LevelProgressProvider := preload("res://ui/hud/journal_level_progress_provider.gd")
+const CLOUD_DRIFT_PERIOD_SECONDS := 300.0
 
 @export var player_path: NodePath = NodePath("ChibiRunner")
 @export var journal_area_name := "Rooftop Parkour Gym"
@@ -30,6 +31,8 @@ var _journal_progress_provider: LevelProgressProvider
 
 
 func _ready() -> void:
+	_update_cloud_phase()
+	get_tree().process_frame.connect(_update_cloud_phase)
 	_journal_progress_provider = LevelProgressProvider.new(journal_area_name)
 	for pickup in get_tree().get_nodes_in_group(&"parkour_pickups"):
 		_register_strawberry(pickup)
@@ -48,6 +51,13 @@ func _ready() -> void:
 		_player.wind_field = get_node_or_null("WindTunnel") as RunnerWindField3D
 		if _player.touch_hud != null:
 			_player.touch_hud.bind_journal_level_progress(_journal_progress_provider)
+
+
+func _update_cloud_phase() -> void:
+	# A global float animates the visible sky without dirtying its static radiance.
+	var elapsed := Time.get_ticks_msec() * 0.001
+	var phase := fposmod(elapsed, CLOUD_DRIFT_PERIOD_SECONDS) * TAU / CLOUD_DRIFT_PERIOD_SECONDS
+	RenderingServer.global_shader_parameter_set(&"rooftop_cloud_phase", phase)
 
 
 func _register_strawberry(node: Node) -> void:
