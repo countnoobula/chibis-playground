@@ -1,6 +1,6 @@
 # Checkpoint 8 · Root ledges
 
-**Owner** Codex lead for integration and evidence, with scoped Luna Max implementation. **Status** Implemented and verified. Overnight checkpoint published for player review.
+**Owner** Codex lead for integration and evidence, with scoped Luna Max implementation. **Status** User-approved.
 
 [Previous checkpoint](atlas-07-ambient-breeze.md) · [Milestone tracker](../changelog.md) · [Project instructions](../AGENTS.md)
 
@@ -41,3 +41,7 @@ Godot 4.7.2 / Windows x64 / Vulkan Forward Mobile / 1280 × 720 / 60 Hz simulate
 Player review is deferred for the overnight run. Judge the approach camera, jump timing and grip readability.
 
 The packaged traversal regression passed 26 checks, including a deliberate walk off the shelf, checkpoint retry and a second complete transfer.
+
+### Player review · 2026-11-28
+
+The player approved the root ledges after trying the pole-to-shelf route.
