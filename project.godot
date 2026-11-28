@@ -149,3 +149,27 @@ rooftop_cloud_phase={
 "type": "float",
 "value": 0.0
 }
+rooftop_sky_key={
+"type": "vec3",
+"value": Vector3(0, 0, -1)
+}
+rooftop_sky_sun={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+rooftop_sky_moon={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+rooftop_sky_cloud={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+rooftop_sky_zenith={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+rooftop_sky_horizon={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}

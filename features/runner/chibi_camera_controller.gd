@@ -429,6 +429,13 @@ func _update_camera_water_profile(water: WaterBody3D, delta: float) -> void:
 	_camera_water_visibility = lerpf(_camera_water_visibility, target_visibility, blend)
 
 
+func sync_water_ambient_lighting() -> void:
+	if _water_environment == null or _dry_environment == null:
+		return
+	_water_environment.ambient_light_color = _dry_environment.ambient_light_color
+	_water_environment.ambient_light_energy = _dry_environment.ambient_light_energy
+
+
 func _apply_camera_water_environment() -> void:
 	if not is_instance_valid(_presentation_camera) or _water_environment == null or _dry_environment == null:
 		return

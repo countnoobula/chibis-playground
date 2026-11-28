@@ -66,6 +66,10 @@ func set_menu_open(open: bool) -> void:
 	_update_mouse_mode()
 
 
+func is_menu_open() -> bool:
+	return _menu_open
+
+
 func _update_mouse_mode() -> void:
 	if DisplayServer.get_name() == "headless":
 		return

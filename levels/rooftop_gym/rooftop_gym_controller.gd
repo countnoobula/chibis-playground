@@ -51,6 +51,19 @@ func _ready() -> void:
 		_player.wind_field = get_node_or_null("WindTunnel") as RunnerWindField3D
 		if _player.touch_hud != null:
 			_player.touch_hud.bind_journal_level_progress(_journal_progress_provider)
+		if OS.get_cmdline_user_args().has("--debug-menu"):
+			_add_sky_preview()
+
+
+func _add_sky_preview() -> void:
+	var lighting := preload("res://levels/rooftop_gym/rooftop_celestial_lighting.gd").new()
+	lighting.name = "CelestialLighting"
+	lighting.setup($WorldEnvironment, $SunLight, $SkyFill, _player.camera_ctrl)
+	add_child(lighting)
+	var preview := preload("res://levels/rooftop_gym/rooftop_sky_preview.gd").new()
+	preview.name = "SkyPreview"
+	preview.setup(lighting, _player)
+	add_child(preview)
 
 
 func _update_cloud_phase() -> void:

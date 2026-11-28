@@ -154,6 +154,8 @@ Add each active target here with its owner, status, and a short description. Che
 
 ## Completed work
 
+- [Rooftop sun, moon and time of day · 2026-11-28](changelog/2026-11-28-rooftop-celestial-lighting.md) · User-approved. Verified phase-driven moonlight and measured at most 0.45 ms median GPU overhead across the active preview variants.
+
 - [Rooftop cloud optimisation · 2026-11-28](changelog/2026-11-28-rooftop-weather-performance.md) · User-approved. Median GPU frame time with clouds fell 34–38% across six views on Apple M1.
 
 - [Rooftop movement and rope polish · 2026-11-28](changelog/rooftop-30fps-movement.md) · Player-approved. All 370 checks passed at 30 fps, 60 fps and variable timing.
