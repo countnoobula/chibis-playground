@@ -68,28 +68,22 @@ func _run() -> void:
 		and controller.get("active_checkpoint_transform") is Transform3D,
 		"The live valley keeps Root Ledges as the retry checkpoint through the transfer")
 
-	var edge_x := shelf.global_position.x + 2.7
-	var collision := shelf.get_node_or_null("CollisionShape3D") as CollisionShape3D
-	if collision != null and collision.shape is BoxShape3D:
-		edge_x = shelf.global_position.x + (collision.shape as BoxShape3D).size.x * 0.5 + 0.45
-	var top_y := shelf.global_position.y + 0.13
+	# Step off the side before entering the next checkpoint at the swing.
+	var collision := shelf.get_node("CollisionShape3D") as CollisionShape3D
+	var box := collision.shape as BoxShape3D
+	var edge_z := shelf.global_position.z + box.size.z * 0.5
+	var top_y := shelf.global_position.y + box.size.y * 0.5
 	input.call("clear_touch_input")
-	input.call("set_touch_move", FORWARD_STICK)
+	await _ticks(20)
+	input.call("set_touch_move", Vector2.RIGHT)
 	var walked_off := false
-	var drop_min_y := _runner.global_position.y
-	for _tick in 170:
+	for _tick in 90:
 		await _ticks(1)
-		drop_min_y = minf(drop_min_y, _runner.global_position.y)
-		if _runner.global_position.x > edge_x and _runner.global_position.y < top_y - 0.45:
+		if _runner.global_position.z > edge_z and _runner.global_position.y < top_y - 0.45:
 			walked_off = true
 			break
-		if String(_runner.get("current_state")) == "Locomotion" and _runner.is_on_floor() \
-				and _runner.global_position.x <= edge_x and _runner.global_position.x > shelf.global_position.x:
-			continue
 	input.call("set_touch_move", Vector2.ZERO)
-	_check(walked_off,
-		"Holding forward walks off the shelf’s exposed +X edge before retry (edge x %.2f, min y %.2f, final %s)"
-		% [edge_x, drop_min_y, str(_runner.global_position)])
+	_check(walked_off, "Chibi falls from the side of the shelf before the canopy checkpoint")
 	await _capture("drop_from_shelf")
 	if not walked_off:
 		await _finish()

@@ -4,7 +4,7 @@
 
 ### Roaming Atlas and First Steps Valley
 
-**Owner** Codex · **Checkpoint** 8 of 11 · **Status** verified, player review pending · **Current tasks** 4/4 · **User-approved checkpoints** 5/11
+**Owner** Codex · **Checkpoint** 9 of 11 · **Status** verified, player review pending · **Current tasks** 4/4 · **User-approved checkpoints** 5/11
 
 #### 1. Art and tracker
 
@@ -114,14 +114,14 @@ User-approved. [Verification and review decision](changelog/2026-11-27-atlas-art
 
 #### 9. Canopy gap
 
-- [ ] Author rope catch and swing
-- [ ] Tune the release landing
-- [ ] Add the descending line
-- [ ] Verify early-drop recovery and retry
+- [x] Author rope catch and swing
+- [x] Tune the release landing
+- [x] Add the descending line
+- [x] Verify early-drop recovery and retry
 
 **Review.** Catch, release, and ride the line. Deliberately release early and recover.
 
-[Implementation plan, acceptance checks and handoff](changelog/atlas-09-canopy-gap.md) · Planned.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-09-canopy-gap.md) · Verified. Player review pending.
 
 #### 10. Strong wind and finish
 
