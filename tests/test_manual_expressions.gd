@@ -69,7 +69,10 @@ func _run() -> void:
 	for voice in gym.find_children("*", "AudioStreamPlayer3D", true, false):
 		voice.stop()
 	gym.queue_free()
-	await create_timer(0.3).timeout
+	# Fixed-fps runs accelerate game timers, while the audio mixer uses wall time.
+	var settle_until := Time.get_ticks_msec() + 350
+	while Time.get_ticks_msec() < settle_until:
+		await process_frame
 	await process_frame
 	print("Manual expression checks: ", failures, " failures")
 	quit(1 if failures else 0)

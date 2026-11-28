@@ -960,14 +960,32 @@ func _test_runner_motion(gym: Node3D, chibi: ParkourController, skeleton: Skelet
 		await _wait_physics_frames(8)
 		chibi.flow_level = flow
 		chibi.start_ledge_mantle()
-		var phase_error := 0.0
-		for _i in 60:
-			await _wait_physics_frames(1)
+		# The body interpolates between physics ticks. Sample its clip after the
+		# mixer applies that same rendered frame, including at lower render rates.
+		var mantle_sample := {"error": 0.0, "first": 1.0, "last": 0.0}
+		var sample_mantle := func():
+			if chibi.current_state != "MantleUp":
+				return
+			# On entry the mixer may still have the zero-time seek queued.
+			# Its clip telemetry then belongs to the preceding mantle.
+			if anim.anim_tree.get("parameters/MantleUp/Phase/seek_request") >= 0.0:
+				return
+			var step := 1.0 / (Engine.physics_ticks_per_second * chibi._mantle_duration)
+			var previous := maxf(0.0, chibi.mantle_alpha - step)
+			var expected := lerpf(previous, chibi.mantle_alpha, Engine.get_physics_interpolation_fraction())
+			var clip_phase := _get_clip_phase(anim, "MantleUp")
+			mantle_sample.error = maxf(mantle_sample.error, absf(expected - clip_phase))
+			mantle_sample.first = minf(mantle_sample.first, clip_phase)
+			mantle_sample.last = maxf(mantle_sample.last, clip_phase)
+		anim.anim_tree.mixer_applied.connect(sample_mantle)
+		for _i in 75:
+			await physics_frame
 			if chibi.current_state != "MantleUp":
 				break
-			phase_error = maxf(phase_error, absf(chibi.mantle_alpha - _get_clip_phase(anim, "MantleUp")))
-		_assert_true(phase_error < 0.065 and chibi.current_state == "Locomotion" and chibi.get_collision_mask_value(1) and chibi.global_position.y > 1.6,
-			"Mantle clip follows ledge release and landing at flow %.1f (phase error %.3f)" % [flow, phase_error])
+		anim.anim_tree.mixer_applied.disconnect(sample_mantle)
+		var sampled_lift: bool = mantle_sample.first < 0.15 and mantle_sample.last > 0.85
+		_assert_true(sampled_lift and mantle_sample.error < 0.065 and chibi.current_state == "Locomotion" and chibi.get_collision_mask_value(1) and chibi.global_position.y > 1.6,
+			"Mantle clip follows ledge release and landing at flow %.1f (phase error %.3f)" % [flow, mantle_sample.error])
 
 	var ceiling := _test_collision_box(gym, Vector3(4.0, 1.1, 16.0), Vector3(2.5, 0.55, 4.0))
 	chibi.reset_for_respawn(Vector3(4.0, 0.06, 18.6))

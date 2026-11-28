@@ -89,14 +89,24 @@ func _run() -> void:
 	director.release_expression(manual)
 	check(director._face_index == director._automatic_face, "Picker releases into current automatic pose")
 	player.reset_for_respawn(Vector3(0, 12, 6))
-	var landing_smile := false
+	var saw_squeal := false
+	var grounded_after_squeal := false
+	var settled_on_ground := false
+	var unexpected_rescue := false
 	for i in 155:
 		await physics_frame
-		landing_smile = landing_smile or director._automatic_face == 9
-	check(not landing_smile and director._cloud_index == -1, "Landing releases fall cloud without a rescue smile")
+		saw_squeal = saw_squeal or director._automatic_face == 14
+		grounded_after_squeal = grounded_after_squeal or (saw_squeal and player.is_on_floor())
+		if grounded_after_squeal:
+			settled_on_ground = settled_on_ground or director._automatic_face in [0, 1]
+		unexpected_rescue = unexpected_rescue or director._automatic_face == 9 or director._cloud_index >= 0
+	check(settled_on_ground and not unexpected_rescue, "A long fall onto the roof settles without a rescue smile or cloud")
 	for voice in gym.find_children("*", "AudioStreamPlayer3D", true, false):
 		voice.stop()
 	gym.queue_free()
-	await create_timer(0.3).timeout
+	# Fixed-fps runs accelerate game timers, while the audio mixer uses wall time.
+	var settle_until := Time.get_ticks_msec() + 350
+	while Time.get_ticks_msec() < settle_until:
+		await process_frame
 	print("Automatic rooftop reactions: ", failures, " failures")
 	quit(1 if failures else 0)

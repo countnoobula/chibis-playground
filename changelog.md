@@ -147,11 +147,11 @@ User-approved. [Verification and review decision](changelog/2026-11-27-atlas-art
 ### Other active work
 
 
-- [**Chibi facial expressions**](changelog/chibi-facial-expressions.md) · Owner: Codex · Status: artwork reviewed, [gameplay integration plan](changelog/chibi-gameplay-expressions.md) approved. Checkpoint 2 of 3 implemented, with all four rooftop reaction tasks verified and approved. Checkpoint 1 approved and pushed in da64a20.
-
 Add each active target here with its owner, status, and a short description. Check the current project and reread this file before editing. Update your own entry and preserve edits from other agents. When work is verified, move it to the relevant section below with the date and the checks that ran.
 
 ## Completed work
+
+- [Chibi rooftop expressions · 2026-11-28](changelog/chibi-gameplay-expressions.md) · All three checkpoints approved, including automatic rooftop reactions and the exported emoji picker.
 
 - [Title and transition · 2026-11-27](changelog/2026-11-27-title-and-transition.md)
 - [Atlas art and tracker · 2026-11-27](changelog/2026-11-27-atlas-art-and-tracker.md)
