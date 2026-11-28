@@ -28,6 +28,7 @@
 [ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_understory/crossing_rounded_blossoms.glb" id="26_rounded_blossoms"]
 [ext_resource type="PackedScene" path="res://assets/environment/woodland/forest/moss_mound.glb" id="27_moss_mound"]
 [ext_resource type="PackedScene" path="res://features/water/water_body_3d.tscn" id="28_water_body"]
+[ext_resource type="PackedScene" path="res://levels/first_steps/dry_crossing.tscn" id="29_dry_crossing"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_summer"]
 sky_top_color = Color(0.29803923, 0.56078434, 0.6901961, 1)
@@ -93,6 +94,8 @@ directional_shadow_max_distance = 82.0
 position = Vector3(-8, 1.1, -18)
 outline = PackedVector2Array(-15, 8, -11, 8, -7, 7, -5, 4, -2, 5, 2, 4, 6, 2, 10, 1, 14, 1, 15, -1, 13, -4, 9, -6, 4, -6, -2, -5, -9, -5, -15, -3, -18, 0, -19, 4)
 max_depth = 3.8
+
+[node name="DryCrossing" parent="." instance=ExtResource("29_dry_crossing")]
 
 [node name="SafeSpawn" type="Marker3D" parent="."]
 position = Vector3(0, 5.08, 34)

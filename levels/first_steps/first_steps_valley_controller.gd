@@ -1,16 +1,24 @@
 class_name FirstStepsValleyController
 extends Node3D
 
-## Sends Chibi back to the trailhead if they fall out of the valley.
+## Sends Chibi back to the latest safe valley checkpoint if they fall out.
 
 const LevelProgressProvider := preload("res://ui/hud/journal_level_progress_provider.gd")
+const SectionRetryPrompt := preload("res://ui/hud/section_retry_prompt.gd")
 const ReliefSurfaceShader := preload("res://levels/first_steps/terrain/materials/relief_surface_shader.gd")
 const WaterCausticSurfaceShader := preload("res://levels/first_steps/terrain/materials/water_caustic_surface_shader.gd")
 const WATER_CAUSTIC_RECEIVER_GROUP: StringName = &"water_caustic_receivers"
+const SECTION_CHECKPOINT_GROUP: StringName = &"first_steps_section_checkpoints"
+const DEFAULT_CAMERA_PITCH := -0.22
+const SECTION_CAMERA_PITCH := -0.56
 
 @export var runner_path: NodePath = NodePath("ChibiRunner")
 @export var safe_spawn_path: NodePath = NodePath("SafeSpawn")
 @export_range(-100.0, 0.0, 0.5) var fall_limit_y: float = -24.0
+@export_group("Section retry")
+@export var section_checkpoint_group: StringName = SECTION_CHECKPOINT_GROUP
+@export var developer_section_start_path: NodePath = NodePath("DryCrossing/DeveloperStart")
+@export var developer_section_start_enabled: bool = true
 @export_group("Water caustics")
 @export var water_body_path: NodePath = NodePath("CreekWater")
 
@@ -20,7 +28,18 @@ const WATER_CAUSTIC_RECEIVER_GROUP: StringName = &"water_caustic_receivers"
 
 var _runner: ParkourController
 var _safe_spawn: Marker3D
+var _developer_section_start: Node3D
+var _active_checkpoint_transform := Transform3D.IDENTITY
+var _active_checkpoint_name := "Trailhead"
+var _active_checkpoint_camera_pitch := DEFAULT_CAMERA_PITCH
+var _retry_prompt: SectionRetryPrompt
 var _journal_progress_provider: LevelProgressProvider
+var active_checkpoint_name: String:
+	get:
+		return _active_checkpoint_name
+var active_checkpoint_transform: Transform3D:
+	get:
+		return _active_checkpoint_transform
 
 
 func _enter_tree() -> void:
@@ -38,10 +57,15 @@ func _ready() -> void:
 	_journal_progress_provider = LevelProgressProvider.new("First Steps Valley")
 	_runner = get_node_or_null(runner_path) as ParkourController
 	_safe_spawn = get_node_or_null(safe_spawn_path) as Marker3D
+	_developer_section_start = get_node_or_null(developer_section_start_path) as Node3D
 	if _runner == null:
 		push_error("First Steps Valley could not find its ChibiRunner.")
 	if _safe_spawn == null:
 		push_error("First Steps Valley could not find its SafeSpawn marker.")
+	else:
+		_active_checkpoint_transform = _safe_spawn.global_transform
+	_bind_section_checkpoints()
+	_build_retry_prompt()
 	_configure_terrain_relief()
 	_configure_water_caustics()
 	if _runner != null and _runner.touch_hud != null:
@@ -122,9 +146,86 @@ func _configure_caustic_meshes(node: Node, water: WaterBody3D, configured_mesh_i
 func _physics_process(_delta: float) -> void:
 	if _runner == null or _safe_spawn == null:
 		return
+	if OS.is_debug_build() and developer_section_start_enabled and Input.is_action_just_pressed(&"debug_zone_1"):
+		start_at_developer_section()
 	if _runner.global_position.y > fall_limit_y:
 		return
-	_runner.reset_for_respawn(_safe_spawn.global_position)
-	_runner.global_rotation = _safe_spawn.global_rotation
+	retry_section()
+
+
+## Teleport to the current section checkpoint and clear movement, traversal, and camera state.
+func retry_section() -> void:
+	if _runner == null:
+		return
+	_teleport_runner(_active_checkpoint_transform, _active_checkpoint_camera_pitch)
+
+
+## Developer-only shortcut used to inspect the dry crossing from its authored start marker.
+func start_at_developer_section() -> void:
+	if not developer_section_start_enabled or not OS.is_debug_build() or _runner == null:
+		return
+	if _developer_section_start == null:
+		_developer_section_start = get_node_or_null(developer_section_start_path) as Node3D
+	if _developer_section_start == null:
+		return
+	_activate_section_checkpoint(_developer_section_start.global_transform, "Dry Crossing", SECTION_CAMERA_PITCH)
+	_teleport_runner(_active_checkpoint_transform, _active_checkpoint_camera_pitch)
+
+
+func _bind_section_checkpoints() -> void:
+	for node in get_tree().get_nodes_in_group(section_checkpoint_group):
+		if not (node is Area3D) or not is_ancestor_of(node):
+			continue
+		var checkpoint_area := node as Area3D
+		checkpoint_area.body_entered.connect(_on_section_checkpoint_body_entered.bind(checkpoint_area))
+
+
+func _on_section_checkpoint_body_entered(body: Node3D, checkpoint_area: Area3D) -> void:
+	if body != _runner:
+		return
+	var spawn := checkpoint_area.get_node_or_null("Spawn") as Node3D
+	var spawn_node: Node3D = spawn if spawn != null else checkpoint_area
+	var section_name := str(checkpoint_area.get_meta("section_name", "Dry Crossing")).strip_edges()
+	if section_name.is_empty():
+		section_name = "Dry Crossing"
+	_activate_section_checkpoint(spawn_node.global_transform, section_name, SECTION_CAMERA_PITCH)
+
+
+func _activate_section_checkpoint(
+		spawn_transform: Transform3D,
+		section_name: String,
+		camera_pitch: float = SECTION_CAMERA_PITCH
+) -> void:
+	_active_checkpoint_transform = spawn_transform
+	_active_checkpoint_name = section_name
+	_active_checkpoint_camera_pitch = camera_pitch
+	if _retry_prompt != null:
+		_retry_prompt.show_checkpoint(section_name)
+
+
+func _teleport_runner(spawn_transform: Transform3D, camera_pitch: float) -> void:
+	_runner.reset_for_respawn(spawn_transform.origin)
+	var spawn_rotation := spawn_transform.basis.get_euler()
+	_runner.global_rotation = spawn_rotation
+	_runner.reset_physics_interpolation()
 	if _runner.camera_ctrl != null:
+		_runner.camera_ctrl.yaw = spawn_rotation.y
+		_runner.camera_ctrl.pitch = camera_pitch
 		_runner.camera_ctrl.reset_after_teleport()
+
+
+func _build_retry_prompt() -> void:
+	if _runner == null or _runner.touch_hud == null:
+		return
+	# Keep this in the main HUD so it works with either desktop or touch controls.
+	# Place it just behind the pause journal, which covers it while the game is paused.
+	var hud_root := _runner.touch_hud.get_node_or_null("HUDRoot") as Control
+	if hud_root == null:
+		return
+	_retry_prompt = SectionRetryPrompt.new()
+	_retry_prompt.name = "SectionRetryPrompt"
+	hud_root.add_child(_retry_prompt)
+	var pause_menu := hud_root.get_node_or_null("PauseMenu")
+	if pause_menu != null:
+		hud_root.move_child(_retry_prompt, pause_menu.get_index())
+	_retry_prompt.retry_requested.connect(retry_section)

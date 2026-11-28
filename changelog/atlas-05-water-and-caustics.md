@@ -35,7 +35,7 @@ Review entry, dive and exit in one continuous traversal. Compare the shallow she
 
 ## Handoff and change history
 
-- **Next action** Close the approved checkpoint with its dedicated commit and push.
+- **Next action** Approved checkpoint committed and pushed to origin/main as 6e7b2f8. Remote HEAD verified.
 
 ### 2026-11-28 · Creek integration
 

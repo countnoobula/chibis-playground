@@ -1,0 +1,204 @@
+[gd_scene load_steps=23 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_root/root_walk_shell.glb" id="1_root_shell"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_cliffs/creek_boulder_low_wedge.glb" id="2_low_boulder"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_cliffs/moss_creek_boulder.glb" id="3_creek_boulder"]
+[ext_resource type="PackedScene" path="res://features/stations/parkour_balance_beam.tscn" id="4_balance_beam"]
+[ext_resource type="Texture2D" path="res://assets/environment/woodland/textures/valley_root/T_ValleyRootBark_BaseColor.png" id="5_root_bark_color"]
+[ext_resource type="Texture2D" path="res://assets/environment/woodland/textures/valley_root/T_ValleyRootBark_Roughness.png" id="6_root_bark_roughness"]
+[ext_resource type="Texture2D" path="res://assets/environment/woodland/textures/valley_cliffs/T_ValleyBoulderMoss_BaseColor.png" id="7_boulder_moss"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vault_root"]
+size = Vector3(0.5, 0.96, 2.2)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_boulder_a"]
+points = PackedVector3Array(1.05, -0.13, 0, 0.742, -0.13, 0.41, 0, -0.13, 0.58, -0.742, -0.13, 0.41, -1.05, -0.13, 0, -0.742, -0.13, -0.41, 0, -0.13, -0.58, 0.742, -0.13, -0.41, 0.9, 0.42, 0, 0.636, 0.42, 0.389, 0, 0.42, 0.55, -0.636, 0.42, 0.389, -0.9, 0.42, 0, -0.636, 0.42, -0.389, 0, 0.42, -0.55, 0.636, 0.42, -0.389, 0.72, 0.72, 0, 0.509, 0.72, 0.389, 0, 0.72, 0.55, -0.509, 0.72, 0.389, -0.72, 0.72, 0, -0.509, 0.72, -0.389, 0, 0.72, -0.55, 0.509, 0.72, -0.389, 0.55, 0.932, 0, 0.389, 0.932, 0.389, 0, 0.932, 0.55, -0.389, 0.932, 0.389, -0.55, 0.932, 0, -0.389, 0.932, -0.389, 0, 0.932, -0.55, 0.389, 0.932, -0.389)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_boulder_b"]
+points = PackedVector3Array(1.75, -0.368, 0, 1.237, -0.368, 0.99, 0, -0.368, 1.4, -1.237, -0.368, 0.99, -1.75, -0.368, 0, -1.237, -0.368, -0.99, 0, -0.368, -1.4, 1.237, -0.368, -0.99, 1.5, 0.55, 0, 1.061, 0.55, 0.884, 0, 0.55, 1.25, -1.061, 0.55, 0.884, -1.5, 0.55, 0, -1.061, 0.55, -0.884, 0, 0.55, -1.25, 1.061, 0.55, -0.884, 1.05, 1.35, 0, 0.742, 1.35, 0.636, 0, 1.35, 0.9, -0.742, 1.35, 0.636, -1.05, 1.35, 0, -0.742, 1.35, -0.636, 0, 1.35, -0.9, 0.742, 1.35, -0.636, 0.7, 2.147, 0, 0.495, 2.147, 0.495, 0, 2.147, 0.7, -0.495, 2.147, 0.495, -0.7, 2.147, 0, -0.495, 2.147, -0.495, 0, 2.147, -0.7, 0.495, 2.147, -0.495)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_checkpoint"]
+radius = 1.45
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vault_footing"]
+size = Vector3(2.55, 0.36, 2.0)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_vault_footing"]
+radius = 1.0
+height = 2.55
+radial_segments = 16
+rings = 6
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vault_footing"]
+albedo_texture = ExtResource("5_root_bark_color")
+uv1_triplanar = true
+roughness = 0.94
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_landing_moss"]
+albedo_texture = ExtResource("7_boulder_moss")
+roughness = 0.98
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_landing_moss_a"]
+top_radius = 0.55
+bottom_radius = 0.55
+height = 0.025
+radial_segments = 16
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_landing_moss_b"]
+top_radius = 0.7
+bottom_radius = 0.7
+height = 0.025
+radial_segments = 16
+
+[sub_resource type="Shader" id="Shader_log_bark"]
+code = "shader_type spatial;\nuniform sampler2D bark_color : source_color, repeat_enable;\nuniform sampler2D bark_roughness : repeat_enable;\nuniform float length_repeats = 4.0;\nvoid fragment() {\n\tvec2 bark_uv = vec2(UV.y * length_repeats, UV.x);\n\tALBEDO = texture(bark_color, bark_uv).rgb;\n\tROUGHNESS = texture(bark_roughness, bark_uv).r;\n}\n"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_log_bark"]
+shader = SubResource("Shader_log_bark")
+shader_parameter/bark_color = ExtResource("5_root_bark_color")
+shader_parameter/bark_roughness = ExtResource("6_root_bark_roughness")
+shader_parameter/length_repeats = 4.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_balance_log"]
+top_radius = 0.142
+bottom_radius = 0.142
+height = 8.0
+radial_segments = 64
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_log_end_grain"]
+albedo_color = Color(0.49, 0.335, 0.207, 1)
+roughness = 0.94
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_log_end_grain"]
+top_radius = 0.142
+bottom_radius = 0.142
+height = 0.018
+radial_segments = 64
+
+[node name="DryCrossing" type="Node3D"]
+
+[node name="SectionStart" type="Marker3D" parent="."]
+position = Vector3(-22.5, 2.55, -16)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="DeveloperStart" type="Marker3D" parent="."]
+position = Vector3(-22.5, 2.55, -16)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="CheckpointArea" type="Area3D" parent="." groups=["first_steps_section_checkpoints"]]
+position = Vector3(-22.5, 2.55, -16)
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CheckpointArea"]
+shape = SubResource("SphereShape3D_checkpoint")
+
+[node name="Spawn" type="Marker3D" parent="CheckpointArea"]
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="VaultRoot" type="StaticBody3D" parent="."]
+position = Vector3(-19.3, 1.5, -16)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VaultRoot"]
+position = Vector3(0, 0.48, 0)
+shape = SubResource("BoxShape3D_vault_root")
+
+[node name="RootWalkShell" parent="VaultRoot" instance=ExtResource("1_root_shell")]
+position = Vector3(0, 0.15, 0)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(0.2, 0.2, 0.2)
+
+[node name="VaultFooting" type="StaticBody3D" parent="."]
+position = Vector3(-17.79, 1.55, -16)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VaultFooting"]
+shape = SubResource("BoxShape3D_vault_footing")
+
+[node name="PlinthMesh" type="MeshInstance3D" parent="VaultFooting"]
+rotation = Vector3(0, 0, 1.5707963)
+scale = Vector3(0.18, 1, 1)
+mesh = SubResource("CapsuleMesh_vault_footing")
+surface_material_override/0 = SubResource("StandardMaterial3D_vault_footing")
+
+[node name="UnderrootWest" parent="VaultFooting" instance=ExtResource("2_low_boulder")]
+position = Vector3(-0.72, -0.84, 0)
+rotation = Vector3(0, 0.9, 0)
+scale = Vector3(1.2, 1.25, 1.2)
+
+[node name="UnderrootEast" parent="VaultFooting" instance=ExtResource("2_low_boulder")]
+position = Vector3(0.72, -0.84, 0)
+rotation = Vector3(0, -0.7, 0)
+scale = Vector3(1.2, 1.25, 1.2)
+
+[node name="BoulderHopA" type="StaticBody3D" parent="."]
+position = Vector3(-13.65, 0.468, -16)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BoulderHopA"]
+rotation = Vector3(0, 0.48, 0)
+shape = SubResource("ConvexPolygonShape3D_boulder_a")
+
+[node name="Rock" parent="BoulderHopA" instance=ExtResource("2_low_boulder")]
+rotation = Vector3(0, 0.48, 0)
+scale = Vector3(1.7, 1.7, 1.7)
+
+[node name="MossLandingTop" type="MeshInstance3D" parent="BoulderHopA"]
+position = Vector3(0, 0.9195, 0)
+mesh = SubResource("CylinderMesh_landing_moss_a")
+surface_material_override/0 = SubResource("StandardMaterial3D_landing_moss")
+
+[node name="Landing" type="Marker3D" parent="BoulderHopA"]
+position = Vector3(0, 0.932, 0)
+
+[node name="BoulderHopB" type="StaticBody3D" parent="."]
+position = Vector3(-9.25, -0.747, -16)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BoulderHopB"]
+rotation = Vector3(0, -0.72, 0)
+shape = SubResource("ConvexPolygonShape3D_boulder_b")
+
+[node name="Rock" parent="BoulderHopB" instance=ExtResource("3_creek_boulder")]
+rotation = Vector3(0, -0.72, 0)
+scale = Vector3(3.5, 3.5, 3.5)
+
+[node name="MossLandingTop" type="MeshInstance3D" parent="BoulderHopB"]
+position = Vector3(0, 2.1345, 0)
+mesh = SubResource("CylinderMesh_landing_moss_b")
+surface_material_override/0 = SubResource("StandardMaterial3D_landing_moss")
+
+[node name="Landing" type="Marker3D" parent="BoulderHopB"]
+position = Vector3(0, 2.147, 0)
+
+[node name="BalanceLog" parent="." instance=ExtResource("4_balance_beam")]
+position = Vector3(0.5, 1.4, -16)
+rotation = Vector3(0, 1.5707963, 0)
+beam_length = 8.0
+beam_radius = 0.14
+
+[node name="LogDressing" type="MeshInstance3D" parent="BalanceLog"]
+position = Vector3(0, 0, -4)
+rotation = Vector3(1.5707963, 0, 0)
+mesh = SubResource("CylinderMesh_balance_log")
+surface_material_override/0 = SubResource("ShaderMaterial_log_bark")
+
+[node name="EastEndGrain" type="MeshInstance3D" parent="BalanceLog"]
+position = Vector3(0, 0, 0.009)
+rotation = Vector3(1.5707963, 0, 0)
+mesh = SubResource("CylinderMesh_log_end_grain")
+surface_material_override/0 = SubResource("StandardMaterial3D_log_end_grain")
+
+[node name="WestEndGrain" type="MeshInstance3D" parent="BalanceLog"]
+position = Vector3(0, 0, -8.009)
+rotation = Vector3(1.5707963, 0, 0)
+mesh = SubResource("CylinderMesh_log_end_grain")
+surface_material_override/0 = SubResource("StandardMaterial3D_log_end_grain")
+
+[node name="DryExit" type="Marker3D" parent="."]
+position = Vector3(2, 1.85, -16)
+rotation = Vector3(0, -1.5707963, 0)
