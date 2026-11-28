@@ -73,6 +73,9 @@ func _run() -> void:
 		and rock.global_transform.is_equal_approx(placed_transform),
 		"redo restores the rock to the same slope and transform")
 
+	# The valley binds its live runner in _ready. Save the placement as authored
+	# in the editor, before that transient runtime binding exists.
+	terrain.set("clipmap_target", null)
 	var packed_valley := PackedScene.new()
 	var pack_error := packed_valley.pack(valley)
 	_assert(pack_error == OK, "slope placement scene packs for persistence")
@@ -117,12 +120,17 @@ func _verify_disposable_starter_resculpt() -> void:
 	if starter_scene == null:
 		return
 	var starter := starter_scene.instantiate() as Node3D
+	var camera := Camera3D.new()
+	root.add_child(camera)
+	camera.current = true
+	starter.set("collision_mode", Terrain3DCollision.FULL_GAME)
 	root.add_child(starter)
 	await _wait_physics_frames(8)
 	var space: PhysicsDirectSpaceState3D = starter.get_world_3d().direct_space_state
 	var before_hit := _raycast(space, Vector2.ZERO)
 	_assert(not before_hit.is_empty(), "starter Terrain3D has a pre-resculpt collision surface")
 	if before_hit.is_empty():
+		camera.queue_free()
 		starter.free()
 		await process_frame
 		return
@@ -150,6 +158,7 @@ func _verify_disposable_starter_resculpt() -> void:
 			height_delta, base_height, terrain_data.get_height(Vector3.ZERO)])
 		_assert(height_delta >= 3.0,
 			"five in-memory Terrain3D height samples and collision update move the raycast surface")
+	camera.queue_free()
 	starter.free()
 	await process_frame
 

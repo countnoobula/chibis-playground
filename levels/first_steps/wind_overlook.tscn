@@ -73,15 +73,15 @@ clearcoat = 0.22
 script = ExtResource("1_controller")
 
 [node name="SectionStart" type="Marker3D" parent="."]
-position = Vector3(34.2, 4.75, 0)
+position = Vector3(34.2, 4.78, 0)
 rotation = Vector3(0, -1.5707963, 0)
 
 [node name="DeveloperStart" type="Marker3D" parent="."]
-position = Vector3(34.2, 4.75, 0)
+position = Vector3(34.2, 4.78, 0)
 rotation = Vector3(0, -1.5707963, 0)
 
 [node name="CheckpointArea" type="Area3D" parent="." groups=["first_steps_section_checkpoints"]]
-position = Vector3(34.2, 4.75, 0)
+position = Vector3(34.2, 4.78, 0)
 collision_mask = 2
 metadata/developer_action = &"debug_zone_4"
 metadata/section_name = "Wind Overlook"

@@ -4,7 +4,7 @@
 
 ### Roaming Atlas and First Steps Valley
 
-**Owner** Codex · **Checkpoint** 10 of 11 · **Status** verified, player review pending · **Current tasks** 5/5 · **User-approved checkpoints** 5/11
+**Owner** Codex · **Checkpoint** 11 of 11 · **Status** verified, player review pending · **Current tasks** 5/5 · **User-approved checkpoints** 5/11
 
 #### 1. Art and tracker
 
@@ -137,15 +137,15 @@ User-approved. [Verification and review decision](changelog/2026-11-27-atlas-art
 
 #### 11. End-to-end verification
 
-- [ ] Complete the valley from Title
-- [ ] Check section retries and developer station starts
-- [ ] Run gameplay and menu regressions
-- [ ] Review desktop and touch layouts
-- [ ] Verify exports and record device coverage
+- [x] Complete the valley from Title
+- [x] Check section retries and developer station starts
+- [x] Run gameplay and menu regressions
+- [x] Review desktop and touch layouts
+- [x] Verify exports and record device coverage
 
 **Review.** Play to the overlook, retry a section, return to the atlas, and enter Rooftop Gym. Check 1280 × 720 desktop and 844 × 390 landscape touch. Record Windows launch, Android export, and physical-device results separately.
 
-[Implementation plan, acceptance checks and handoff](changelog/atlas-11-end-to-end-verification.md) · Planned.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-11-end-to-end-verification.md) · Verified. Player review pending.
 
 ### Other active work
 

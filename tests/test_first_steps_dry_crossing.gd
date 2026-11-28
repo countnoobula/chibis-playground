@@ -118,6 +118,7 @@ func _run() -> void:
 	await _verify_retry(level, player, input, camera, checkpoint_spawn, "dry finish")
 
 	# Retry while wet, then repeat the same miss and recover without a reset.
+	var shore_spawn := level.get_node("RootLedges/CheckpointArea/Spawn") as Node3D
 	var first_miss := await _drive_course(player, input, camera, water, root_obstacle,
 		boulder_a, boulder_b, balance_log, dry_exit, 2, 0, false)
 	_check(bool(first_miss.get("miss_swum", false)), "A deliberate first-hop miss drops Chibi into CreekWater swimming")
@@ -129,7 +130,9 @@ func _run() -> void:
 	_check(bool(first_recovery.get("miss_swum", false)) and first_shore
 		and int(player.get("wind_reset_serial")) == first_serial,
 		"The first-hop miss swims to shore and rejoins DryExit without a reset")
-	await _verify_retry(level, player, input, camera, checkpoint_spawn, "first-hop recovery")
+	await _verify_retry(level, player, input, camera, shore_spawn, "first-hop recovery")
+	level.call("start_at_developer_section", &"debug_zone_1")
+	await _ticks(24)
 
 	var second_miss := await _drive_course(player, input, camera, water, root_obstacle,
 		boulder_a, boulder_b, balance_log, dry_exit, 3, 0, false)
@@ -138,7 +141,9 @@ func _run() -> void:
 	_check(bool(second_miss.get("miss_swum", false)) and second_shore
 		and int(player.get("wind_reset_serial")) == second_serial,
 		"The second-hop miss swims to shore and rejoins DryExit without a reset")
-	await _verify_retry(level, player, input, camera, checkpoint_spawn, "second-hop recovery")
+	await _verify_retry(level, player, input, camera, shore_spawn, "second-hop recovery")
+	level.call("start_at_developer_section", &"debug_zone_1")
+	await _ticks(24)
 
 	var log_miss := await _drive_course(player, input, camera, water, root_obstacle,
 		boulder_a, boulder_b, balance_log, dry_exit, 5, 0, false)
@@ -147,7 +152,7 @@ func _run() -> void:
 	_check(bool(log_miss.get("miss_swum", false)) and log_shore
 		and int(player.get("wind_reset_serial")) == log_serial,
 		"Walking off the log's west end reaches the creek; swimming returns Chibi to DryExit")
-	await _verify_retry(level, player, input, camera, checkpoint_spawn, "log recovery")
+	await _verify_retry(level, player, input, camera, shore_spawn, "log recovery")
 
 	if OS.is_debug_build():
 		level.call("start_at_developer_section")
