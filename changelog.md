@@ -4,7 +4,7 @@
 
 ### Roaming Atlas and First Steps Valley
 
-**Owner** Codex · **Checkpoint** 6 of 11 · **Status** dry crossing implemented and verified, awaiting player review · **Current tasks** 5/5 · **User-approved checkpoints** 5/11
+**Owner** Codex · **Checkpoint** 7 of 11 · **Status** verified, player review pending · **Current tasks** 4/4 · **User-approved checkpoints** 5/11
 
 #### 1. Art and tracker
 
@@ -92,14 +92,14 @@ User-approved. [Verification and review decision](changelog/2026-11-27-atlas-art
 
 #### 7. Ambient breeze
 
-- [ ] Animate plant tips
-- [ ] Animate scarf and ahoge
-- [ ] Keep trunks and plant roots anchored
-- [ ] Compare movement with breeze enabled and disabled
+- [x] Animate plant tips
+- [x] Animate scarf and ahoge
+- [x] Keep trunks and plant roots anchored
+- [x] Compare movement with breeze enabled and disabled
 
 **Review.** Observe Chibi standing still. Repeat identical run and jump inputs and verify that direction, speed, and trajectory match.
 
-[Implementation plan, acceptance checks and handoff](changelog/atlas-07-ambient-breeze.md) · Planned.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-07-ambient-breeze.md) · Verified. Player review pending.
 
 #### 8. Root ledges
 

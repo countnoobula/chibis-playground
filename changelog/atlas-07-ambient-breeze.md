@@ -1,6 +1,6 @@
 # Checkpoint 7 · Ambient breeze
 
-**Owner** Codex lead for integration and evidence, with scoped Luna Max implementation. **Status** Planned. Start after checkpoint 6 receives player approval.
+**Owner** Codex lead for integration and evidence, with scoped Luna Max implementation. **Status** Implemented and verified. Overnight checkpoint published for player review.
 
 [Previous checkpoint](atlas-06-first-dry-crossing.md) · [Milestone tracker](../changelog.md) · [Project instructions](../AGENTS.md)
 
@@ -19,10 +19,10 @@ Ambient wind is presentation only. Reserve runner redirection for explicitly aut
 
 ## Implementation checklist
 
-- [ ] Identify the foliage deformation inputs, scarf presentation and ahoge attachment. Determine which existing parameters can share a direction and phase without touching physics.
-- [ ] Author mild tip motion with fixed roots and trunks. Check grass against the terrain edge and leaves against branches so motion reads as bending.
-- [ ] Apply the breeze to scarf and ahoge presentation. Inspect idle, running, swimming and glide transitions for clipping or sudden pose changes.
-- [ ] Replay identical input from the same spawn with ambient breeze on and off. Record positions, headings and velocities at matching physics ticks through a run, takeoff, apex and landing. Investigate any movement difference.
+- [x] Identify the foliage deformation inputs, scarf presentation and ahoge attachment. Determine which existing parameters can share a direction and phase without touching physics.
+- [x] Author mild tip motion with fixed roots and trunks. Check grass against the terrain edge and leaves against branches so motion reads as bending.
+- [x] Apply the breeze to scarf and ahoge presentation. Inspect idle, running, swimming and glide transitions for clipping or sudden pose changes.
+- [x] Replay identical input from the same spawn with ambient breeze on and off. Record positions, headings and velocities at matching physics ticks through a run, takeoff, apex and landing. Investigate any movement difference.
 
 ## Acceptance and evidence
 
@@ -30,6 +30,12 @@ Show a still-camera motion comparison with identifiable anchored roots and scarf
 
 ## Handoff and change history
 
-- **Next action** After the preceding checkpoint is approved, inspect the current working tree and run the first checklist step against that revision.
-- **Changes and verification** Pending. Append dated implementation notes, files changed, test conditions, results and capture links here as work lands.
-- **Review** Awaiting implementation and player review. Record feedback, rerun the affected checks, and record the approval commit and push when this checkpoint closes.
+### 2026-11-28 · Ambient breeze playtest
+
+The valley instances its own breeze node. It scales local foliage material copies and applies a post-spring visual modifier to both scarf tails and the ahoge. The authored foliage height mask pins the roots. The modifier fades its scarf contribution during glide deployment. Designers can edit strength on AmbientBreeze; the debug build accepts **B** for a live comparison.
+
+The standalone regression passed 38 assertions against the exported pack. Matched 60 Hz run, takeoff, apex and landing traces measured zero difference in position, heading and velocity to five decimal places; jump rise was 0.65 m. Tests sampled the applied skeleton pose and fixed root transforms. A separate packed probe toggled B, entered PoolSwim and deployed the scarf during descent. The scarf blend dropped below 0.00001 while the glider was active.
+
+Verified on Windows Vulkan Forward Mobile at 1280 × 720. Captured a fixed camera beside the creek bellflowers with the same render timing in both runs. [Breeze off/on animation](../source_art/LayoutReview/first-steps-ambient-breeze.gif) · [Movement regression](../tests/test_first_steps_breeze.gd) · [Windows build](../builds/first_steps_checkpoint_7/Chibi.exe)
+
+Review is deferred by the owner for this overnight run. Compare the strength at the trailhead and creek using B.

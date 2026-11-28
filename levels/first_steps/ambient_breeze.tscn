@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://levels/first_steps/ambient_breeze.gd" id="1_ambient_breeze"]
+
+[node name="AmbientBreeze" type="Node"]
+script = ExtResource("1_ambient_breeze")
