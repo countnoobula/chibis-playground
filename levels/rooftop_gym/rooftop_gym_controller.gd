@@ -36,6 +36,11 @@ func _ready() -> void:
 	get_tree().node_added.connect(_register_strawberry)
 	_player = get_node_or_null(player_path) as ParkourController
 	if _player != null:
+		var reactions := preload("res://features/runner/rooftop_reactions.gd").new()
+		reactions.name = "RooftopReactions"
+		add_child(reactions)
+		reactions.setup(_player)
+		_player.expression_director.requests_cleared.connect(reactions.reset)
 		var picker := preload("res://ui/emoji_picker.gd").new()
 		picker.name = "EmojiPicker"
 		add_child(picker)

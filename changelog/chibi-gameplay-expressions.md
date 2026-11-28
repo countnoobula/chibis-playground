@@ -15,12 +15,12 @@
 | Soft determination | Settle onto a balance beam or start a controlled climb | Automatic, face only |
 | Focused determination | Commit to a wall run | Automatic, face only |
 | Tiny pout | Strain during mantle pull-up | Automatic, face only |
-| Brave little smile | Secure a ledge after a frightening fall | Automatic recovery, with cloud if the fall cloud was visible |
+| Brave little smile | Secure a ledge after a frightening fall | Automatic recovery, face only |
 | Surprised | Discover a reveal or unexpected object | On request |
 | Little gasp | Enter the existing qualified deep-fall reaction | Automatic, face first |
 | Wide-eyed gasp | Surprise reveal with a longer held beat | On request |
 | Startled squeal | Sudden authored scare | On request |
-| Free-fall squeal | Continue falling in the qualified flail long enough for the gasp to register | Automatic, with cloud |
+| Free-fall squeal | Continue falling in the qualified flail long enough for the gasp to register | Automatic, face only |
 | Sleepy | A long rest, bedtime, or emote | On request |
 | Scared | Hesitation before an authored hazard | On request |
 | Angry | A scripted frustration beat or emote, with peach-to-coral cloud | On request |
@@ -36,10 +36,10 @@
 
 ## Checkpoint 2 · Connect rooftop events and blend the poses
 
-- [ ] Resolve the base from current movement; overlay a short event reaction or an explicitly held authored request. Proposed precedence: explicit override, urgent falling reaction, ordinary authored reaction, traversal, idle. Higher priority interrupts from the currently displayed pose. Drop stale events and return to the current valid base when finished. Equal-priority repeats of the same ID extend the hold without restarting.
-- [ ] Start with 180–300 ms eased blends for idle and traversal, 80–120 ms for a startled reaction and 250–400 ms to settle. Let brows and lids lead a gasp by about two frames at 60 fps. Close the mouth through a compatible lip pose before changing open-mouth silhouettes. Layer natural blinks on available lids. Keep bite-valve contact when submerged.
-- [ ] Begin the gasp on qualified fall-flail entry. Try a squeal after another 0.35 s of continuous flail. Cancel immediately at catch, landing or scarf deployment, even during anticipation; settle the visible face smoothly. Use previous fall context to distinguish a rescue catch from an ordinary grab. Only start traversal or flow expressions once the state has settled (~0.15 s). Tune by capture.
-- [ ] Keep the cloud quiet for everyday movement. On strong or authored reactions let the face lead by ~0.1 s, ease the cloud in over ~0.15 s and out over ~0.2 s. When a visible cloud changes emotion, keep its anchor and shell, blend the palette and swap the glyph during a small scale dip to avoid doubled eyes. Smooth anchor motion separately from the body’s squash. Honor cancel and reset even during a cloud transition.
+- [x] Resolve the automatic face from movement and interrupt from the currently visible pose. Explicit picker selections take priority.
+- [x] Ease facial transitions across eyes, brows and mouth. Keep the mouth open from gasp to squeal and close it through a shared lip shape for the rescue smile.
+- [x] Start the gasp on fall-flail entry and the squeal after 0.35 seconds of sustained flailing. A secured catch starts the brave smile. Landing or scarf deployment cancels the fall sequence.
+- [x] Following player feedback, automatic movement uses face and body. Clouds remain available through the picker and explicit requests. A fall or landing may interrupt an ordinary authored face without taking ownership of a separately requested cloud.
 - Review evidence: short rooftop clips of idle to giggle, run to wall run, mantle, short hop, long drop to catch, glide and landing. Check the release into locomotion, and that normal traversal leaves the route readable from behind.
 
 ## Checkpoint 3 · Verify interruptions and ship the reviewed tuning
@@ -68,3 +68,13 @@ Manual control defaults to Both and Hold. F opens the picker while the mouse is 
 
 Godot 4.7.2 on Windows, Forward Mobile. Captured [twenty live runner poses](<C:/Users/count/.codex/visualizations/2026/11/26/01a2195a-164a-74f3-b7e4-5e26d3c07124/checkpoint-one/Rooftop expressions.png>), [picker](<C:/Users/count/.codex/visualizations/2026/11/26/01a2195a-164a-74f3-b7e4-5e26d3c07124/checkpoint-one/picker.png>), [upright cloud at 72 degrees](<C:/Users/count/.codex/visualizations/2026/11/26/01a2195a-164a-74f3-b7e4-5e26d3c07124/checkpoint-one/orbit1.png>), and [wink with the dive mouthpiece engaged](<C:/Users/count/.codex/visualizations/2026/11/26/01a2195a-164a-74f3-b7e4-5e26d3c07124/checkpoint-one/wink-gear1.png>). The dive capture exercises the deployed gear pose on the rooftop. Desktop native-touch event injection opened the picker and selected Crying. The hold, timer, priority, independent channels, Auto, direct closed-to-open replacement and respawn checks live in `tests/test_manual_expressions.gd`. The player approved checkpoint 1 and requested automatic rooftop reactions.
 - Automated verification on Windows: 340 rooftop regression checks passed, 0 failed. The dedicated manual-expression test also passed. No automatic gameplay trigger mappings have been added in this checkpoint.
+
+### Checkpoint 2 · Rooftop automatic reactions · 2026-11-28
+
+Checkpoint 1 was approved, committed as `da64a20`, pushed and verified on `origin/main`. This checkpoint installs `features/runner/rooftop_reactions.gd` only for the rooftop gym. It reads the movement state after the physics controller updates and drives the face. Only explicit requests show a cloud. The emoji picker still takes precedence. The common fall and catch face meshes are prepared on gym entry so these transitions avoid rebuilding the skinned body during a drop. A regular authored cue with priority below 50 yields to a qualified falling reaction; a priority-100 picker selection remains held until released.
+
+The Zone 2 review drop starts beside the outside corner of the existing flat ledge. Chibi then falls under normal gravity and her ordinary collision probe secures the catch. A shorter drop at the same ledge exercises an early catch before the squeal. The normal hop, ground landing and scarf deployment have separate checks. A rescue smile lasts about 0.6 s on the secured ledge, then blends back into the hanging expression.
+
+Godot 4.7.2 on Windows, Forward Mobile. The recorded drop reaches gasp at physics tick 18, squeal at 38 and the ledge catch at 71. The short drop catches at tick 35 during the gasp. Both runs keep the cloud hidden. [Fall and catch clip](<C:/Users/count/.codex/visualizations/2026/11/26/01a2195a-164a-74f3-b7e4-5e26d3c07124/checkpoint-two/Drop and catch.mp4>) and [rooftop reaction reel](<C:/Users/count/.codex/visualizations/2026/11/26/01a2195a-164a-74f3-b7e4-5e26d3c07124/checkpoint-two/Rooftop reaction reel.mp4>). The player approved checkpoint 2 on 2026-11-28.
+
+The automatic and manual expression checks passed. All 340 rooftop checks passed at a fixed 60 fps. In a separate variable-frame run, the full-speed mantle phase error measured 0.066 against a 0.065 limit. The dedicated accelerated expression tests also reported resources still in use at shutdown. Their normal-speed runs exited cleanly.

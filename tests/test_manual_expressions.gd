@@ -33,7 +33,7 @@ func _run() -> void:
 		button.pressed.emit()
 		check(director._face_index == 19 and director._cloud_index == 19, "Crying menu choice applies both outputs")
 		picker._auto_button.pressed.emit()
-		check(director._face_index == -1 and director._cloud_index == -1, "Auto releases the manual hold")
+		check(director._face_index == director._automatic_face and director._cloud_index == -1, "Auto releases the manual hold")
 	picker._close_picker()
 	for i in director.IDS.size():
 		var handle: int = director.request_expression(director.IDS[i])
@@ -60,7 +60,7 @@ func _run() -> void:
 	director.release_expression(overlay)
 	check(director._cloud_index == 18, "Cloud returns to held pose")
 	director.release_expression(baseline)
-	check(director._face_index == -1 and director._cloud_index == -1, "Auto restored")
+	check(director._face_index == director._automatic_face and director._cloud_index == -1, "Auto restored")
 	check(director.request_expression(&"missing") == -1, "Invalid ID rejected")
 	director.request_expression(&"crying")
 	player.reset_for_respawn(player.global_position)
@@ -73,4 +73,3 @@ func _run() -> void:
 	await process_frame
 	print("Manual expression checks: ", failures, " failures")
 	quit(1 if failures else 0)
-
