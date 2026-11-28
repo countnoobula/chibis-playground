@@ -23,6 +23,7 @@ func run(tree: SceneTree, gym: Node3D, chibi: ParkourController, check: Callable
 	await _test_beam_approaches_and_step_off()
 	await _test_first_pole_cap_and_hop()
 	await _test_sloth_line_approach_and_block()
+	await _test_sloth_line_release()
 	await _test_zip_line_approach_and_side_rejection()
 	await _test_swing_approach_and_side_rejection()
 
@@ -178,6 +179,31 @@ func _test_sloth_line_approach_and_block() -> void:
 	blocker.queue_free()
 	_chibi.chibi_input.set_touch_move(Vector2.ZERO)
 	_check.call(blocked, "A side approach blocked by a collider cannot snap onto the sloth line")
+
+
+func _test_sloth_line_release() -> void:
+	var line := _gym.get_node("Zone4_AerialCircuit/SlothLine_01") as ParkourLine
+	var start_t := 0.60
+	_reset(_chibi._line_feet_at(line, start_t, false))
+	var attached := _chibi.try_enter_parkour_line(line, false, start_t, line.end_offset.length(), 3.8, 7.4)
+	for tick in 50:
+		await _tree.physics_frame
+	var middle: MeshInstance3D = line._seg_meshes[line.SEGMENTS / 2]
+	var loaded_height := middle.global_position.y
+	var loaded_sag := line._current_sag
+	_chibi.chibi_input.set_touch_jump(true)
+	await _tree.physics_frame
+	_chibi.chibi_input.set_touch_jump(false)
+	await _tree.physics_frame
+	var rise := middle.global_position.y - loaded_height
+	_check.call(attached and loaded_sag > 0.3 and not line._has_rider and _chibi.current_state == "Locomotion"
+		and rise >= 0.0 and rise < 0.10,
+		"The loaded crawl rope starts rebounding smoothly when Chibi jumps off (two-tick rise %.3f m)" % rise)
+	_reset(OPEN_DECK)
+	for tick in 200:
+		await _tree.physics_frame
+	_check.call(absf(line._rider_t - 0.5) < 0.002 and absf(line._current_sag - line.rest_sag) < 0.002,
+		"The released crawl rope settles back to its centered resting curve")
 
 
 func _test_zip_line_approach_and_side_rejection() -> void:

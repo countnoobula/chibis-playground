@@ -180,8 +180,9 @@ func set_rider_progress(t: float) -> void:
 
 func notify_rider_release() -> void:
 	_has_rider = false
-	_rider_t = 0.0
-	_update_pulley_visual()
+	if is_zip_line:
+		_rider_t = 0.0
+		_update_pulley_visual()
 
 
 func get_pulley_handle_world_pos() -> Vector3:
@@ -219,6 +220,9 @@ func _physics_process(delta: float) -> void:
 		var target_sag := loaded_sag if _has_rider else rest_sag
 		var k := 120.0 if _has_rider else 230.0
 		var damp := 11.0 if _has_rider else 4.0
+		if not _has_rider:
+			# Let the bend return from the release point as the unloaded cable rebounds.
+			_rider_t = lerpf(_rider_t, 0.5, 1.0 - exp(-damp * dt))
 		_sag_vel += ((target_sag - _current_sag) * k - damp * _sag_vel) * dt
 		_current_sag = clampf(_current_sag + _sag_vel * dt, -0.55, 0.75)
 		_update_rope_visual()

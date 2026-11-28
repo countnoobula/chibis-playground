@@ -198,4 +198,3 @@ func _press_jump() -> void:
 func _ticks(count: int) -> void:
 	for frame in count:
 		await _tree.physics_frame
-		await _tree.process_frame

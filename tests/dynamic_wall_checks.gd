@@ -273,7 +273,6 @@ func _reach(direction: Vector2, height: float, limit: int) -> bool:
 func _frames(count: int) -> void:
 	for _i in count:
 		await _tree.physics_frame
-		await _tree.process_frame
 
 
 func _key(code: Key, pressed: bool) -> void:

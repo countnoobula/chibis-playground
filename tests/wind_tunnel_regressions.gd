@@ -256,4 +256,3 @@ func _world(point: Vector3) -> Vector3:
 func _ticks(count: int) -> void:
 	for frame in count:
 		await _tree.physics_frame
-		await _tree.process_frame

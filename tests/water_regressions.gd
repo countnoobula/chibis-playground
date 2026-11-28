@@ -14,6 +14,9 @@ func run(tree: SceneTree, check: Callable) -> void:
 	var surface := water.get_surface_height()
 	_test_caustic_receivers(water, check)
 	var gear := player.pose_mod.dive_gear
+	var rig := player.get_node("ChibiRigBinder") as ChibiRigBinder
+	var skeleton := rig.skeleton
+	var face_mesh := rig.mesh_inst
 	var forehead := gear.find_child("ForeheadGoggles", true, false) as MeshInstance3D
 	var dive_mask := gear.find_child("DivingMask", true, false) as MeshInstance3D
 	var snorkel := gear.find_child("Snorkel", true, false) as MeshInstance3D
@@ -21,10 +24,62 @@ func run(tree: SceneTree, check: Callable) -> void:
 	var strap_material := strap.get_surface_override_material(0) as BaseMaterial3D
 	var dry_strap_color := strap_material.albedo_color
 	var stowed_y := forehead.position.y
+	var strap_diving_shape := strap.find_blend_shape_by_name("Diving")
+	var strap_hair_shape := strap.find_blend_shape_by_name("AroundHair")
+	var surprised_shape := face_mesh.find_blend_shape_by_name("Expr_Surprised")
+	var initial_gear_samples: Array[Dictionary] = []
+	var equip_gear_samples: Array[Dictionary] = []
+	var stow_gear_samples: Array[Dictionary] = []
+	var gear_sample_phase := ["initial"]
+	var sample_applied_gear_pose := func() -> void:
+		var sample := {
+			"progress": gear.progress,
+			"gesture": gear.gesture_weight,
+			"mouthpiece": gear.mouthpiece_weight,
+			"state": player.current_state,
+			"forehead_visible": forehead.is_visible_in_tree(),
+			"mask_visible": dive_mask.is_visible_in_tree(),
+			"snorkel_visible": snorkel.is_visible_in_tree(),
+			"forehead_y": forehead.position.y,
+			"outlet_world": gear.get_snorkel_outlet_world(),
+			"strap_visible": strap.is_visible_in_tree(),
+			"strap_transparency": strap_material.transparency,
+			"strap_color": strap_material.albedo_color,
+			"strap_diving": strap.get_blend_shape_value(strap_diving_shape) if strap_diving_shape >= 0 else -1.0,
+			"strap_hair": strap.get_blend_shape_value(strap_hair_shape) if strap_hair_shape >= 0 else -1.0,
+			"mouth_shape": face_mesh.get_blend_shape_value(surprised_shape) if surprised_shape >= 0 else -1.0,
+		}
+		match gear_sample_phase[0]:
+			"initial":
+				initial_gear_samples.append(sample)
+				gear_sample_phase[0] = "ignore"
+			"equip":
+				equip_gear_samples.append(sample)
+				if player.current_state == "PoolSwim" and gear.progress >= 0.999:
+					gear_sample_phase[0] = "ignore"
+			"stow_armed":
+				if player.current_state == "PoolSwim" and gear.progress >= 0.999:
+					gear_sample_phase[0] = "stow"
+					stow_gear_samples.append(sample)
+			"stow":
+				stow_gear_samples.append(sample)
+				if player.current_state == "Locomotion" and gear.progress <= 0.001:
+					gear_sample_phase[0] = "ignore"
+	skeleton.skeleton_updated.connect(sample_applied_gear_pose)
+	await _wait_for_pose_sample(tree, initial_gear_samples)
 	check.call(strap.is_visible_in_tree() and not gear.get_snorkel_outlet_world().is_finite(),
 		"The dry strap is visible and the stowed snorkel has no active bubble outlet")
 	check.call(forehead.visible and not dive_mask.visible and not snorkel.visible
 		and gear.progress == 0.0 and gear.head_bone >= 0, "Dry Chibi starts with head-mounted forehead goggles")
+	var initial_pose_was_applied := not initial_gear_samples.is_empty()
+	if initial_pose_was_applied:
+		var initial_pose: Dictionary = initial_gear_samples.back()
+		var initial_outlet: Vector3 = initial_pose["outlet_world"]
+		initial_pose_was_applied = float(initial_pose["progress"]) == 0.0 \
+			and bool(initial_pose["forehead_visible"]) and not bool(initial_pose["mask_visible"]) \
+			and not bool(initial_pose["snorkel_visible"]) and bool(initial_pose["strap_visible"]) \
+			and not initial_outlet.is_finite()
+	check.call(initial_pose_was_applied, "The first applied gear pose keeps goggles on the forehead and the snorkel stowed")
 	check.call(absf(surface - ChibiPool.WATER_Y) > 0.5 and water.outline.size() > 4,
 		"The same WaterBody3D supports an irregular basin at another elevation")
 	check.call(not water.contains_horizontal(Vector3(0.5, surface, 5.98)),
@@ -39,11 +94,10 @@ func run(tree: SceneTree, check: Callable) -> void:
 		check.call(player.current_state == "Locomotion" and player.get_active_water() == water
 			and player.external_walk_speed_cap < player.config.base_run_speed, "Chibi wades on the rocky shallows")
 		player.camera_ctrl.yaw = 0.0
+		gear_sample_phase[0] = "equip"
+		await _wait_for_pose_sample(tree, equip_gear_samples)
 		player.chibi_input.set_touch_move(Vector2.UP)
 		var entry_kept_momentum := false
-		var saw_pull_down := false
-		var strap_stayed_opaque := true
-		var saw_strap_color_change := false
 		for tick in 175:
 			var was_walking := player.current_state == "Locomotion"
 			var previous_speed := Vector2(player.velocity.x, player.velocity.z).length()
@@ -51,17 +105,44 @@ func run(tree: SceneTree, check: Callable) -> void:
 			if was_walking and player.current_state == "PoolSwim":
 				var swim_speed := Vector2(player.velocity.x, player.velocity.z).length()
 				entry_kept_momentum = previous_speed > 0.8 and swim_speed > previous_speed * 0.85
-			strap_stayed_opaque = strap_stayed_opaque and strap.is_visible_in_tree() \
-				and strap_material.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED
-			if gear.gesture_weight > 0.7 and forehead.visible and dive_mask.visible:
-				saw_pull_down = saw_pull_down or forehead.position.y < stowed_y - 0.06
+		var equip_pose_valid := _gear_transition_samples_valid(equip_gear_samples, 0.0, 1.0)
+		var equip_stayed_opaque := true
+		var saw_pull_down := false
+		var saw_strap_color_change := false
+		for sample: Dictionary in equip_gear_samples:
+			equip_stayed_opaque = equip_stayed_opaque and bool(sample["strap_visible"]) \
+				and int(sample["strap_transparency"]) == BaseMaterial3D.TRANSPARENCY_DISABLED
+			if float(sample["gesture"]) > 0.7 and bool(sample["forehead_visible"]) and bool(sample["mask_visible"]):
+				saw_pull_down = saw_pull_down or float(sample["forehead_y"]) < stowed_y - 0.06
+				var sampled_color: Color = sample["strap_color"]
 				saw_strap_color_change = saw_strap_color_change or (
-					not strap_material.albedo_color.is_equal_approx(dry_strap_color)
-					and not strap_material.albedo_color.is_equal_approx(ChibiDiveGear.DIVE_STRAP_COLOR))
-		check.call(strap_stayed_opaque and saw_strap_color_change
+					not sampled_color.is_equal_approx(dry_strap_color)
+					and not sampled_color.is_equal_approx(ChibiDiveGear.DIVE_STRAP_COLOR))
+		var equip_first: Dictionary = equip_gear_samples.front() if not equip_gear_samples.is_empty() else {}
+		var equip_last: Dictionary = equip_gear_samples.back() if not equip_gear_samples.is_empty() else {}
+		var equip_outlet: Vector3 = equip_last.get("outlet_world", Vector3.INF)
+		var equip_strap_pose_valid := equip_pose_valid \
+			and float(equip_first.get("strap_diving", -1.0)) <= 0.01 \
+			and float(equip_last.get("strap_diving", -1.0)) >= 0.99
+		var saw_strap_blend_shape := false
+		for sample: Dictionary in equip_gear_samples:
+			var strap_dive := float(sample["strap_diving"])
+			if strap_dive > 0.15 and strap_dive < 0.99 and float(sample["strap_hair"]) > 0.1:
+				saw_strap_blend_shape = true
+		var equip_mouthpiece_pose_valid := equip_pose_valid and \
+			float(equip_first.get("mouthpiece", -1.0)) <= 0.01 \
+			and float(equip_last.get("mouthpiece", -1.0)) >= 0.99 \
+			and float(equip_last.get("mouth_shape", -1.0)) > 0.75 \
+			and bool(equip_last.get("snorkel_visible", false)) \
+			and equip_outlet.is_finite()
+		check.call(equip_mouthpiece_pose_valid,
+			"Applied pose samples show the mouthpiece seat and bite shape through equip (%d distinct poses)" %
+			[_distinct_gear_progress_samples(equip_gear_samples)])
+		check.call(equip_stayed_opaque and saw_strap_color_change and saw_strap_blend_shape
+			and equip_strap_pose_valid
 			and strap_material.albedo_color.is_equal_approx(ChibiDiveGear.DIVE_STRAP_COLOR),
-			"Equip keeps one opaque strap visible and blends lavender to sage")
-		check.call(saw_pull_down, "Bank entry moves and morphs the goggles during the hands-up gesture")
+			"Applied pose samples keep one opaque strap visible and blend lavender to sage")
+		check.call(saw_pull_down and equip_pose_valid, "Applied gear pose moves and morphs the goggles during the hands-up gesture")
 		check.call(gear.progress == 1.0 and not forehead.visible and dive_mask.visible and snorkel.visible
 			and gear.mouthpiece_weight == 1.0, "Swimming settles into the mask and seated snorkel")
 		check.call(player.current_state == "PoolSwim" and player.get_active_water() == water,
@@ -159,6 +240,7 @@ func run(tree: SceneTree, check: Callable) -> void:
 	check.call(player.camera_ctrl.get_camera_water() == null and camera.environment == null,
 		"Exiting the water sideways restores the dry camera environment")
 
+	gear_sample_phase[0] = "stow_armed"
 	player.reset_for_respawn(Vector3(0.5, surface - 1.05, 1.9))
 	player.chibi_input.set_touch_move(Vector2.DOWN)
 	player.chibi_input.set_touch_jump(true)
@@ -166,20 +248,46 @@ func run(tree: SceneTree, check: Callable) -> void:
 	var saw_stow_color_change := false
 	for tick in 155:
 		await _ticks(tree, 1)
-		strap_on_during_stow = strap_on_during_stow and strap.is_visible_in_tree() \
-			and strap_material.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED
-		if player.current_state == "Locomotion" and gear.progress > 0.2 and gear.progress < 0.6:
-			saw_stow_color_change = saw_stow_color_change or not strap_material.albedo_color.is_equal_approx(dry_strap_color)
 	player.chibi_input.set_touch_move(Vector2.ZERO)
 	player.chibi_input.set_touch_jump(false)
 	check.call(player.current_state == "Locomotion" and player.get_active_water() == null,
 		"Swimming back up the rocky bank returns to dry locomotion")
 	await _ticks(tree, 50)
+	var stow_pose_valid := _gear_transition_samples_valid(stow_gear_samples, 1.0, 0.0)
+	var stow_mouthpiece_pose_valid := stow_pose_valid
+	var stow_first: Dictionary = stow_gear_samples.front() if not stow_gear_samples.is_empty() else {}
+	var stow_last: Dictionary = stow_gear_samples.back() if not stow_gear_samples.is_empty() else {}
+	var stow_outlet: Vector3 = stow_last.get("outlet_world", Vector3.INF)
+	stow_mouthpiece_pose_valid = stow_mouthpiece_pose_valid \
+		and float(stow_first.get("mouthpiece", -1.0)) >= 0.99 \
+		and float(stow_first.get("mouth_shape", -1.0)) > 0.75 \
+		and float(stow_last.get("mouthpiece", -1.0)) <= 0.01 \
+		and not stow_outlet.is_finite() \
+		and not bool(stow_last.get("snorkel_visible", true)) \
+		and float(stow_last.get("mouth_shape", 1.0)) < 0.15
+	check.call(stow_mouthpiece_pose_valid,
+		"Applied pose samples restore the mouth as the mouthpiece stows (%d distinct poses)" %
+		[_distinct_gear_progress_samples(stow_gear_samples)])
 	check.call(gear.progress == 0.0 and forehead.visible and not dive_mask.visible and not snorkel.visible,
 		"Bank exit puts the original goggles back on her forehead")
-	check.call(strap_on_during_stow and saw_stow_color_change
+	for sample: Dictionary in stow_gear_samples:
+		strap_on_during_stow = strap_on_during_stow and bool(sample["strap_visible"]) \
+			and int(sample["strap_transparency"]) == BaseMaterial3D.TRANSPARENCY_DISABLED
+		var sample_progress := float(sample["progress"])
+		if sample["state"] == "Locomotion" and sample_progress > 0.2 and sample_progress < 0.6:
+			var sampled_color: Color = sample["strap_color"]
+			saw_stow_color_change = saw_stow_color_change or not sampled_color.is_equal_approx(dry_strap_color)
+	var stow_strap_pose_valid := stow_pose_valid \
+		and float(stow_first.get("strap_diving", -1.0)) >= 0.99 \
+		and float(stow_last.get("strap_diving", -1.0)) <= 0.01
+	var saw_stow_blend_shape := false
+	for sample: Dictionary in stow_gear_samples:
+		var strap_dive := float(sample["strap_diving"])
+		if strap_dive > 0.15 and strap_dive < 0.99 and float(sample["strap_hair"]) > 0.1:
+			saw_stow_blend_shape = true
+	check.call(strap_on_during_stow and saw_stow_color_change and saw_stow_blend_shape and stow_strap_pose_valid
 		and strap_material.albedo_color.is_equal_approx(dry_strap_color),
-		"Stow keeps the same strap visible and restores lavender")
+		"Applied pose samples keep the same strap visible and restore lavender")
 	gear.advance(0.34, "PoolSwim", 1.2)
 	var interrupted_at := gear.progress
 	gear.advance(0.09, "Locomotion", 0.0)
@@ -192,6 +300,7 @@ func run(tree: SceneTree, check: Callable) -> void:
 		"Respawn clears an interrupted dive-gear gesture")
 	await _test_swim_glide(tree, player, deep, check)
 	await _test_enclosed_swimming(tree, basin, player, surface, check)
+	skeleton.skeleton_updated.disconnect(sample_applied_gear_pose)
 	basin.queue_free()
 	await tree.process_frame
 	await tree.process_frame
@@ -292,4 +401,29 @@ func _floor_at(anchor: Node3D, position: Vector3) -> Dictionary:
 func _ticks(tree: SceneTree, count: int) -> void:
 	for i in count:
 		await tree.physics_frame
-		await tree.process_frame
+
+
+func _wait_for_pose_sample(tree: SceneTree, samples: Array[Dictionary]) -> void:
+	var sample_count := samples.size()
+	for _tick in Engine.physics_ticks_per_second:
+		if samples.size() > sample_count:
+			return
+		await _ticks(tree, 1)
+
+
+func _gear_transition_samples_valid(samples: Array[Dictionary], start: float, finish: float) -> bool:
+	if samples.size() < 2 or _distinct_gear_progress_samples(samples) < 6:
+		return false
+	return absf(float(samples.front()["progress"]) - start) <= 0.01 \
+		and absf(float(samples.back()["progress"]) - finish) <= 0.01
+
+
+func _distinct_gear_progress_samples(samples: Array[Dictionary]) -> int:
+	var count := 0
+	var last_progress := 0.0
+	for sample: Dictionary in samples:
+		var progress := float(sample["progress"])
+		if count == 0 or absf(progress - last_progress) > 0.005:
+			count += 1
+			last_progress = progress
+	return count

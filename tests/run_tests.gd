@@ -445,7 +445,6 @@ func _test_full_gym_and_physics() -> void:
 	chibi.transition_to("LedgeHang")
 	for _i in 10:
 		await physics_frame
-		await process_frame
 	skel.skeleton_updated.disconnect(on_skel)
 	for side in 2:
 		_assert_true(last_hand_err[side] < 0.01, "Live LedgeHang IK plants hand %d on beveled rim at skin upload (err=%.4f m)" % [side, last_hand_err[side]])
@@ -473,41 +472,115 @@ func _test_full_gym_and_physics() -> void:
 	var sloth_line := gym.get_node_or_null("Zone4_AerialCircuit/SlothLine_01") as ParkourLine
 	_assert_true(sloth_line != null, "SlothLine_01 exists in Zone 4")
 	if sloth_line != null:
-		var mid_rope := sloth_line.get_rope_world_pos_at_t(0.5)
-		chibi.global_position = mid_rope - Vector3(0.0, 0.616, 0.0)
-		var entered := chibi.try_enter_parkour_line(sloth_line, false, 0.5, 9.0, 3.8, 7.4)
-		_assert_true(entered and chibi.current_state == "RopeLine", "Chibi attaches cleanly to SlothLine_01")
-		var max_head_dy := -99.0
-		var yaw_fwd := 0.0
-		var yaw_rev := 0.0
-		for step in 55:
-			if step < 15:
-				chibi.chibi_input.set_touch_move(Vector2(0.0, -1.0))
-			elif step < 20:
-				chibi.chibi_input.set_touch_move(Vector2.ZERO)
-			elif step < 40:
-				chibi.chibi_input.set_touch_move(Vector2(0.0, 1.0))
-			else:
-				chibi.chibi_input.set_touch_move(Vector2(0.0, -1.0))
-			await physics_frame
+		var resting_midpoint := sloth_line.to_global(sloth_line.end_offset * 0.5 - Vector3.UP * sloth_line.rest_sag)
+		for phase_offset in 2:
+			if phase_offset == 1:
+				chibi._jump_off_rope_line()
+				await _wait_physics_frames(7)
+				chibi.reset_for_respawn(Vector3(0.0, 0.06, 12.0))
+				await _wait_physics_frames(2)
+			# Start both offsets from the same centered, unloaded cable.
+			sloth_line.notify_rider_release()
+			sloth_line._current_sag = sloth_line.rest_sag
+			sloth_line._sag_vel = 0.0
+			sloth_line._tracked_player = null
+			sloth_line.set_rider_progress(0.5)
+			sloth_line._update_rope_visual()
+			while Engine.get_physics_frames() % 2 != phase_offset:
+				await physics_frame
+			var mid_rope := sloth_line.get_rope_world_pos_at_t(0.5)
+			_assert_true(mid_rope.distance_to(resting_midpoint) < 0.002, "SlothLine phase %d uses the same settled rope start point" % phase_offset)
+			chibi.reset_for_respawn(mid_rope - Vector3.UP * 0.616)
+			var entry_tick := Engine.get_physics_frames()
+			var entered := chibi.try_enter_parkour_line(sloth_line, false, 0.5, 9.0, 3.8, 7.4)
+			_assert_true(entered and chibi.current_state == "RopeLine", "Chibi attaches cleanly to SlothLine_01 at phase %d" % phase_offset)
+			_assert_true(entry_tick % 2 == phase_offset, "SlothLine phase %d enters on physics tick %d" % [phase_offset, entry_tick])
+
+			var pose_metrics := {
+				"samples": 0,
+				"last_process_frame": -1,
+				"first_relative_tick": -1,
+				"last_relative_tick": -1,
+				"input_step": 0,
+				"stage_samples": {"grab": 0, "stop": 0, "reverse": 0, "reverse_back": 0},
+				"last_grip_errors": {},
+				"max_head_dy": -INF,
+			}
+			var sample_uploaded_pose := func() -> void:
+				if chibi.current_state != "RopeLine":
+					return
+				var process_frame_index := Engine.get_process_frames()
+				if process_frame_index == pose_metrics["last_process_frame"]:
+					return
+				pose_metrics["last_process_frame"] = process_frame_index
+				var relative_tick := Engine.get_physics_frames() - entry_tick
+				if pose_metrics["samples"] == 0:
+					pose_metrics["first_relative_tick"] = relative_tick
+				pose_metrics["last_relative_tick"] = relative_tick
+				pose_metrics["samples"] = int(pose_metrics["samples"]) + 1
+				var input_step := int(pose_metrics["input_step"])
+				var stage := "grab"
+				if input_step >= 40:
+					stage = "reverse_back"
+				elif input_step >= 20:
+					stage = "reverse"
+				elif input_step >= 15:
+					stage = "stop"
+				var stages: Dictionary = pose_metrics["stage_samples"]
+				stages[stage] = int(stages[stage]) + 1
+				var cur_t := clampf(chibi._line_distance / chibi._line_length, 0.0, 1.0)
+				var rope_world := sloth_line.get_rope_world_pos_at_t(cur_t)
+				var skeleton_world := skel.get_global_transform_interpolated()
+				var head_y := (skeleton_world * skel.get_bone_global_pose(skel.find_bone("head"))).origin.y
+				pose_metrics["max_head_dy"] = maxf(float(pose_metrics["max_head_dy"]), head_y - rope_world.y)
+				var grip_errors: Dictionary = pose_metrics["last_grip_errors"]
+				for bone_name in ["hand_l", "hand_r", "foot_l", "foot_r"]:
+					var bone_world := skeleton_world * skel.get_bone_global_pose(skel.find_bone(bone_name))
+					grip_errors[bone_name] = absf(bone_world.origin.y - rope_world.y)
+			skel.skeleton_updated.connect(sample_uploaded_pose)
+
+			var yaw_fwd := 0.0
+			var yaw_rev := 0.0
+			for step in 55:
+				pose_metrics["input_step"] = step
+				if step < 15:
+					chibi.chibi_input.set_touch_move(Vector2(0.0, -1.0))
+				elif step < 20:
+					chibi.chibi_input.set_touch_move(Vector2.ZERO)
+				elif step < 40:
+					chibi.chibi_input.set_touch_move(Vector2(0.0, 1.0))
+				else:
+					chibi.chibi_input.set_touch_move(Vector2(0.0, -1.0))
+				await physics_frame
+				if step == 14:
+					yaw_fwd = chibi.rotation.y
+				elif step == 39:
+					yaw_rev = chibi.rotation.y
+			chibi.chibi_input.set_touch_move(Vector2.ZERO)
 			await process_frame
-			var cur_t := clampf(chibi._line_distance / chibi._line_length, 0.0, 1.0)
-			var rw_y := sloth_line.get_rope_world_pos_at_t(cur_t).y
-			var head_y := (skel.global_transform * skel.get_bone_global_pose(skel.find_bone("head"))).origin.y
-			max_head_dy = maxf(max_head_dy, head_y - rw_y)
-			if step == 14:
-				yaw_fwd = chibi.rotation.y
-			elif step == 39:
-				yaw_rev = chibi.rotation.y
-		chibi.chibi_input.set_touch_move(Vector2.ZERO)
-		var final_t := clampf(chibi._line_distance / chibi._line_length, 0.0, 1.0)
-		var rope_world := sloth_line.get_rope_world_pos_at_t(final_t)
-		var hl_y := (skel.global_transform * skel.get_bone_global_pose(skel.find_bone("hand_l"))).origin.y
-		var fl_y := (skel.global_transform * skel.get_bone_global_pose(skel.find_bone("foot_l"))).origin.y
-		var yaw_delta_deg := rad_to_deg(absf(angle_difference(yaw_fwd, yaw_rev)))
-		_assert_true(absf(hl_y - rope_world.y) < 0.06 and absf(fl_y - rope_world.y) < 0.06, "SlothHang hands & feet wrap directly onto rope (hand_dy=%.3f m, foot_dy=%.3f m)" % [hl_y - rope_world.y, fl_y - rope_world.y])
-		_assert_true(max_head_dy < -0.18, "SlothHang head stays cleanly below rope across all 55 frames of grab & reversal (max_head_dy=%.3f m)" % max_head_dy)
-		_assert_true(yaw_delta_deg > 165.0, "SlothHang cleanly rotates 180 deg around Y on direction reversal (delta=%.1f deg)" % yaw_delta_deg)
+			skel.skeleton_updated.disconnect(sample_uploaded_pose)
+			var sample_count := int(pose_metrics["samples"])
+			var max_head_dy := float(pose_metrics["max_head_dy"])
+			print("[ROPE] phase %d entry tick %d, %d applied poses, first pose at +%d physics ticks (max head dy %.4f m)" % [
+				phase_offset, entry_tick, sample_count, int(pose_metrics["first_relative_tick"]), max_head_dy
+			])
+			var covered_action: bool = pose_metrics["first_relative_tick"] <= 2 and pose_metrics["last_relative_tick"] >= 52
+			_assert_true(sample_count >= 20 and covered_action, "SlothHang samples applied poses through grab, stop and reversal at phase %d (%d poses)" % [phase_offset, sample_count])
+			var stage_samples: Dictionary = pose_metrics["stage_samples"]
+			_assert_true(stage_samples["grab"] > 0 and stage_samples["stop"] > 0 and stage_samples["reverse"] > 0 and stage_samples["reverse_back"] > 0,
+				"SlothHang applied poses cover grab, stop and both reversals at phase %d (%s)" % [phase_offset, str(stage_samples)])
+			_assert_true(max_head_dy < -0.18, "SlothHang applied head stays at least 18 cm below rope at phase %d (max_head_dy=%.3f m)" % [phase_offset, max_head_dy])
+
+			var grip_errors: Dictionary = pose_metrics["last_grip_errors"]
+			var grip_ok := true
+			for error in grip_errors.values():
+				grip_ok = grip_ok and float(error) < 0.06
+			_assert_true(grip_ok, "SlothHang hands & feet wrap onto rope at phase %d (hands %.3f/%.3f m, feet %.3f/%.3f m)" % [
+				phase_offset, grip_errors["hand_l"], grip_errors["hand_r"], grip_errors["foot_l"], grip_errors["foot_r"]
+			])
+			var yaw_delta_deg := rad_to_deg(absf(angle_difference(yaw_fwd, yaw_rev)))
+			_assert_true(yaw_delta_deg > 165.0, "SlothHang cleanly rotates 180 deg around Y on phase %d reversal (delta=%.1f deg)" % [phase_offset, yaw_delta_deg])
+
 		chibi._jump_off_rope_line()
 		await _wait_physics_frames(7)
 		_assert_true(chibi.current_state == "Locomotion" and chibi.anim_ctrl.current_state == "RopeDrop" and _get_clip_phase(chibi.anim_ctrl, "RopeDrop") > 0.2, "Rope dismount pose advances without being replaced by the airborne loop")
@@ -541,7 +614,6 @@ func _test_full_gym_and_physics() -> void:
 		var start_pulley_pos := zip_line.get_pulley_handle_world_pos()
 		for _zf in 25:
 			await physics_frame
-			await process_frame
 		var mid_pulley_pos := zip_line.get_pulley_handle_world_pos()
 		var pulley_travel := start_pulley_pos.distance_to(mid_pulley_pos)
 		var zh_l := (skel.global_transform * skel.get_bone_global_pose(skel.find_bone("hand_l"))).origin
@@ -629,7 +701,6 @@ func _test_full_gym_and_physics() -> void:
 		chibi.chibi_input.set_touch_move(Vector2.UP)
 		for _sf in 35:
 			await physics_frame
-			await process_frame
 		_assert_true(chibi.current_state == "PoolSwim" and chibi.get_active_water() == pool.water_body,
 			"Chibi enters PoolSwim cleanly in the rooftop basin")
 		var sw_pel := skel.get_bone_global_pose(skel.find_bone("pelvis")).origin
@@ -942,16 +1013,40 @@ func _test_runner_motion(gym: Node3D, chibi: ParkourController, skeleton: Skelet
 				plant_sample[0] = distance_from_plant
 				plant_sample[1] = hand.distance_to(rail)
 		skeleton.skeleton_updated.connect(sample_plant)
+		var vault_sample := {"error": 0.0, "first": 1.0, "last": 0.0, "count": 0, "last_process_frame": -1}
+		var sample_vault := func() -> void:
+			if chibi.current_state != "SpeedVault":
+				return
+			# Ignore the old clip position while AnimationTree applies the entry seek.
+			if anim.anim_tree.get("parameters/SpeedVault/Phase/seek_request") >= 0.0:
+				return
+			var process_frame_id := Engine.get_process_frames()
+			if vault_sample["last_process_frame"] == process_frame_id:
+				return
+			vault_sample["last_process_frame"] = process_frame_id
+			var step := 1.0 / (Engine.physics_ticks_per_second * chibi._vault_duration)
+			var previous := maxf(0.0, chibi._vault_alpha - step)
+			var expected := lerpf(previous, chibi._vault_alpha, Engine.get_physics_interpolation_fraction())
+			var clip_phase := _get_clip_phase(anim, "SpeedVault")
+			vault_sample["error"] = maxf(vault_sample["error"], absf(expected - clip_phase))
+			vault_sample["first"] = minf(vault_sample["first"], clip_phase)
+			vault_sample["last"] = maxf(vault_sample["last"], clip_phase)
+			vault_sample["count"] += 1
+		anim.anim_tree.mixer_applied.connect(sample_vault)
 		for _i in 60:
-			await _wait_physics_frames(1)
+			await physics_frame
 			if chibi.current_state != "SpeedVault":
 				break
-			var phase := _get_clip_phase(anim, "SpeedVault")
-			phase_error = maxf(phase_error, absf(chibi._vault_alpha - phase))
+		anim.anim_tree.mixer_applied.disconnect(sample_vault)
 		skeleton.skeleton_updated.disconnect(sample_plant)
+		var covered_vault: bool = vault_sample["first"] < 0.15 and vault_sample["last"] > 0.85
+		var enough_vault_samples: bool = vault_sample["count"] >= 8
+		phase_error = vault_sample["error"]
 		var hand_error: float = plant_sample[1]
-		_assert_true(phase_error < 0.065 and hand_error < 0.085 and chibi.current_state == "Locomotion" and chibi.get_collision_mask_value(1),
-			"Vault clip follows body through plant and clearance at flow %.1f (phase error %.3f, contact %.3f m)" % [flow, phase_error, hand_error])
+		_assert_true(covered_vault and enough_vault_samples and phase_error < 0.065 and hand_error < 0.085
+			and chibi.current_state == "Locomotion" and chibi.get_collision_mask_value(1),
+			"Vault clip follows body through plant and clearance at flow %.1f (phase error %.3f, contact %.3f m, %d samples)"
+			% [flow, phase_error, hand_error, vault_sample["count"]])
 
 	for flow: float in [0.0, 1.0]:
 		chibi.reset_for_respawn(Vector3(-24.0, 1.1, 8.8))
@@ -1260,7 +1355,6 @@ func _test_running_landing_overlay(chibi: ParkourController) -> void:
 func _wait_physics_frames(count: int) -> void:
 	for _i in count:
 		await physics_frame
-		await process_frame
 
 
 func _test_station_overlap_after_respawn(gym: Node3D, chibi: ParkourController) -> void:

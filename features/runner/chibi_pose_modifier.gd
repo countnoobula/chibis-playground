@@ -11,6 +11,8 @@ const BALANCE_PELVIS_COMPRESSION_MAX := 0.090
 const GROUND_TARGET_AHEAD_MIN := 0.120
 const GROUND_TARGET_AHEAD_MAX := 0.130
 const WALL_CLIMB_BODY_INSET := 0.16
+# Preserve the original hand-and-foot grip plane while clearing the cable with her head.
+const SLOTH_HEAD_CLEARANCE := 0.017
 const WALL_CLIMB_POSE_BLEND_RATE := 16.0
 const SWIM_POSE_BLEND_RATE := 15.0
 const SWIM_SCULL_RATE := 1.8
@@ -1240,6 +1242,10 @@ func _process_modification_with_delta(_delta: float) -> void:
 		and (parkour_state == "Locomotion" or parkour_state == "PoolSwim"):
 		_apply_dive_gear_gesture(skel)
 	_apply_scarf_glide_pose(skel, _delta)
+	if parkour_state == "RopeLine" and _head_bone >= 0:
+		var head_pose := skel.get_bone_global_pose(_head_bone)
+		head_pose.origin += skel.global_transform.basis.inverse() * Vector3.DOWN * SLOTH_HEAD_CLEARANCE
+		skel.set_bone_global_pose(_head_bone, head_pose)
 
 
 func _advance_wind_pose(delta: float) -> void:
