@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Terrain3DAssets" path="res://levels/first_steps/terrain/woodland_terrain_assets.tres" id="1_assets"]
+[ext_resource type="Terrain3DMaterial" path="res://levels/first_steps/terrain/materials/creek_terrain_material.tres" id="2_material"]
+
+[node name="CreekTerrain" type="Terrain3D"]
+region_size = 64
+vertex_spacing = 1.0
+tessellation_level = 0
+mesh_size = 48
+data_directory = "res://levels/first_steps/terrain/valley_data"
+material = ExtResource("2_material")
+assets = ExtResource("1_assets")
+collision_mode = 4
+collision_shape_size = 16
+collision_radius = 64
+collision_layer = 1
+collision_mask = 1
+collision_priority = 1.0

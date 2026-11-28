@@ -1,0 +1,61 @@
+[gd_resource type="Terrain3DAssets" load_steps=13 format=3]
+
+[ext_resource type="Texture2D" path="res://levels/first_steps/terrain/materials/meadow_grass_albedo_height.png" id="1_meadow_albedo"]
+[ext_resource type="Texture2D" path="res://levels/first_steps/terrain/materials/meadow_grass_normal_roughness.png" id="2_meadow_normal"]
+[ext_resource type="Texture2D" path="res://levels/first_steps/terrain/materials/warm_path_albedo_height.png" id="3_path_albedo"]
+[ext_resource type="Texture2D" path="res://levels/first_steps/terrain/materials/warm_path_normal_roughness.png" id="4_path_normal"]
+[ext_resource type="Texture2D" path="res://levels/first_steps/terrain/materials/creek_earth_albedo_height.png" id="5_creek_albedo"]
+[ext_resource type="Texture2D" path="res://levels/first_steps/terrain/materials/creek_earth_normal_roughness.png" id="6_creek_normal"]
+[ext_resource type="Texture2D" path="res://levels/first_steps/terrain/materials/mossy_stone_albedo_height.png" id="7_stone_albedo"]
+[ext_resource type="Texture2D" path="res://levels/first_steps/terrain/materials/mossy_stone_normal_roughness.png" id="8_stone_normal"]
+
+[sub_resource type="Terrain3DTextureAsset" id="MeadowGrassTexture"]
+name = "Meadow Grass"
+id = 0
+albedo_texture = ExtResource("1_meadow_albedo")
+normal_texture = ExtResource("2_meadow_normal")
+albedo_color = Color(0.75, 0.88, 0.8, 1)
+normal_depth = 0.45
+roughness = 0.12
+uv_scale = 0.5145
+displacement_scale = 2.0
+displacement_offset = -0.004519
+
+[sub_resource type="Terrain3DTextureAsset" id="WarmPathTexture"]
+name = "Warm Path"
+id = 1
+albedo_texture = ExtResource("3_path_albedo")
+normal_texture = ExtResource("4_path_normal")
+albedo_color = Color(0.78, 0.72, 0.86, 1)
+normal_depth = 0.3
+roughness = 0.2
+uv_scale = 0.819
+displacement_scale = 0.7
+displacement_offset = 0.113274
+
+[sub_resource type="Terrain3DTextureAsset" id="CreekEarthTexture"]
+name = "Creek Earth"
+id = 2
+albedo_texture = ExtResource("5_creek_albedo")
+normal_texture = ExtResource("6_creek_normal")
+albedo_color = Color(0.9, 0.86, 0.82, 1)
+normal_depth = 0.55
+roughness = 0.1
+uv_scale = 0.5
+displacement_scale = 0.0
+displacement_offset = 0.0
+
+[sub_resource type="Terrain3DTextureAsset" id="MossyStoneTexture"]
+name = "Mossy Stone"
+id = 3
+albedo_texture = ExtResource("7_stone_albedo")
+normal_texture = ExtResource("8_stone_normal")
+albedo_color = Color(0.86, 0.92, 0.74, 1)
+normal_depth = 0.45
+roughness = 0.05
+uv_scale = 0.5
+displacement_scale = 0.0
+displacement_offset = 0.0
+
+[resource]
+texture_list = Array[Terrain3DTextureAsset]([SubResource("MeadowGrassTexture"), SubResource("WarmPathTexture"), SubResource("CreekEarthTexture"), SubResource("MossyStoneTexture")])

@@ -40,13 +40,10 @@ func _run() -> void:
 		return
 	if not _check(StringName(atlas.get("selected_destination_id")) == &"first_steps", "First Steps Valley should be selected when the atlas opens."):
 		return
-	if not _check(StringName(postcard.get("current_destination")) == &"first_steps" and launch_button.disabled, "The First Steps postcard should show its pending status and disable Play."):
-		return
-	if not _check_pending_cta(postcard, launch_button, &"first_steps"):
+	if not _check(StringName(postcard.get("current_destination")) == &"first_steps" and not launch_button.disabled, "First Steps should open with a playable postcard."):
 		return
 
-	# Controller navigation reaches the selected pin. Selecting a pending pin and
-	# confirming it must not leave the atlas.
+	# Confirming a pin selects it. Only its postcard launches the level.
 	_gamepad_axis(JOY_AXIS_LEFT_X, 1.0)
 	await process_frame
 	var initial_pin_focus := root.gui_get_focus_owner()
@@ -57,16 +54,10 @@ func _run() -> void:
 	if not _check(current_scene == main_menu and atlas.is_visible_in_tree(), "Confirming a pin should select it without launching a level."):
 		return
 
-	# The selected pending destination keeps the separate postcard Play action
-	# disabled. Right pans the focused map; confirm returns focus to the pin.
 	_action(&"ui_right", true)
 	_action(&"ui_right", false)
 	await process_frame
-	if not _check(root.gui_get_focus_owner() == map_viewport and launch_button.disabled, "A pending destination should pan the map instead of focusing disabled Play."):
-		return
-	_gamepad_button(JOY_BUTTON_A)
-	await process_frame
-	if not _check(current_scene == main_menu and root.gui_get_focus_owner() == first_steps_pin, "Confirm on the map should return to the selected pin without launching."):
+	if not _check(root.gui_get_focus_owner() == launch_button, "First Steps should offer postcard Play from its focused pin."):
 		return
 
 	# A drag that begins on a different pin must pan without selecting that pin.
@@ -127,6 +118,34 @@ func _run() -> void:
 	if not _check(not launch_button.disabled and not str(postcard.get("availability_label")).is_empty(), "Rooftop Gym should be the available destination."):
 		return
 
+	# Launch the valley through its postcard and exercise a fresh title entry.
+	if not await _select_pin(atlas, map_viewport, postcard, launch_button, &"first_steps", first_steps_pin, main_menu, touch_input):
+		return
+	_click(_center(launch_button), touch_input)
+	if not await _wait_for_scene("res://levels/first_steps/first_steps_valley.tscn", 240):
+		_fail("First Steps Play should launch the creek bend.")
+		return
+	var valley_runner := current_scene.get_node_or_null("ChibiRunner") as ParkourController
+	var trailhead := current_scene.get_node_or_null("SafeSpawn") as Marker3D
+	if not _check(valley_runner != null and trailhead != null, "The valley should load its runner and trailhead."):
+		return
+	for frame in 45:
+		await physics_frame
+	if not _check(valley_runner.is_on_floor() and valley_runner.global_position.distance_to(trailhead.global_position) < 1.0, "Chibi should settle onto the terrain at the trailhead."):
+		return
+	valley_runner.global_position.y = -40.0
+	for frame in 30:
+		await physics_frame
+	if not _check(valley_runner.is_on_floor() and valley_runner.global_position.distance_to(trailhead.global_position) < 1.0, "Falling out of the valley should return Chibi to safe ground."):
+		return
+	if change_scene_to_file(entry) != OK:
+		_fail("Could not reenter the title after the valley route.")
+		return
+	await scene_changed
+	main_menu = current_scene
+	play = main_menu.get_node("ArtworkCanvas/TitleControls/PlayButton")
+	_click(_center(play), touch_input)
+	await create_timer(0.5).timeout
 	# Return to the title with controller Cancel, then reopen with keyboard confirm.
 	_gamepad_button(JOY_BUTTON_B)
 	await create_timer(0.5).timeout
@@ -197,7 +216,7 @@ func _run() -> void:
 	var settle_until := Time.get_ticks_msec() + 350
 	while Time.get_ticks_msec() < settle_until:
 		await process_frame
-	print("PASS: Title, four atlas pins, Intro/Lake copy and lead-ins, pending Coming soon CTA, Rooftop Gym Play, pause/resume")
+	print("PASS: Title, four atlas pins, Intro/Lake pending, First Steps and Rooftop launches, pause/resume")
 	quit(0)
 
 
@@ -215,7 +234,7 @@ func _select_pin(atlas: Control, map_viewport: Control, postcard: Control, launc
 		return false
 	if not _check(not str(postcard.get("availability_label")).is_empty(), "The %s postcard should show availability." % destination):
 		return false
-	if destination != &"rooftop_gym":
+	if destination in [&"lake", &"intro"]:
 		if not _check_pending_cta(postcard, launch_button, destination):
 			return false
 		_click(_center(launch_button), touch_input)
@@ -223,12 +242,12 @@ func _select_pin(atlas: Control, map_viewport: Control, postcard: Control, launc
 		if not _check(current_scene == main_menu and atlas.is_visible_in_tree(), "Selecting or clicking Play for %s must not launch it." % destination):
 			return false
 	else:
-		if not _check(not launch_button.disabled, "Rooftop Gym should enable postcard Play."):
+		if not _check(not launch_button.disabled, "%s should enable postcard Play." % destination):
 			return false
 		var launch_label := postcard.get_node_or_null("LaunchButton/LaunchLabel") as Label
-		if not _check(postcard.get("availability_label") == "Available" and launch_label != null and launch_label.text == "Play", "Rooftop Gym should show its available Play CTA."):
+		if not _check(postcard.get("availability_label") == "Available" and launch_label != null and launch_label.text == "Play", "%s should show its available Play CTA." % destination):
 			return false
-		if not _check(current_scene == main_menu and atlas.is_visible_in_tree(), "Selecting the Rooftop Gym pin must not launch it."):
+		if not _check(current_scene == main_menu and atlas.is_visible_in_tree(), "Selecting %s must not launch it." % destination):
 			return false
 	return true
 

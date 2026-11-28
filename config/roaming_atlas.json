@@ -53,9 +53,9 @@
       "sticker": "res://ui/menu/art/atlas/postcards/first_steps.png",
       "title": "First Steps Valley",
       "tagline": "I wonder how cold the creek is.",
-      "description": "Follow the creek, cross the logs, and find your way through the woods.",
-      "enabled": false,
-      "scene": ""
+      "description": "Follow the woodland trail down to the bend in the creek.",
+      "enabled": true,
+      "scene": "res://levels/first_steps/first_steps_valley.tscn"
     }
   ]
 }

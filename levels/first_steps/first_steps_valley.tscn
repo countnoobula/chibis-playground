@@ -1,0 +1,710 @@
+[gd_scene load_steps=34 format=3]
+
+[ext_resource type="Script" path="res://levels/first_steps/first_steps_valley_controller.gd" id="1_controller"]
+[ext_resource type="PackedScene" path="res://levels/first_steps/terrain/creek_terrain.tscn" id="2_terrain"]
+[ext_resource type="PackedScene" path="res://features/runner/chibi_runner.tscn" id="3_runner"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_root/moss_root_arch.glb" id="4_root_arch"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_trees/elder_trunk.glb" id="5_elder_trunk"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_trees/hazel_bough.glb" id="6_hazel_bough"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_cliffs/moss_cliff_shelf.glb" id="7_cliff_shelf"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_cliffs/moss_promontory.glb" id="8_promontory"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_cliffs/moss_creek_boulder.glb" id="9_creek_boulder"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_cliffs/creek_boulder_low_wedge.glb" id="10_low_wedge"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_cliffs/creek_boulder_stepped_flank.glb" id="11_stepped_flank"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_flora/crossing_arching_bellflowers.glb" id="12_arching_bellflowers"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_flora/mixed_bellflower_cluster.glb" id="13_mixed_bellflowers"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_flora/valley_bellflowers.glb" id="14_bellflowers"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_flora/valley_leaf_shrub.glb" id="15_leaf_shrub"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_flora/valley_strawberry.glb" id="16_strawberry"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_understory/birch_trail_plush_moss.glb" id="17_plush_moss"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_understory/moss_pillow.glb" id="18_moss_pillow"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_understory/painted_mixed_blooms.glb" id="19_painted_blooms"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_understory/painted_pebbles.glb" id="20_painted_pebbles"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/forest/canopy_crown.glb" id="21_canopy_crown"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/forest/canopy_bough_a.glb" id="22_canopy_bough_a"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/forest/canopy_bough_b.glb" id="23_canopy_bough_b"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_understory/painted_clover.glb" id="24_painted_clover"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_understory/painted_shrub.glb" id="25_painted_shrub"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_understory/crossing_rounded_blossoms.glb" id="26_rounded_blossoms"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/forest/moss_mound.glb" id="27_moss_mound"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_summer"]
+sky_top_color = Color(0.29803923, 0.56078434, 0.6901961, 1)
+sky_horizon_color = Color(0.92156863, 0.7607843, 0.60784316, 1)
+ground_bottom_color = Color(0.29803923, 0.4, 0.28235295, 1)
+ground_horizon_color = Color(0.6392157, 0.7176471, 0.49411765, 1)
+sun_angle_max = 18.0
+
+[sub_resource type="Sky" id="Sky_summer"]
+sky_material = SubResource("SkyMaterial_summer")
+
+[sub_resource type="Environment" id="Environment_summer"]
+background_mode = 2
+sky = SubResource("Sky_summer")
+ambient_light_source = 2
+ambient_light_color = Color(0.81960785, 0.84313726, 0.7372549, 1)
+ambient_light_energy = 0.58
+reflected_light_source = 1
+tonemap_mode = 3
+tonemap_exposure = 0.84
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.7176471, 0.8235294, 0.77254903, 1)
+fog_density = 0.012
+fog_sky_affect = 0.0
+fog_depth_begin = 26.0
+fog_depth_end = 92.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_bank_rock"]
+radius = 0.68
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_small_rock"]
+radius = 0.53
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_tree_trunk"]
+radius = 1.0
+height = 15.0
+
+[node name="FirstStepsValley" type="Node3D"]
+script = ExtResource("1_controller")
+fall_limit_y = -24.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_summer")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.7853982, 0.61086524, 0)
+light_color = Color(1, 0.85882354, 0.6901961, 1)
+light_energy = 1.05
+shadow_enabled = true
+shadow_blur = 1.8
+directional_shadow_max_distance = 82.0
+
+[node name="CreekTerrain" parent="." instance=ExtResource("2_terrain")]
+
+[node name="SafeSpawn" type="Marker3D" parent="."]
+position = Vector3(0, 5.08, 34)
+
+[node name="ChibiRunner" parent="." instance=ExtResource("3_runner")]
+position = Vector3(0, 5.08, 34)
+
+[node name="Dressing" type="Node3D" parent="."]
+
+[node name="Trailhead" type="Node3D" parent="Dressing"]
+
+[node name="NaturalGate" parent="Dressing/Trailhead" instance=ExtResource("4_root_arch")]
+position = Vector3(-3.5, 3.5, 25.5)
+rotation = Vector3(0, -0.12, 0.04)
+scale = Vector3(0.85, 0.85, 0.85)
+
+[node name="ElderTreeWest" type="StaticBody3D" parent="Dressing/Trailhead"]
+position = Vector3(-15, 3.9, 24)
+rotation = Vector3(0, -0.4, 0)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Dressing/Trailhead/ElderTreeWest"]
+position = Vector3(0, 7.5, 0)
+shape = SubResource("CylinderShape3D_tree_trunk")
+
+[node name="Trunk" parent="Dressing/Trailhead/ElderTreeWest" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/Trailhead/ElderTreeWest" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.2, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="BoughNorth" parent="Dressing/Trailhead/ElderTreeWest" instance=ExtResource("22_canopy_bough_a")]
+position = Vector3(0, 11.3, 0)
+rotation = Vector3(0, -1.15, 0)
+scale = Vector3(0.86, 0.86, 0.86)
+
+[node name="BoughEast" parent="Dressing/Trailhead/ElderTreeWest" instance=ExtResource("23_canopy_bough_b")]
+position = Vector3(0.4, 12.2, 0.2)
+rotation = Vector3(0, 2.25, 0)
+scale = Vector3(0.82, 0.82, 0.82)
+
+[node name="ElderTreeEast" type="StaticBody3D" parent="Dressing/Trailhead"]
+position = Vector3(15, 3.71, 24)
+rotation = Vector3(0, 2.0, 0)
+scale = Vector3(0.88, 0.88, 0.88)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Dressing/Trailhead/ElderTreeEast"]
+position = Vector3(0, 7.5, 0)
+shape = SubResource("CylinderShape3D_tree_trunk")
+
+[node name="Trunk" parent="Dressing/Trailhead/ElderTreeEast" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/Trailhead/ElderTreeEast" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.0, 0)
+scale = Vector3(0.74, 0.74, 0.74)
+
+[node name="BoughNorth" parent="Dressing/Trailhead/ElderTreeEast" instance=ExtResource("22_canopy_bough_a")]
+position = Vector3(0, 11.6, 0)
+rotation = Vector3(0, 1.05, 0)
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="BoughEast" parent="Dressing/Trailhead/ElderTreeEast" instance=ExtResource("23_canopy_bough_b")]
+position = Vector3(0, 12.2, 0)
+rotation = Vector3(0, -2.45, 0)
+scale = Vector3(0.84, 0.84, 0.84)
+
+[node name="Bend" type="Node3D" parent="Dressing"]
+
+[node name="BendTreeWest" type="StaticBody3D" parent="Dressing/Bend"]
+position = Vector3(-30, 4.32, -20)
+rotation = Vector3(0, 0.5, 0)
+scale = Vector3(0.9, 0.9, 0.9)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Dressing/Bend/BendTreeWest"]
+position = Vector3(0, 7.5, 0)
+shape = SubResource("CylinderShape3D_tree_trunk")
+
+[node name="Trunk" parent="Dressing/Bend/BendTreeWest" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/Bend/BendTreeWest" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.0, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="BoughNorth" parent="Dressing/Bend/BendTreeWest" instance=ExtResource("22_canopy_bough_a")]
+position = Vector3(0, 11.5, 0)
+rotation = Vector3(0, -1.35, 0)
+scale = Vector3(0.88, 0.88, 0.88)
+
+[node name="BoughEast" parent="Dressing/Bend/BendTreeWest" instance=ExtResource("23_canopy_bough_b")]
+position = Vector3(0, 12.0, 0)
+rotation = Vector3(0, 2.0, 0)
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="ElderTreeMiddleWest" type="StaticBody3D" parent="Dressing/Bend"]
+position = Vector3(-27, 4.3, 4)
+rotation = Vector3(0, 0.75, 0)
+scale = Vector3(0.9, 0.9, 0.9)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Dressing/Bend/ElderTreeMiddleWest"]
+position = Vector3(0, 7.5, 0)
+shape = SubResource("CylinderShape3D_tree_trunk")
+
+[node name="Trunk" parent="Dressing/Bend/ElderTreeMiddleWest" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/Bend/ElderTreeMiddleWest" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.1, 0)
+scale = Vector3(0.72, 0.72, 0.72)
+
+[node name="BoughNorth" parent="Dressing/Bend/ElderTreeMiddleWest" instance=ExtResource("22_canopy_bough_a")]
+position = Vector3(0, 11.3, 0)
+rotation = Vector3(0, -1.25, 0)
+scale = Vector3(0.82, 0.82, 0.82)
+
+[node name="BoughEast" parent="Dressing/Bend/ElderTreeMiddleWest" instance=ExtResource("6_hazel_bough")]
+position = Vector3(0, 12.0, 0)
+rotation = Vector3(0, 1.8, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="ElderTreeMiddleEast" type="StaticBody3D" parent="Dressing/Bend"]
+position = Vector3(27, 4.32, -9)
+rotation = Vector3(0, -1.2, 0)
+scale = Vector3(0.9, 0.9, 0.9)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Dressing/Bend/ElderTreeMiddleEast"]
+position = Vector3(0, 7.5, 0)
+shape = SubResource("CylinderShape3D_tree_trunk")
+
+[node name="Trunk" parent="Dressing/Bend/ElderTreeMiddleEast" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/Bend/ElderTreeMiddleEast" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.0, 0)
+scale = Vector3(0.75, 0.75, 0.75)
+
+[node name="BoughNorth" parent="Dressing/Bend/ElderTreeMiddleEast" instance=ExtResource("23_canopy_bough_b")]
+position = Vector3(0, 11.4, 0)
+rotation = Vector3(0, 1.1, 0)
+scale = Vector3(0.86, 0.86, 0.86)
+
+[node name="BoughEast" parent="Dressing/Bend/ElderTreeMiddleEast" instance=ExtResource("22_canopy_bough_a")]
+position = Vector3(0, 12.2, 0)
+rotation = Vector3(0, -2.6, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="ElderTreeBendEast" type="StaticBody3D" parent="Dressing/Bend"]
+position = Vector3(30, 4.9, -20)
+rotation = Vector3(0, 2.1, 0)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Dressing/Bend/ElderTreeBendEast"]
+position = Vector3(0, 7.5, 0)
+shape = SubResource("CylinderShape3D_tree_trunk")
+
+[node name="Trunk" parent="Dressing/Bend/ElderTreeBendEast" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/Bend/ElderTreeBendEast" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.4, 0)
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="BoughNorth" parent="Dressing/Bend/ElderTreeBendEast" instance=ExtResource("22_canopy_bough_a")]
+position = Vector3(0, 11.5, 0)
+rotation = Vector3(0, 1.25, 0)
+scale = Vector3(0.9, 0.9, 0.9)
+
+[node name="BoughEast" parent="Dressing/Bend/ElderTreeBendEast" instance=ExtResource("23_canopy_bough_b")]
+position = Vector3(0, 12.4, 0)
+rotation = Vector3(0, -2.15, 0)
+scale = Vector3(0.85, 0.85, 0.85)
+
+[node name="BackGrove" type="Node3D" parent="Dressing"]
+
+[node name="GroveWestTall" type="Node3D" parent="Dressing/BackGrove"]
+position = Vector3(-50, 6.7, -40)
+rotation = Vector3(0, 0.2, 0)
+scale = Vector3(1.1, 1.1, 1.1)
+
+[node name="Trunk" parent="Dressing/BackGrove/GroveWestTall" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/BackGrove/GroveWestTall" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.2, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="BoughA" parent="Dressing/BackGrove/GroveWestTall" instance=ExtResource("22_canopy_bough_a")]
+position = Vector3(0, 11.3, 0)
+rotation = Vector3(0, -1.1, 0)
+scale = Vector3(0.92, 0.92, 0.92)
+
+[node name="BoughB" parent="Dressing/BackGrove/GroveWestTall" instance=ExtResource("23_canopy_bough_b")]
+position = Vector3(0, 12.2, 0)
+rotation = Vector3(0, 2.35, 0)
+scale = Vector3(0.84, 0.84, 0.84)
+
+[node name="GroveWestMid" type="Node3D" parent="Dressing/BackGrove"]
+position = Vector3(-40, 6.83, -44)
+rotation = Vector3(0, 0.9, 0)
+scale = Vector3(0.9, 0.9, 0.9)
+
+[node name="Trunk" parent="Dressing/BackGrove/GroveWestMid" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/BackGrove/GroveWestMid" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.0, 0)
+scale = Vector3(0.74, 0.74, 0.74)
+
+[node name="BoughA" parent="Dressing/BackGrove/GroveWestMid" instance=ExtResource("23_canopy_bough_b")]
+position = Vector3(0, 11.4, 0)
+rotation = Vector3(0, 1.1, 0)
+scale = Vector3(0.82, 0.82, 0.82)
+
+[node name="BoughB" parent="Dressing/BackGrove/GroveWestMid" instance=ExtResource("6_hazel_bough")]
+position = Vector3(0, 12.0, 0)
+rotation = Vector3(0, -2.35, 0)
+scale = Vector3(0.72, 0.72, 0.72)
+
+[node name="GroveInnerWest" type="Node3D" parent="Dressing/BackGrove"]
+position = Vector3(-28, 4.98, -38)
+rotation = Vector3(0, -0.55, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="Trunk" parent="Dressing/BackGrove/GroveInnerWest" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/BackGrove/GroveInnerWest" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.3, 0)
+scale = Vector3(0.82, 0.82, 0.82)
+
+[node name="BoughA" parent="Dressing/BackGrove/GroveInnerWest" instance=ExtResource("22_canopy_bough_a")]
+position = Vector3(0, 11.2, 0)
+rotation = Vector3(0, -1.4, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="BoughB" parent="Dressing/BackGrove/GroveInnerWest" instance=ExtResource("23_canopy_bough_b")]
+position = Vector3(0, 12.1, 0)
+rotation = Vector3(0, 2.05, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="GroveCenterWest" type="Node3D" parent="Dressing/BackGrove"]
+position = Vector3(-16, 5.26, -45)
+rotation = Vector3(0, 0.35, 0)
+
+[node name="Trunk" parent="Dressing/BackGrove/GroveCenterWest" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/BackGrove/GroveCenterWest" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.3, 0)
+scale = Vector3(0.82, 0.82, 0.82)
+
+[node name="BoughA" parent="Dressing/BackGrove/GroveCenterWest" instance=ExtResource("23_canopy_bough_b")]
+position = Vector3(0, 11.5, 0)
+rotation = Vector3(0, 1.2, 0)
+scale = Vector3(0.88, 0.88, 0.88)
+
+[node name="BoughB" parent="Dressing/BackGrove/GroveCenterWest" instance=ExtResource("22_canopy_bough_a")]
+position = Vector3(0, 12.4, 0)
+rotation = Vector3(0, -2.4, 0)
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="GroveCenter" type="Node3D" parent="Dressing/BackGrove"]
+position = Vector3(-4, 4.4, -38)
+rotation = Vector3(0, -1.2, 0)
+scale = Vector3(0.86, 0.86, 0.86)
+
+[node name="Trunk" parent="Dressing/BackGrove/GroveCenter" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/BackGrove/GroveCenter" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.1, 0)
+scale = Vector3(0.76, 0.76, 0.76)
+
+[node name="BoughA" parent="Dressing/BackGrove/GroveCenter" instance=ExtResource("22_canopy_bough_a")]
+position = Vector3(0, 11.3, 0)
+rotation = Vector3(0, -1.25, 0)
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="BoughB" parent="Dressing/BackGrove/GroveCenter" instance=ExtResource("6_hazel_bough")]
+position = Vector3(0, 12.1, 0)
+rotation = Vector3(0, 2.3, 0)
+scale = Vector3(0.74, 0.74, 0.74)
+
+[node name="GroveEast" type="Node3D" parent="Dressing/BackGrove"]
+position = Vector3(10, 5.41, -46)
+rotation = Vector3(0, 0.7, 0)
+scale = Vector3(1.05, 1.05, 1.05)
+
+[node name="Trunk" parent="Dressing/BackGrove/GroveEast" instance=ExtResource("5_elder_trunk")]
+
+[node name="CanopyCrown" parent="Dressing/BackGrove/GroveEast" instance=ExtResource("21_canopy_crown")]
+position = Vector3(0, 13.2, 0)
+scale = Vector3(0.82, 0.82, 0.82)
+
+[node name="BoughA" parent="Dressing/BackGrove/GroveEast" instance=ExtResource("23_canopy_bough_b")]
+position = Vector3(0, 11.4, 0)
+rotation = Vector3(0, 1.2, 0)
+scale = Vector3(0.9, 0.9, 0.9)
+
+[node name="BoughB" parent="Dressing/BackGrove/GroveEast" instance=ExtResource("22_canopy_bough_a")]
+position = Vector3(0, 12.3, 0)
+rotation = Vector3(0, -2.55, 0)
+scale = Vector3(0.82, 0.82, 0.82)
+
+[node name="BackBankCover" type="Node3D" parent="Dressing"]
+
+[node name="ShoreClumpWest" type="Node3D" parent="Dressing/BackBankCover"]
+position = Vector3(-36, 2.22, -31)
+
+[node name="MossMound" parent="Dressing/BackBankCover/ShoreClumpWest" instance=ExtResource("27_moss_mound")]
+position = Vector3(-0.5, -0.03, 0)
+rotation = Vector3(0, 0.7, 0)
+scale = Vector3(0.58, 0.58, 0.58)
+
+[node name="PaintedShrub" parent="Dressing/BackBankCover/ShoreClumpWest" instance=ExtResource("25_painted_shrub")]
+position = Vector3(1.2, 0.02, -0.2)
+rotation = Vector3(0, -0.6, 0)
+scale = Vector3(0.75, 0.75, 0.75)
+
+[node name="Clover" parent="Dressing/BackBankCover/ShoreClumpWest" instance=ExtResource("24_painted_clover")]
+position = Vector3(-1.5, 0.02, 0.8)
+rotation = Vector3(0, 1.1, 0)
+
+[node name="RoundedBlooms" parent="Dressing/BackBankCover/ShoreClumpWest" instance=ExtResource("26_rounded_blossoms")]
+position = Vector3(0.9, 0.02, 1.0)
+rotation = Vector3(0, -1.8, 0)
+scale = Vector3(1.15, 1.15, 1.15)
+
+[node name="ShoreClumpMidWest" type="Node3D" parent="Dressing/BackBankCover"]
+position = Vector3(-20, 3.17, -30)
+
+[node name="PlushMoss" parent="Dressing/BackBankCover/ShoreClumpMidWest" instance=ExtResource("17_plush_moss")]
+position = Vector3(-0.8, 0.02, 0.2)
+rotation = Vector3(0, 0.3, 0)
+scale = Vector3(1.15, 1.15, 1.15)
+
+[node name="LeafShrub" parent="Dressing/BackBankCover/ShoreClumpMidWest" instance=ExtResource("15_leaf_shrub")]
+position = Vector3(1.3, 0.03, -0.2)
+rotation = Vector3(0, 0.7, 0)
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="Clover" parent="Dressing/BackBankCover/ShoreClumpMidWest" instance=ExtResource("24_painted_clover")]
+position = Vector3(-1.4, 0.03, 1.0)
+rotation = Vector3(0, -0.8, 0)
+
+[node name="MixedBlooms" parent="Dressing/BackBankCover/ShoreClumpMidWest" instance=ExtResource("19_painted_blooms")]
+position = Vector3(1.5, 0.03, 1.0)
+rotation = Vector3(0, 1.5, 0)
+scale = Vector3(0.72, 0.72, 0.72)
+
+[node name="ShoreClumpMid" type="Node3D" parent="Dressing/BackBankCover"]
+position = Vector3(-8, 3.24, -30)
+
+[node name="MossMound" parent="Dressing/BackBankCover/ShoreClumpMid" instance=ExtResource("27_moss_mound")]
+position = Vector3(0.6, -0.03, 0.2)
+rotation = Vector3(0, -0.8, 0)
+scale = Vector3(0.56, 0.56, 0.56)
+
+[node name="PaintedShrub" parent="Dressing/BackBankCover/ShoreClumpMid" instance=ExtResource("25_painted_shrub")]
+position = Vector3(-1.3, 0.02, 0.3)
+rotation = Vector3(0, 0.8, 0)
+scale = Vector3(0.76, 0.76, 0.76)
+
+[node name="Clover" parent="Dressing/BackBankCover/ShoreClumpMid" instance=ExtResource("24_painted_clover")]
+position = Vector3(1.5, 0.02, 1.0)
+rotation = Vector3(0, -1.4, 0)
+
+[node name="RoundedBlooms" parent="Dressing/BackBankCover/ShoreClumpMid" instance=ExtResource("26_rounded_blossoms")]
+position = Vector3(-1.2, 0.02, -1.1)
+rotation = Vector3(0, 0.5, 0)
+scale = Vector3(1.2, 1.2, 1.2)
+
+[node name="ShoreClumpEast" type="Node3D" parent="Dressing/BackBankCover"]
+position = Vector3(6, 3.04, -31)
+
+[node name="MossMound" parent="Dressing/BackBankCover/ShoreClumpEast" instance=ExtResource("27_moss_mound")]
+position = Vector3(-0.5, -0.03, 0.1)
+rotation = Vector3(0, 1.0, 0)
+scale = Vector3(0.6, 0.6, 0.6)
+
+[node name="LeafShrub" parent="Dressing/BackBankCover/ShoreClumpEast" instance=ExtResource("15_leaf_shrub")]
+position = Vector3(1.4, 0.02, -0.2)
+rotation = Vector3(0, -0.5, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="Clover" parent="Dressing/BackBankCover/ShoreClumpEast" instance=ExtResource("24_painted_clover")]
+position = Vector3(-1.4, 0.02, 1.0)
+rotation = Vector3(0, 0.8, 0)
+
+[node name="MixedBlooms" parent="Dressing/BackBankCover/ShoreClumpEast" instance=ExtResource("19_painted_blooms")]
+position = Vector3(1.3, 0.02, 1.2)
+rotation = Vector3(0, -1.2, 0)
+scale = Vector3(0.76, 0.76, 0.76)
+
+[node name="BankRockWest" type="StaticBody3D" parent="Dressing/Bend"]
+position = Vector3(-23.7, 3.25, -13.8)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Rock" parent="Dressing/Bend/BankRockWest" instance=ExtResource("9_creek_boulder")]
+position = Vector3(0, 0.05, 0)
+rotation = Vector3(0, 0.6, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Dressing/Bend/BankRockWest"]
+position = Vector3(0, 0.42, 0)
+shape = SubResource("SphereShape3D_bank_rock")
+
+[node name="BankRockEast" type="StaticBody3D" parent="Dressing/Bend"]
+position = Vector3(22, 3.3, -13.2)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Rock" parent="Dressing/Bend/BankRockEast" instance=ExtResource("10_low_wedge")]
+rotation = Vector3(0, 2.15, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Dressing/Bend/BankRockEast"]
+position = Vector3(0, 0.42, 0)
+shape = SubResource("SphereShape3D_small_rock")
+
+[node name="BoulderShelfWest" parent="Dressing/Bend" instance=ExtResource("7_cliff_shelf")]
+position = Vector3(-28, 3.25, -19)
+rotation = Vector3(0, 0.45, 0)
+scale = Vector3(0.9, 0.9, 0.9)
+
+[node name="BoulderShelfEast" parent="Dressing/Bend" instance=ExtResource("8_promontory")]
+position = Vector3(26, 3.8, -19)
+rotation = Vector3(0, -0.7, 0)
+scale = Vector3(1.2, 1.2, 1.2)
+
+[node name="SteppedFlankWest" parent="Dressing/Bend" instance=ExtResource("11_stepped_flank")]
+position = Vector3(-24.7, 3.4, -8)
+rotation = Vector3(0, 1.7, 0)
+
+[node name="CreekFloraWest" parent="Dressing/Bend" instance=ExtResource("12_arching_bellflowers")]
+position = Vector3(-18.8, 2.45, -9.5)
+rotation = Vector3(0, -0.8, 0)
+
+[node name="CreekFloraEast" parent="Dressing/Bend" instance=ExtResource("13_mixed_bellflowers")]
+position = Vector3(18.8, 2.98, -17.8)
+rotation = Vector3(0, 2.4, 0)
+
+[node name="CreekFlowersWest" parent="Dressing/Bend" instance=ExtResource("14_bellflowers")]
+position = Vector3(-25, 0.44, -22)
+rotation = Vector3(0, 0.7, 0)
+
+[node name="CreekFlowersEast" parent="Dressing/Bend" instance=ExtResource("14_bellflowers")]
+position = Vector3(22.5, 3.2, -7)
+rotation = Vector3(0, -1.8, 0)
+scale = Vector3(1.1, 1.1, 1.1)
+
+[node name="CreekShrubWest" parent="Dressing/Bend" instance=ExtResource("15_leaf_shrub")]
+position = Vector3(-22, 2.95, -8)
+rotation = Vector3(0, 0.4, 0)
+scale = Vector3(0.85, 0.85, 0.85)
+
+[node name="CreekShrubEast" parent="Dressing/Bend" instance=ExtResource("15_leaf_shrub")]
+position = Vector3(20, 3.1, -8)
+rotation = Vector3(0, 1.3, 0)
+scale = Vector3(0.9, 0.9, 0.9)
+
+[node name="TrailStrawberry" parent="Dressing/Trailhead" instance=ExtResource("16_strawberry")]
+position = Vector3(-7.5, 3.81, 14)
+rotation = Vector3(0, -0.25, 0)
+scale = Vector3(0.9, 0.9, 0.9)
+
+[node name="MossAtTrailhead" parent="Dressing/Trailhead" instance=ExtResource("17_plush_moss")]
+position = Vector3(7.2, 2.83, 19)
+rotation = Vector3(0, 0.5, 0)
+
+[node name="TrailFlowersWest" parent="Dressing/Trailhead" instance=ExtResource("19_painted_blooms")]
+position = Vector3(-12, 3.35, 8)
+rotation = Vector3(0, 1.2, 0)
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="TrailFlowersEast" parent="Dressing/Trailhead" instance=ExtResource("19_painted_blooms")]
+position = Vector3(9.5, 2.85, 11.5)
+rotation = Vector3(0, -0.9, 0)
+scale = Vector3(0.95, 0.95, 0.95)
+
+[node name="TrailheadCoverWest" type="Node3D" parent="Dressing/Trailhead"]
+position = Vector3(-7, 3.15, 31)
+
+[node name="MossMound" parent="Dressing/Trailhead/TrailheadCoverWest" instance=ExtResource("27_moss_mound")]
+position = Vector3(-0.4, -0.03, 0)
+rotation = Vector3(0, 0.3, 0)
+scale = Vector3(0.68, 0.68, 0.68)
+
+[node name="LeafShrub" parent="Dressing/Trailhead/TrailheadCoverWest" instance=ExtResource("15_leaf_shrub")]
+position = Vector3(1.6, 0.02, -0.2)
+rotation = Vector3(0, -0.6, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="Clover" parent="Dressing/Trailhead/TrailheadCoverWest" instance=ExtResource("24_painted_clover")]
+position = Vector3(-1.5, 0.02, 1.2)
+rotation = Vector3(0, 0.9, 0)
+
+[node name="RoundedBlooms" parent="Dressing/Trailhead/TrailheadCoverWest" instance=ExtResource("26_rounded_blossoms")]
+position = Vector3(1.0, 0.03, 1.0)
+rotation = Vector3(0, -1.1, 0)
+scale = Vector3(1.2, 1.2, 1.2)
+
+[node name="TrailheadCoverEast" type="Node3D" parent="Dressing/Trailhead"]
+position = Vector3(7, 3.08, 31)
+
+[node name="MossMound" parent="Dressing/Trailhead/TrailheadCoverEast" instance=ExtResource("27_moss_mound")]
+position = Vector3(0.2, -0.03, -0.1)
+rotation = Vector3(0, -0.45, 0)
+scale = Vector3(0.62, 0.62, 0.62)
+
+[node name="PaintedShrub" parent="Dressing/Trailhead/TrailheadCoverEast" instance=ExtResource("25_painted_shrub")]
+position = Vector3(-1.5, 0.0, 0.6)
+rotation = Vector3(0, 0.75, 0)
+scale = Vector3(0.85, 0.85, 0.85)
+
+[node name="Clover" parent="Dressing/Trailhead/TrailheadCoverEast" instance=ExtResource("24_painted_clover")]
+position = Vector3(1.4, 0.02, 1.2)
+rotation = Vector3(0, -0.5, 0)
+scale = Vector3(0.9, 0.9, 0.9)
+
+[node name="MixedBlooms" parent="Dressing/Trailhead/TrailheadCoverEast" instance=ExtResource("19_painted_blooms")]
+position = Vector3(1.6, 0.0, -0.9)
+rotation = Vector3(0, 2.0, 0)
+scale = Vector3(0.68, 0.68, 0.68)
+
+[node name="MossPillowWest" parent="Dressing/Bend" instance=ExtResource("18_moss_pillow")]
+position = Vector3(-15, 2.65, -4)
+rotation = Vector3(0, 1.4, 0)
+
+[node name="MossPillowEast" parent="Dressing/Bend" instance=ExtResource("18_moss_pillow")]
+position = Vector3(12.5, 2.9, -4)
+rotation = Vector3(0, -0.5, 0)
+
+[node name="ApproachCoverWest" type="Node3D" parent="Dressing/Trailhead"]
+position = Vector3(-14, 2.82, 10)
+
+[node name="PlushMoss" parent="Dressing/Trailhead/ApproachCoverWest" instance=ExtResource("17_plush_moss")]
+position = Vector3(-0.8, 0.02, 0.3)
+rotation = Vector3(0, 0.8, 0)
+scale = Vector3(1.1, 1.1, 1.1)
+
+[node name="PaintedShrub" parent="Dressing/Trailhead/ApproachCoverWest" instance=ExtResource("25_painted_shrub")]
+position = Vector3(1.4, 0.03, -0.1)
+rotation = Vector3(0, -0.9, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="Clover" parent="Dressing/Trailhead/ApproachCoverWest" instance=ExtResource("24_painted_clover")]
+position = Vector3(-1.7, 0.02, 1.1)
+rotation = Vector3(0, 1.3, 0)
+
+[node name="RoundedBlooms" parent="Dressing/Trailhead/ApproachCoverWest" instance=ExtResource("26_rounded_blossoms")]
+position = Vector3(1.2, 0.03, 1.2)
+rotation = Vector3(0, 0.45, 0)
+scale = Vector3(1.15, 1.15, 1.15)
+
+[node name="ApproachCoverEast" type="Node3D" parent="Dressing/Bend"]
+position = Vector3(12, 2.93, -4)
+
+[node name="MossMound" parent="Dressing/Bend/ApproachCoverEast" instance=ExtResource("27_moss_mound")]
+position = Vector3(0.7, -0.03, -0.2)
+rotation = Vector3(0, 0.9, 0)
+scale = Vector3(0.62, 0.62, 0.62)
+
+[node name="LeafShrub" parent="Dressing/Bend/ApproachCoverEast" instance=ExtResource("15_leaf_shrub")]
+position = Vector3(-1.4, 0.02, 0.2)
+rotation = Vector3(0, 0.8, 0)
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="PaintedBlooms" parent="Dressing/Bend/ApproachCoverEast" instance=ExtResource("19_painted_blooms")]
+position = Vector3(1.4, 0.02, 1.0)
+rotation = Vector3(0, -0.8, 0)
+scale = Vector3(0.75, 0.75, 0.75)
+
+[node name="Clover" parent="Dressing/Bend/ApproachCoverEast" instance=ExtResource("24_painted_clover")]
+position = Vector3(-1.5, 0.02, -1.0)
+rotation = Vector3(0, 1.7, 0)
+
+[node name="BendCoverWest" type="Node3D" parent="Dressing/Bend"]
+position = Vector3(-22, 2.98, -8)
+
+[node name="MossPillow" parent="Dressing/Bend/BendCoverWest" instance=ExtResource("18_moss_pillow")]
+position = Vector3(-0.5, 0.02, 0.4)
+rotation = Vector3(0, 0.2, 0)
+scale = Vector3(1.1, 1.1, 1.1)
+
+[node name="PaintedShrub" parent="Dressing/Bend/BendCoverWest" instance=ExtResource("25_painted_shrub")]
+position = Vector3(-1.6, 0.0, -0.2)
+rotation = Vector3(0, -0.5, 0)
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="Clover" parent="Dressing/Bend/BendCoverWest" instance=ExtResource("24_painted_clover")]
+position = Vector3(1.3, 0.02, 0.9)
+rotation = Vector3(0, 1.0, 0)
+
+[node name="RoundedBlooms" parent="Dressing/Bend/BendCoverWest" instance=ExtResource("26_rounded_blossoms")]
+position = Vector3(0.6, 0.02, -1.2)
+rotation = Vector3(0, 2.1, 0)
+
+[node name="BendCoverEast" type="Node3D" parent="Dressing/Bend"]
+position = Vector3(20, 3.15, -8)
+
+[node name="MossMound" parent="Dressing/Bend/BendCoverEast" instance=ExtResource("27_moss_mound")]
+position = Vector3(0.4, -0.03, -0.1)
+rotation = Vector3(0, -0.6, 0)
+scale = Vector3(0.7, 0.7, 0.7)
+
+[node name="PaintedShrub" parent="Dressing/Bend/BendCoverEast" instance=ExtResource("25_painted_shrub")]
+position = Vector3(-1.5, 0.02, 0.6)
+rotation = Vector3(0, 0.5, 0)
+scale = Vector3(0.82, 0.82, 0.82)
+
+[node name="Clover" parent="Dressing/Bend/BendCoverEast" instance=ExtResource("24_painted_clover")]
+position = Vector3(1.2, 0.02, 1.0)
+rotation = Vector3(0, -1.3, 0)
+
+[node name="MixedBlooms" parent="Dressing/Bend/BendCoverEast" instance=ExtResource("19_painted_blooms")]
+position = Vector3(1.5, 0.02, -1.0)
+rotation = Vector3(0, 2.6, 0)
+scale = Vector3(0.7, 0.7, 0.7)
+
+[node name="PebblesWest" parent="Dressing/Bend" instance=ExtResource("20_painted_pebbles")]
+position = Vector3(-20.8, 1.62, -16.3)
+rotation = Vector3(0, 0.8, 0)
+
+[node name="PebblesEast" parent="Dressing/Bend" instance=ExtResource("20_painted_pebbles")]
+position = Vector3(20.1, 3.03, -20.5)
+rotation = Vector3(0, -1.0, 0)

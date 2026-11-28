@@ -1,0 +1,20 @@
+[gd_resource type="Terrain3DMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://levels/first_steps/terrain/materials/shaders/creek_displacement_buffer.gdshader" id="1_relief_buffer"]
+
+[resource]
+auto_shader_enabled = false
+texture_filtering = 0
+projection_enabled = true
+show_checkered = false
+show_colormap = false
+world_background = 0
+max_regions = 64
+displacement_scale = 0.42
+displacement_sharpness = 0.25
+buffer_shader_override = ExtResource("1_relief_buffer")
+buffer_shader_override_enabled = true
+_shader_parameters = {
+"relief_inner_radius": 3.0,
+"relief_outer_radius": 6.0
+}

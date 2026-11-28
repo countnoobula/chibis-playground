@@ -28,7 +28,7 @@ Use the reviewed checkpoint records as the expected baseline. Record the tested 
 
 ## Acceptance and evidence
 
-Attach the route results, desktop and phone captures, export identities and platform coverage. List remaining issues with reproduction steps. Leave final approval to the player.
+Attach the route results, desktop and phone captures, export identities and platform coverage. List remaining issues with reproduction steps. Leave final approval to the player. At final designer handoff, provide the verified starter, First Steps collection and checkpoint 4 evidence with a short paint → place → save → reopen → play exercise.
 
 ## Handoff and change history
 

@@ -49,6 +49,8 @@ Run this from the Godot project root using the installed Godot executable if `go
 | `features/stations/` | Placeable beam, pole, line, swing, and trampoline scenes, their behavior, and equipment paint defaults. Set station dimensions and line mode on each instance. |
 | `features/items/` | Pickups shared across levels, including the strawberry. |
 | `levels/rooftop_gym/` | The gym scene, course layout, spawns, palette, sky, pool, tower, wind tunnel, and rooftop-specific assemblies. |
+| `levels/first_steps/` | The First Steps Valley trailhead, creek bend and Terrain3D resources. Follow the [terrain starter guide](levels/first_steps/terrain/README.md) to give each new level its own editable region directory. |
+| `Data/scene_builder/` | The designer's First Steps placement palette. The [collection guide](Data/scene_builder/README.md) covers woodland props and reusable gameplay scenes. |
 | `ui/` and `settings/` | Title and journal scenes and artwork in `ui/menu/`, touch controls in `ui/hud/`, and persisted preferences in the GameSettings autoload. |
 | `assets/` and `source_art/` | Shared runtime models, audio, fonts, and the self-contained woodland kit. Editable Blender masters and regeneration inputs live under the Godot-ignored `source_art/` root. |
 | `addons/` | Vendored Godot integrations and editor plugins. Keep upstream files, version information, and licenses together. |

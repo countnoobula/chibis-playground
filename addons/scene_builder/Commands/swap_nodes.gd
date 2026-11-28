@@ -1,0 +1,77 @@
+@tool
+extends EditorPlugin
+## Replaces each selected node in the Scene with an instance of the selected
+## PackedScene from the FileSystem.
+##
+## The instantiated PackedScene inherits transform information from the node it
+## replaces. Exactly one PackedScene should be selected in the FileSystem and
+## at least one node should be selected in the Scene.
+##
+## * Assumes that the selected PackedScene path, and selected nodes all
+##	 have a Node3D as their root, skips selected nodes otherwise.
+
+var utilities = SceneBuilderToolbox.new()
+
+func execute():
+	var undo_redo: EditorUndoRedoManager = get_undo_redo()
+	var current_scene: Node = EditorInterface.get_edited_scene_root()
+	var selection: EditorSelection = EditorInterface.get_selection()
+	var selected_nodes: Array[Node] = selection.get_selected_nodes()
+	var selected_paths: PackedStringArray = EditorInterface.get_selected_paths()
+	
+	# Verify that only one FileSystem path is selected
+	if selected_paths.size() != 1:
+		print("[Swap Nodes] Please select exactly one PackedScene in the FileSystem.")
+		return
+	
+	# Verify that selected Filesystem item is a PackedScene
+	var selected_path = selected_paths[0]
+	var resource = load(selected_path)
+	if not resource or not resource is PackedScene:
+		print("[Swap Nodes] The selected path is not a PackedScene.")
+		return
+	
+	# Verify selected nodes
+	if selected_nodes.is_empty():
+		print("[Swap Nodes] Select at least one node in the Scene.")
+		return
+	
+	undo_redo.create_action("Swap selected nodes with a single selected node in FileSystem")
+
+	var all_names = utilities.get_all_node_names(current_scene)
+
+	for node in selected_nodes:
+		
+		if not node is Node3D:
+			print("[Swap Nodes] Skipping non-Node3D node: " + node.name)
+			continue
+		
+		var instance = resource.instantiate()
+		if not instance is Node3D:
+			print("[Swap Nodes] Skipping, instantiated scene root is not a Node3D")
+			instance.queue_free()
+			continue
+		
+		instance.transform = node.transform
+		instance.name = utilities.increment_name_until_unique(instance.name, all_names)
+
+		var parent = node.get_parent()
+		if parent and instance and node:
+			var original_index = node.get_index()
+
+			undo_redo.add_do_method(parent, "add_child", instance)
+			undo_redo.add_do_method(instance, "set_owner", current_scene)
+			undo_redo.add_do_method(node, "set_owner", null)
+			undo_redo.add_do_method(parent, "remove_child", node)
+
+			undo_redo.add_undo_method(instance, "set_owner", null)
+			undo_redo.add_undo_method(parent, "remove_child", instance)
+			undo_redo.add_undo_method(parent, "add_child", node)
+			undo_redo.add_undo_method(node, "set_owner", current_scene)
+			undo_redo.add_undo_method(parent, "move_child", node, original_index)
+
+			print("[Swap Nodes] Node has been swapped: " + node.name)
+		else:
+			printerr("[Swap Nodes] parent not found for node: " + node.name)
+	
+	undo_redo.commit_action()

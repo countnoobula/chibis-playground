@@ -1,0 +1,9 @@
+[gd_resource type="Terrain3DMaterial" format=3]
+
+[resource]
+auto_shader_enabled = false
+projection_enabled = true
+show_checkered = false
+show_colormap = false
+world_background = 0
+max_regions = 64

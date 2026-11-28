@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SceneBuilderDatabase" load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://co6tannoytmsk" path="res://addons/scene_builder/scene_builder_database.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+collections = {
+"Gameplay": {
+"Balance Beam": {
+"random_offset_y_max": 0.0,
+"random_offset_y_min": 0.0,
+"random_rot_x": 0.0,
+"random_rot_y": 0.0,
+"random_rot_z": 0.0,
+"random_scale_max": 1.0,
+"random_scale_min": 1.0,
+"uid": "uid://v6q3k2m4n5j0a",
+"use_random_rotation": false,
+"use_random_scale": false,
+"use_random_vertical_offset": false
+}
+},
+"Woodland": {
+"Moss Boulder": {
+"random_offset_y_max": 0.0,
+"random_offset_y_min": 0.0,
+"random_rot_x": 0.0,
+"random_rot_y": 360.0,
+"random_rot_z": 0.0,
+"random_scale_max": 1.1,
+"random_scale_min": 0.9,
+"uid": "uid://rihffoda2jl4",
+"use_random_rotation": true,
+"use_random_scale": true,
+"use_random_vertical_offset": false
+}
+}
+}

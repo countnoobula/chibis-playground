@@ -4,7 +4,7 @@
 
 ### Roaming Atlas and First Steps Valley
 
-**Owner** Codex · **Checkpoint** 3 of 11 · **Status** user-approved, planning discussion before checkpoint 4 · **Current tasks** 13/13 · **User-approved checkpoints** 3/11
+**Owner** Codex · **Checkpoint** 4 of 11 · **Status** terrain and painted relief user-approved · **Current tasks** 8/8 · **User-approved checkpoints** 4/11
 
 #### 1. Art and tracker
 
@@ -53,15 +53,18 @@ User-approved. [Verification and review decision](changelog/2026-11-27-atlas-art
 
 #### 4. Terrain and designer defaults
 
-- [ ] Pin MIT-licensed Terrain3D 1.1.0 stable with its license
-- [ ] Verify clean Godot 4.7.2 Forward Mobile import
-- [ ] Create a reusable four-material woodland starter
-- [ ] Sculpt the trailhead and creek bend
-- [ ] Enable valley launch from the atlas
+- [x] Pin MIT-licensed Terrain3D 1.1.0 stable with its license
+- [x] Verify clean Godot 4.7.2 Forward Mobile import
+- [x] Integrate Scene Builder and prepare a First Steps collection of props and gameplay scenes
+- [x] Verify editor placement, undo/redo, persistence and gameplay on Terrain3D
+- [x] Create a reusable four-material woodland starter
+- [x] Sculpt the trailhead and creek bend
+- [x] Enable valley launch from the atlas
+- [x] Verify player-centered relief on painted flowers and stepping stones
 
-**Review.** Walk the bend at runner height. Paint Meadow Grass, Warm Path, Creek Earth, and Mossy Stone in a separate terrain and reopen it to verify independent terrain data.
+**Review.** Review the palette and creek bend from Chibi’s camera. Codex verifies painting and scene placement in an independent starter. The designer tests at final handoff.
 
-[Implementation plan, acceptance checks and handoff](changelog/atlas-04-terrain-and-designer-defaults.md) · Planned.
+[Implementation, captures and technical verification](changelog/atlas-04-terrain-and-designer-defaults.md) · User-approved.
 
 #### 5. Water and caustics
 

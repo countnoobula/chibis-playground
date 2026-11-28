@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://v6q3k2m4n5j0a"]
+
+[ext_resource type="Script" uid="uid://v6q3k2m4n5j0b" path="res://Data/scene_builder/items/first_steps_balance_beam_item.gd" id="1"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_BalanceBeamPreview"]
+albedo_color = Color(0.764706, 0.694118, 0.85098, 1)
+roughness = 0.72
+
+[node name="BalanceBeamItem" type="Node3D"]
+script = ExtResource("1")
+
+[node name="EditorPreview" type="Node3D" parent="."]
+
+[node name="BeamMesh" type="MeshInstance3D" parent="EditorPreview"]
+material_override = SubResource("StandardMaterial3D_BalanceBeamPreview")
