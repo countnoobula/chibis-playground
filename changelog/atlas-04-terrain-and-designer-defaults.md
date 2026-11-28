@@ -102,3 +102,5 @@ The player approved Warm Path and asked for more pronounced flowers while preser
 [Matched 30° flower comparison](../source_art/LayoutReview/first-steps-flower-lift-30deg.png) · [Windows review build](../builds/first_steps_flower_lift/Chibi.exe). At the trailhead on Windows Vulkan Forward Mobile, the pale petals averaged 2.04 cm above nearby moss, up from 1.05 cm. All 36,086 ground samples clear of the flower mask matched their previous encoded heights. The Warm Path diagnostic PNG matched its previous SHA-256 hash. The exported pack passed the 41.42 m title-to-bend route with grounded endpoints. Checkpoint 4 remains open for player review.
 
 Player approved checkpoint 4 on 2026-11-28 after reviewing Warm Path and the final flower lift. Checkpoint 5 is authorized.
+
+Approval commit [080cde3](https://github.com/countnoobula/chibis-playground/commit/080cde3f8da0def5eec06f66c2f0459ae7f0fd68) was pushed and verified on origin/main before checkpoint 5 started.

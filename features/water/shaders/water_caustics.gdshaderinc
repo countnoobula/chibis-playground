@@ -4,6 +4,8 @@ uniform float water_caustic_strength : hint_range(0.0, 2.0) = 0.62;
 uniform float water_caustic_scale : hint_range(0.1, 8.0) = 1.8;
 uniform float water_caustic_speed : hint_range(0.0, 2.0) = 0.22;
 uniform float water_caustic_shore_fade : hint_range(0.05, 1.0) = 0.7;
+// Broad-phase world-XZ bounds. The outline polygon below remains authoritative.
+uniform vec4 water_caustic_bounds = vec4(0.0);
 uniform float water_plane_y = 0.0;
 uniform float water_depth = 2.0;
 uniform vec2 water_outline_points[32];
@@ -76,6 +78,11 @@ float water_outline_distance(vec2 point_xz) {
 float water_caustic_clip(vec3 world_position) {
 	float depth_below_surface = water_plane_y - world_position.y;
 	if (depth_below_surface <= 0.015 || depth_below_surface >= water_depth + 0.18) {
+		return 0.0;
+	}
+	if (water_outline_count < 3 ||
+		world_position.x < water_caustic_bounds.x || world_position.z < water_caustic_bounds.y ||
+		world_position.x > water_caustic_bounds.z || world_position.z > water_caustic_bounds.w) {
 		return 0.0;
 	}
 	vec2 outline = water_outline_info(world_position.xz);

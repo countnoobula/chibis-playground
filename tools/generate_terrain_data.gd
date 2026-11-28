@@ -27,6 +27,27 @@ const CREEK_POINTS: Array[Vector2] = [
 	Vector2(64.0, -61.0),
 ]
 
+# Checkpoint 5 bathymetry: the trail approaches the creek from the northwest,
+# with a shallow shelf before the channel drops into the dive pocket.
+const WATER_ENTRY_POINTS: Array[Vector3] = [
+	Vector3(-18.0, 2.40, -10.5),
+	Vector3(-18.0, 2.00, -12.5),
+	Vector3(-17.0, 1.35, -14.5),
+	Vector3(-16.0, 0.82, -16.0),
+	Vector3(-14.0, -0.20, -18.0),
+]
+const WADING_SHELF_CENTER := Vector2(-16.0, -16.0)
+const WADING_SHELF_RADII := Vector2(3.0, 2.2)
+const WADING_SHELF_HEIGHT := 0.78
+const DIVE_POOL_CENTER := Vector2(-8.5, -17.5)
+const DIVE_POOL_RADII := Vector2(4.1, 3.0)
+const DIVE_POOL_CUT := 1.35
+const WALK_OUT_POINTS: Array[Vector3] = [
+	Vector3(-2.5, 0.20, -22.0),
+	Vector3(1.0, 1.20, -19.9),
+	Vector3(5.5, 2.35, -17.3),
+]
+
 const EXPOSED_STONE_CENTERS: Array[Vector2] = [
 	Vector2(-23.0, -18.0),
 	Vector2(-11.0, -9.0),
@@ -48,8 +69,13 @@ func _build() -> void:
 		quit(1)
 		return
 
-	var allow_replace := OS.get_cmdline_user_args().has("--replace")
-	if not _prepare_data_directory(VALLEY_DATA_DIR, allow_replace) or not _prepare_data_directory(STARTER_DATA_DIR, allow_replace):
+	var user_args := OS.get_cmdline_user_args()
+	var allow_replace := user_args.has("--replace")
+	var valley_only := user_args.has("--valley-only")
+	if not _prepare_data_directory(VALLEY_DATA_DIR, allow_replace):
+		quit(1)
+		return
+	if not valley_only and not _prepare_data_directory(STARTER_DATA_DIR, allow_replace):
 		quit(1)
 		return
 	_builder_camera = Camera3D.new()
@@ -75,27 +101,30 @@ func _build() -> void:
 	valley_data.save_directory(VALLEY_DATA_DIR)
 	print("Saved valley Terrain3D data to %s (%d regions)." % [VALLEY_DATA_DIR, valley_data.get_regions_active().size()])
 
-	var starter: Node = _new_terrain()
-	root.add_child(starter)
-	await process_frame
-	starter.set("region_size", REGION_SIZE)
-	starter.set("vertex_spacing", 1.0)
-	var starter_data = starter.get("data")
-	if starter_data == null:
-		push_error("Terrain3D node did not initialize its data resource.")
-		quit(1)
-		return
-	var starter_images := _create_images(_make_flat_heightmap(2.35))
-	starter_data.import_images(starter_images, Vector3(WORLD_MIN, 0.0, WORLD_MIN))
-	_paint_starter(starter_data)
-	starter_data.update_maps()
-	starter_data.calc_height_range(true)
-	starter_data.save_directory(STARTER_DATA_DIR)
-	print("Saved independent designer starter data to %s (%d regions)." % [STARTER_DATA_DIR, starter_data.get_regions_active().size()])
+	var starter: Node = null
+	if not valley_only:
+		starter = _new_terrain()
+		root.add_child(starter)
+		await process_frame
+		starter.set("region_size", REGION_SIZE)
+		starter.set("vertex_spacing", 1.0)
+		var starter_data = starter.get("data")
+		if starter_data == null:
+			push_error("Terrain3D node did not initialize its data resource.")
+			quit(1)
+			return
+		var starter_images := _create_images(_make_flat_heightmap(2.35))
+		starter_data.import_images(starter_images, Vector3(WORLD_MIN, 0.0, WORLD_MIN))
+		_paint_starter(starter_data)
+		starter_data.update_maps()
+		starter_data.calc_height_range(true)
+		starter_data.save_directory(STARTER_DATA_DIR)
+		print("Saved independent designer starter data to %s (%d regions)." % [STARTER_DATA_DIR, starter_data.get_regions_active().size()])
 
 	var verification_failed := not await _verify_saved_data()
 	valley.free()
-	starter.free()
+	if is_instance_valid(starter):
+		starter.free()
 	if verification_failed:
 		quit(1)
 	else:
@@ -150,7 +179,28 @@ func _valley_height(world_x: float, world_z: float) -> float:
 
 	var path_result := _closest_height_on_path(Vector2(world_x, world_z))
 	var path_weight := 1.0 - smoothstep(1.8, 5.0, path_result.x)
-	return lerpf(height, path_result.y, path_weight)
+	height = lerpf(height, path_result.y, path_weight)
+
+	var water_entry := _closest_height_on_points(Vector2(world_x, world_z), WATER_ENTRY_POINTS)
+	var entry_weight := 1.0 - smoothstep(1.4, 4.0, water_entry.x)
+	height = lerpf(height, water_entry.y, entry_weight)
+
+	# A broad, shallow bed lets Chibi cross into the creek on foot before the
+	# channel becomes deep enough to trigger the swim controller.
+	var shelf_distance := _elliptical_distance(Vector2(world_x, world_z), WADING_SHELF_CENTER, WADING_SHELF_RADII)
+	var shelf_weight := 1.0 - smoothstep(0.25, 1.10, shelf_distance)
+	height = lerpf(height, WADING_SHELF_HEIGHT, shelf_weight)
+
+	# Keep the deepest floor below the character's head while preserving the
+	# existing creek shape around the localized dive pocket.
+	var pool_distance := _elliptical_distance(Vector2(world_x, world_z), DIVE_POOL_CENTER, DIVE_POOL_RADII)
+	var pool_weight := 1.0 - smoothstep(0.15, 1.0, pool_distance)
+	height -= DIVE_POOL_CUT * pool_weight
+
+	# This shallow, rising lane gives the east/northeast bank a walkable exit.
+	var walk_out := _closest_height_on_points(Vector2(world_x, world_z), WALK_OUT_POINTS)
+	var walk_out_weight := 1.0 - smoothstep(1.5, 4.0, walk_out.x)
+	return lerpf(height, walk_out.y, walk_out_weight)
 
 
 func _paint_valley(data) -> void:
@@ -311,11 +361,15 @@ func _prepare_data_directory(resource_directory: String, allow_replace: bool) ->
 
 
 func _closest_height_on_path(position: Vector2) -> Vector2:
+	return _closest_height_on_points(position, TRAIL_POINTS)
+
+
+func _closest_height_on_points(position: Vector2, points: Array[Vector3]) -> Vector2:
 	var best_distance := INF
 	var best_height := 0.0
-	for index in range(TRAIL_POINTS.size() - 1):
-		var start: Vector3 = TRAIL_POINTS[index]
-		var finish: Vector3 = TRAIL_POINTS[index + 1]
+	for index in range(points.size() - 1):
+		var start: Vector3 = points[index]
+		var finish: Vector3 = points[index + 1]
 		var start_xz := Vector2(start.x, start.z)
 		var end_xz := Vector2(finish.x, finish.z)
 		var segment := end_xz - start_xz
@@ -326,6 +380,10 @@ func _closest_height_on_path(position: Vector2) -> Vector2:
 			best_distance = distance
 			best_height = lerpf(start.y, finish.y, amount)
 	return Vector2(best_distance, best_height)
+
+
+func _elliptical_distance(position: Vector2, center: Vector2, radii: Vector2) -> float:
+	return Vector2((position.x - center.x) / radii.x, (position.y - center.y) / radii.y).length()
 
 
 func _distance_to_curve(position: Vector2, points: Array[Vector2]) -> float:

@@ -4,7 +4,7 @@
 
 ### Roaming Atlas and First Steps Valley
 
-**Owner** Codex · **Checkpoint** 4 of 11 · **Status** terrain and painted relief user-approved · **Current tasks** 8/8 · **User-approved checkpoints** 4/11
+**Owner** Codex · **Checkpoint** 5 of 11 · **Status** user-approved after Windows playtest · **Current tasks** 5/5 · **User-approved checkpoints** 5/11
 
 #### 1. Art and tracker
 
@@ -68,15 +68,15 @@ User-approved. [Verification and review decision](changelog/2026-11-27-atlas-art
 
 #### 5. Water and caustics
 
-- [ ] Place the existing Chibi water body and profile
-- [ ] Sculpt wading shelf, dive pool, and sloping exit
-- [ ] Connect the terrain receiver to the shared caustic shader and water parameters
-- [ ] Exercise wading, swimming, diving, and exit
-- [ ] Capture repeatable views above and below water
+- [x] Place the existing Chibi water body and profile
+- [x] Sculpt wading shelf, dive pool, and sloping exit
+- [x] Connect the terrain receiver to the shared caustic shader and water parameters
+- [x] Exercise wading, swimming, diving, and exit
+- [x] Capture repeatable views above and below water
 
 **Review.** Compare the legibility of the bed with the Underwater concept. Check surface effects, the camera transition, moving light on terrain and rocks, and dry banks.
 
-[Implementation plan, acceptance checks and handoff](changelog/atlas-05-water-and-caustics.md) · Planned.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-05-water-and-caustics.md) · User-approved after swimming and caustics review.
 
 #### 6. First dry crossing
 

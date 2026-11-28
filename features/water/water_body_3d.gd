@@ -174,13 +174,18 @@ func emit_bubble(point: Vector3) -> bool:
 	return true
 
 
-## Registers a water-local ShaderMaterial and updates its caustic uniforms.
+## Registers a ShaderMaterial or a custom material exposing set_shader_param().
 ## Custom shaders must declare the water_* caustic uniforms they use.
-func register_caustic_receiver(material: ShaderMaterial) -> void:
-	if not is_instance_valid(material) or material.shader == null:
+func register_caustic_receiver(receiver: Object) -> void:
+	if not is_instance_valid(receiver):
 		return
-	_remember_receiver(material)
-	_apply_caustic_parameters(material)
+	if receiver is ShaderMaterial:
+		if (receiver as ShaderMaterial).shader == null:
+			return
+	elif not receiver.has_method("set_shader_param"):
+		return
+	_remember_receiver(receiver)
+	_apply_caustic_parameters(receiver)
 
 
 ## Keeps the reusable receiver setup for existing mesh callers.
@@ -365,7 +370,7 @@ func get_profile() -> WaterProfile:
 	return profile if profile != null else DEFAULT_PROFILE
 
 
-func _remember_receiver(material: ShaderMaterial) -> void:
+func _remember_receiver(material: Object) -> void:
 	for existing_ref in _receiver_refs:
 		if existing_ref.get_ref() == material:
 			return
@@ -375,33 +380,49 @@ func _remember_receiver(material: ShaderMaterial) -> void:
 func _update_receiver_uniforms() -> void:
 	var retained: Array[WeakRef] = []
 	for receiver_ref in _receiver_refs:
-		var material := receiver_ref.get_ref() as ShaderMaterial
-		if is_instance_valid(material):
-			_apply_caustic_parameters(material)
+		var receiver: Object = receiver_ref.get_ref()
+		if is_instance_valid(receiver) and (receiver is ShaderMaterial or receiver.has_method("set_shader_param")):
+			_apply_caustic_parameters(receiver)
 			retained.append(receiver_ref)
 	_receiver_refs = retained
 	if _surface_material != null:
 		_apply_surface_profile()
 
 
-func _apply_caustic_parameters(material: ShaderMaterial) -> void:
+func _apply_caustic_parameters(receiver: Object) -> void:
 	var settings := get_profile()
 	var point_count := mini(outline.size(), MAX_SHADER_OUTLINE_POINTS)
 	var world_outline := PackedVector2Array()
 	world_outline.resize(MAX_SHADER_OUTLINE_POINTS)
+	var bounds := Vector4(INF, INF, -INF, -INF)
 	for i in range(point_count):
 		var local_point := outline[i]
 		var world_point := global_transform * Vector3(local_point.x, 0.0, local_point.y)
-		world_outline[i] = Vector2(world_point.x, world_point.z)
-	material.set_shader_parameter("water_outline_points", world_outline)
-	material.set_shader_parameter("water_outline_count", point_count)
-	material.set_shader_parameter("water_plane_y", get_volume_ceiling_height())
-	material.set_shader_parameter("water_depth", maxf(max_depth - ceiling_below_surface, 0.01) * absf(global_transform.basis.y.y))
-	material.set_shader_parameter("water_caustic_color", settings.caustic_color)
-	material.set_shader_parameter("water_caustic_strength", settings.caustic_strength)
-	material.set_shader_parameter("water_caustic_scale", settings.caustic_scale)
-	material.set_shader_parameter("water_caustic_speed", settings.caustic_speed)
-	material.set_shader_parameter("water_caustic_shore_fade", settings.caustic_shore_fade)
+		var point_xz := Vector2(world_point.x, world_point.z)
+		world_outline[i] = point_xz
+		bounds.x = minf(bounds.x, point_xz.x)
+		bounds.y = minf(bounds.y, point_xz.y)
+		bounds.z = maxf(bounds.z, point_xz.x)
+		bounds.w = maxf(bounds.w, point_xz.y)
+	if point_count < 1:
+		bounds = Vector4.ZERO
+	var parameters := {
+		"water_outline_points": world_outline,
+		"water_outline_count": point_count,
+		"water_caustic_bounds": bounds,
+		"water_plane_y": get_volume_ceiling_height(),
+		"water_depth": maxf(max_depth - ceiling_below_surface, 0.01) * absf(global_transform.basis.y.y),
+		"water_caustic_color": settings.caustic_color,
+		"water_caustic_strength": settings.caustic_strength,
+		"water_caustic_scale": settings.caustic_scale,
+		"water_caustic_speed": settings.caustic_speed,
+		"water_caustic_shore_fade": settings.caustic_shore_fade,
+	}
+	for parameter_name in parameters:
+		if receiver is ShaderMaterial:
+			(receiver as ShaderMaterial).set_shader_parameter(parameter_name, parameters[parameter_name])
+		else:
+			receiver.call("set_shader_param", parameter_name, parameters[parameter_name])
 
 
 func _get_ring_mesh() -> ArrayMesh:

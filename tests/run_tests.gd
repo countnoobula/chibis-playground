@@ -34,6 +34,7 @@ func _run_all() -> void:
 	await _test_touch_hud()
 	await _test_full_gym_and_physics()
 	await preload("res://tests/water_regressions.gd").new().run(self, _assert_true)
+	await preload("res://tests/test_first_steps_creek.gd").new().run(self, _assert_true)
 
 	print("=== SUMMARY: %d passed, %d failed ===" % [_passed, _failed])
 	quit(0 if _failed == 0 else 1)

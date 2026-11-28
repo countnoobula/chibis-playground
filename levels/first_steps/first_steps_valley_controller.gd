@@ -5,10 +5,14 @@ extends Node3D
 
 const LevelProgressProvider := preload("res://ui/hud/journal_level_progress_provider.gd")
 const ReliefSurfaceShader := preload("res://levels/first_steps/terrain/materials/relief_surface_shader.gd")
+const WaterCausticSurfaceShader := preload("res://levels/first_steps/terrain/materials/water_caustic_surface_shader.gd")
+const WATER_CAUSTIC_RECEIVER_GROUP: StringName = &"water_caustic_receivers"
 
 @export var runner_path: NodePath = NodePath("ChibiRunner")
 @export var safe_spawn_path: NodePath = NodePath("SafeSpawn")
 @export_range(-100.0, 0.0, 0.5) var fall_limit_y: float = -24.0
+@export_group("Water caustics")
+@export var water_body_path: NodePath = NodePath("CreekWater")
 
 @export_group("Player-centered terrain relief")
 @export var relief_enabled: bool = true
@@ -26,6 +30,11 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	# The playable valley uses physics for ground queries. Terrain3D's 2×2
+	# mouse-picking viewport cannot render the creek's screen-space refraction.
+	var mouse_viewport := get_node_or_null("CreekTerrain/MouseViewport") as SubViewport
+	if mouse_viewport != null:
+		mouse_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	_journal_progress_provider = LevelProgressProvider.new("First Steps Valley")
 	_runner = get_node_or_null(runner_path) as ParkourController
 	_safe_spawn = get_node_or_null(safe_spawn_path) as Marker3D
@@ -34,6 +43,7 @@ func _ready() -> void:
 	if _safe_spawn == null:
 		push_error("First Steps Valley could not find its SafeSpawn marker.")
 	_configure_terrain_relief()
+	_configure_water_caustics()
 	if _runner != null and _runner.touch_hud != null:
 		_runner.touch_hud.bind_journal_level_progress(_journal_progress_provider)
 
@@ -58,6 +68,55 @@ func _configure_terrain_relief() -> void:
 			return
 		if ReliefSurfaceShader.install(terrain_material):
 			terrain_material.set_shader_param("relief_lighting_strength", 1.0)
+
+
+func _configure_water_caustics() -> void:
+	var creek_terrain := get_node_or_null("CreekTerrain") as Terrain3D
+	if creek_terrain == null:
+		push_error("First Steps Valley could not find its CreekTerrain for water caustics.")
+		return
+	var water := get_node_or_null(water_body_path) as WaterBody3D
+	if water == null:
+		push_error("First Steps Valley could not find its CreekWater body for water caustics.")
+		return
+	var terrain_material := creek_terrain.material as Terrain3DMaterial
+	if terrain_material == null:
+		push_error("First Steps Valley CreekTerrain has no Terrain3DMaterial for water caustics.")
+		return
+	if not WaterCausticSurfaceShader.install(terrain_material):
+		return
+
+	# WaterBody3D owns the shared outline, depth, bounds, and profile uniforms. Registering
+	# Terrain3DMaterial through the same receiver API keeps them in sync if the body moves.
+	water.register_caustic_receiver(terrain_material)
+	var configured_mesh_ids: Dictionary = {}
+	for receiver_root in get_tree().get_nodes_in_group(WATER_CAUSTIC_RECEIVER_GROUP):
+		if not is_ancestor_of(receiver_root):
+			continue
+		_configure_caustic_meshes(receiver_root, water, configured_mesh_ids)
+
+
+func _configure_caustic_meshes(node: Node, water: WaterBody3D, configured_mesh_ids: Dictionary) -> void:
+	if node is MeshInstance3D:
+		var mesh_instance := node as MeshInstance3D
+		var instance_id := mesh_instance.get_instance_id()
+		if not configured_mesh_ids.has(instance_id):
+			configured_mesh_ids[instance_id] = true
+			var existing_material := mesh_instance.material_override
+			if existing_material == null and mesh_instance.mesh != null and mesh_instance.mesh.get_surface_count() > 0:
+				existing_material = mesh_instance.get_surface_override_material(0)
+				if existing_material == null:
+					existing_material = mesh_instance.mesh.surface_get_material(0)
+			var already_uses_water_caustics := false
+			if existing_material is ShaderMaterial:
+				var existing_shader := (existing_material as ShaderMaterial).shader
+				already_uses_water_caustics = existing_shader != null and existing_shader.code.contains("water_caustic_light(")
+			if already_uses_water_caustics:
+				water.register_caustic_receiver(existing_material)
+			else:
+				water.configure_caustic_receiver(mesh_instance)
+	for child in node.get_children():
+		_configure_caustic_meshes(child, water, configured_mesh_ids)
 
 
 func _physics_process(_delta: float) -> void:
