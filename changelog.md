@@ -4,7 +4,7 @@
 
 ### Roaming Atlas and First Steps Valley
 
-**Owner** Codex · **Checkpoint** 11 of 11 · **Status** verified, player review pending · **Current tasks** 5/5 · **User-approved checkpoints** 5/11
+**Owner** Codex · **Checkpoint** 11 of 11 · **Status** verified, player review pending · **Current tasks** 5/5 · **User-approved checkpoints** 6/11
 
 #### 1. Art and tracker
 
@@ -88,7 +88,7 @@ User-approved. [Verification and review decision](changelog/2026-11-27-atlas-art
 
 **Review.** Cross dry, deliberately fall in, swim to shore, and retry. Judge the landing silhouettes and spacing from the chase camera.
 
-[Implementation plan, acceptance checks and handoff](changelog/atlas-06-first-dry-crossing.md) · Verified in the Windows build. Awaiting player review.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-06-first-dry-crossing.md) · User-approved.
 
 #### 7. Ambient breeze
 

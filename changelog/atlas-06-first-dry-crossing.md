@@ -1,6 +1,6 @@
 # Checkpoint 6 · First dry crossing
 
-**Owner** Codex lead for integration and evidence, with scoped Luna Max implementation. **Status** Implemented and verified on Windows. Awaiting player review. Checkpoint 5 was approved and pushed as 6e7b2f8.
+**Owner** Codex lead for integration and evidence, with scoped Luna Max implementation. **Status** User-approved.
 
 [Previous checkpoint](atlas-05-water-and-caustics.md) · [Milestone tracker](../changelog.md) · [Project instructions](../AGENTS.md)
 
@@ -47,3 +47,7 @@ Play the dry sequence and recovery route from the normal entry. Save chase-camer
 - The dedicated retry HUD test passed 10 checks covering activation, keyboard R, touch, heading, camera, pause/resume and developer station start. The isolated gameplay suite passed all 353 checks. The final scene also passed the 13-check checkpoint 5 creek traversal. Accelerated headless probes can retain audio resources at shutdown; the final GPU traversal runs exited cleanly. [Retry HUD test](../tests/test_first_steps_retry_hud.gd)
 - The native Windows debug export launched successfully. Pack SHA-256 is ECD8A9EF77472E72ADD1608D266D1C3EA6520B04D9A63A86EEC6988076F09115. Verified the executable, pack and Terrain3D DLL in the archive against their local copies by hash. [Windows playtest ZIP](../builds/first_steps_dry_crossing/Chibi-First-Steps-Dry-Crossing-Windows.zip)
 - **Next action** Player review of root timing, jump spacing, log balance and swim recovery. Update this record with the decision. The owner requested overnight advancement through checkpoint 11 with a separate commit and push at each verified milestone. Player reviews remain pending.
+
+### Player review · 2026-11-28
+
+The player approved the dry crossing after playing the Windows build.
