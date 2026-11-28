@@ -4,7 +4,7 @@
 
 ### Roaming Atlas and First Steps Valley
 
-**Owner** Codex · **Checkpoint** 9 of 11 · **Status** verified, player review pending · **Current tasks** 4/4 · **User-approved checkpoints** 5/11
+**Owner** Codex · **Checkpoint** 10 of 11 · **Status** verified, player review pending · **Current tasks** 5/5 · **User-approved checkpoints** 5/11
 
 #### 1. Art and tracker
 
@@ -125,15 +125,15 @@ User-approved. [Verification and review decision](changelog/2026-11-27-atlas-art
 
 #### 10. Strong wind and finish
 
-- [ ] Dress the woodland trampoline
-- [ ] Author a strong-wind zone
-- [ ] Signal its direction with foliage
-- [ ] Tune the glide landing
-- [ ] Wire finish, replay, and level select
+- [x] Dress the woodland trampoline
+- [x] Author a strong-wind zone
+- [x] Signal its direction with foliage
+- [x] Tune the glide landing
+- [x] Wire finish, replay, and level select
 
 **Review.** Read the wind before takeoff, bounce into it, steer through the glide, and exit the zone. Only an explicitly authored strong-wind zone may redirect Chibi.
 
-[Implementation plan, acceptance checks and handoff](changelog/atlas-10-strong-wind-and-finish.md) · Planned.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-10-strong-wind-and-finish.md) · Verified. Player review pending.
 
 #### 11. End-to-end verification
 

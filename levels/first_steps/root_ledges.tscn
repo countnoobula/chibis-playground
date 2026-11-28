@@ -92,7 +92,7 @@ rotation = Vector3(0, -1.5707963, 0)
 position = Vector3(6.25, 2.55, 0)
 script = ExtResource("1_climb")
 
-[node name="RootCore" type="StaticBody3D" parent="ClimbableRoot"]
+[node name="RootCore" type="StaticBody3D" parent="ClimbableRoot" groups=["root_ledge_summit"]]
 position = Vector3(0, 1.65, 0)
 collision_layer = 1
 

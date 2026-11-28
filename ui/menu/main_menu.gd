@@ -4,6 +4,7 @@ const DESIGN_SIZE := Vector2(1280, 720)
 const MOBILE_CROP_TOP_FRACTION := 0.10
 const TRANSITION_DURATION := 0.30
 const ATLAS_PREVIEW_SCENE := preload("res://ui/menu/atlas_preview.tscn")
+static var _pending_atlas_return_destination: StringName = &""
 
 var _pointer := preload("res://ui/hud/menu_touch_pointer.gd").new()
 var _atlas_preview: Control
@@ -22,6 +23,18 @@ func _ready() -> void:
 	_fit_canvas()
 	title_controls.connect("play_requested", _open_atlas)
 	title_controls.connect("options_requested", _open_options)
+	var return_destination := _pending_atlas_return_destination
+	_pending_atlas_return_destination = &""
+	if not return_destination.is_empty():
+		_open_atlas(return_destination)
+
+
+static func request_atlas_return(destination_id: StringName) -> void:
+	_pending_atlas_return_destination = destination_id
+
+
+static func cancel_atlas_return() -> void:
+	_pending_atlas_return_destination = &""
 
 
 func _fit_canvas() -> void:
@@ -67,7 +80,7 @@ func _close_options(options: Control) -> void:
 	title_controls.get_node("OptionsButton").grab_focus.call_deferred()
 
 
-func _open_atlas() -> void:
+func _open_atlas(destination_id: StringName = &"") -> void:
 	if _transitioning or is_instance_valid(_atlas_preview):
 		return
 	_transitioning = true
@@ -76,6 +89,8 @@ func _open_atlas() -> void:
 	_atlas_preview.connect("back_requested", _return_to_title)
 	_atlas_preview.connect("launch_requested", _launch_scene)
 	add_child(_atlas_preview)
+	if not destination_id.is_empty():
+		_atlas_preview.call("_set_selected_destination", destination_id)
 	_atlas_preview.call("set_interaction_enabled", false)
 	_atlas_preview.call("fit_to_visible_area")
 	var tween := create_tween().set_parallel(true)

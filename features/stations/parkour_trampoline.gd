@@ -7,6 +7,9 @@ const PALETTE := preload("res://features/stations/station_palette.gd")
 
 @export var base_bounce_velocity: float = 10.40
 @export var super_bounce_multiplier: float = 1.22
+@export_group("Appearance")
+@export var frame_material: Material
+@export var pad_material: Material
 
 var _pad_mesh: MeshInstance3D
 var _squish_timer: float = 0.0
@@ -38,9 +41,12 @@ func _build_trampoline() -> void:
 	rm.height = 0.24
 	ring.mesh = rm
 	ring.position = Vector3(0.0, 0.12, 0.0)
-	var rmat := StandardMaterial3D.new()
-	rmat.albedo_color = PALETTE.PORCELAIN
-	rmat.roughness = 0.78
+	var rmat: Material = frame_material
+	if rmat == null:
+		var default_frame := StandardMaterial3D.new()
+		default_frame.albedo_color = PALETTE.PORCELAIN
+		default_frame.roughness = 0.78
+		rmat = default_frame
 	ring.material_override = rmat
 	frame.add_child(ring)
 	add_child(frame)
@@ -66,10 +72,13 @@ func _build_trampoline() -> void:
 	pm.height = 0.10
 	_pad_mesh.mesh = pm
 	_pad_mesh.position = Vector3(0.0, 0.27, 0.0)
-	var pmat := StandardMaterial3D.new()
-	pmat.albedo_color = PALETTE.MINT
-	pmat.roughness = 0.73
-	_pad_mesh.material_override = pmat
+	var top_material: Material = pad_material
+	if top_material == null:
+		var default_pad := StandardMaterial3D.new()
+		default_pad.albedo_color = PALETTE.MINT
+		default_pad.roughness = 0.73
+		top_material = default_pad
+	_pad_mesh.material_override = top_material
 	add_child(_pad_mesh)
 
 

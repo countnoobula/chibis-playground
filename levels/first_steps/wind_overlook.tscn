@@ -1,0 +1,249 @@
+[gd_scene load_steps=25 format=3]
+
+[ext_resource type="Script" path="res://levels/first_steps/wind_overlook_controller.gd" id="1_controller"]
+[ext_resource type="Script" path="res://levels/first_steps/wind_overlook_field.gd" id="2_wind_field"]
+[ext_resource type="Script" path="res://levels/first_steps/wind_overlook_foliage.gd" id="3_foliage"]
+[ext_resource type="PackedScene" path="res://features/stations/parkour_trampoline.tscn" id="4_trampoline"]
+[ext_resource type="PackedScene" path="res://levels/first_steps/valley_finish.tscn" id="5_finish"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/forest/mushroom_cap_large.glb" id="6_mushroom_large"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/forest/mushroom_cap_step.glb" id="7_mushroom_step"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/forest/moss_mound.glb" id="8_moss_mound"]
+[ext_resource type="PackedScene" path="res://assets/environment/woodland/valley_flora/valley_leaf_shrub.glb" id="9_leaf_shrub"]
+[ext_resource type="Texture2D" path="res://assets/environment/woodland/textures/valley_root/T_ValleyRootBark_BaseColor.png" id="10_bark_color"]
+[ext_resource type="Texture2D" path="res://assets/environment/woodland/textures/valley_root/T_ValleyRootBark_Roughness.png" id="11_bark_roughness"]
+[ext_resource type="Texture2D" path="res://assets/environment/woodland/textures/valley_root/T_ValleyRootBark_NormalGL.png" id="12_bark_normal"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_checkpoint"]
+radius = 1.2
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_landing"]
+size = Vector3(7.8, 0.32, 5.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_recovery_step"]
+size = Vector3(1.1, 0.3, 5.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_landing"]
+size = Vector3(7.8, 0.32, 5.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_landing_moss"]
+size = Vector3(7.58, 0.04, 5.18)
+
+[sub_resource type="BoxMesh" id="BoxMesh_recovery_step"]
+size = Vector3(1.1, 0.3, 5.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_recovery_moss"]
+size = Vector3(1.02, 0.035, 4.82)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_finish_area"]
+size = Vector3(7.4, 10.5, 5.0)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_root_rail"]
+top_radius = 0.19
+bottom_radius = 0.25
+height = 7.3
+radial_segments = 16
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_root_support"]
+top_radius = 0.23
+bottom_radius = 0.31
+height = 2.6
+radial_segments = 14
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bark"]
+albedo_texture = ExtResource("10_bark_color")
+roughness_texture = ExtResource("11_bark_roughness")
+normal_enabled = true
+normal_texture = ExtResource("12_bark_normal")
+normal_scale = 0.48
+uv1_triplanar = true
+uv1_scale = Vector3(1.7, 1.7, 1.7)
+roughness = 0.94
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_moss"]
+albedo_color = Color(0.35, 0.49, 0.3, 1)
+roughness = 0.98
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mushroom_pad"]
+albedo_color = Color(0.73, 0.34, 0.38, 1)
+roughness = 0.58
+clearcoat_enabled = true
+clearcoat = 0.22
+
+[node name="WindOverlook" type="Node3D"]
+script = ExtResource("1_controller")
+
+[node name="SectionStart" type="Marker3D" parent="."]
+position = Vector3(34.2, 4.75, 0)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="DeveloperStart" type="Marker3D" parent="."]
+position = Vector3(34.2, 4.75, 0)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="CheckpointArea" type="Area3D" parent="." groups=["first_steps_section_checkpoints"]]
+position = Vector3(34.2, 4.75, 0)
+collision_mask = 2
+metadata/developer_action = &"debug_zone_4"
+metadata/section_name = "Wind Overlook"
+metadata/camera_pitch = -0.45
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CheckpointArea"]
+shape = SubResource("SphereShape3D_checkpoint")
+
+[node name="Spawn" type="Marker3D" parent="CheckpointArea"]
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="FoliageCue" type="Node3D" parent="."]
+position = Vector3(35.7, 5.05, -1.55)
+script = ExtResource("3_foliage")
+
+[node name="Trampoline" parent="." instance=ExtResource("4_trampoline")]
+position = Vector3(38, 5.4, 0)
+frame_material = SubResource("StandardMaterial3D_bark")
+pad_material = SubResource("StandardMaterial3D_mushroom_pad")
+
+[node name="WindField" type="Node3D" parent="."]
+position = Vector3(44.7, 9.6, 0)
+script = ExtResource("2_wind_field")
+half_extents = Vector3(5, 4.5, 3.4)
+local_flow_direction = Vector3(1, 0, 0)
+flow_speed = 8.2
+edge_fade_distance = 0.55
+
+[node name="LandingRootPad" type="StaticBody3D" parent="."]
+position = Vector3(50.35, 5.76, 0)
+collision_layer = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LandingRootPad"]
+shape = SubResource("BoxShape3D_landing")
+
+[node name="RootDeck" type="MeshInstance3D" parent="LandingRootPad"]
+mesh = SubResource("BoxMesh_landing")
+surface_material_override/0 = SubResource("StandardMaterial3D_bark")
+
+[node name="MossTop" type="MeshInstance3D" parent="LandingRootPad"]
+position = Vector3(0, 0.14, 0)
+mesh = SubResource("BoxMesh_landing_moss")
+surface_material_override/0 = SubResource("StandardMaterial3D_moss")
+
+[node name="RootRailNear" type="MeshInstance3D" parent="LandingRootPad"]
+position = Vector3(0, -0.28, -2.45)
+rotation = Vector3(0, 0, 1.5707963)
+mesh = SubResource("CylinderMesh_root_rail")
+surface_material_override/0 = SubResource("StandardMaterial3D_bark")
+
+[node name="RootRailFar" type="MeshInstance3D" parent="LandingRootPad"]
+position = Vector3(0, -0.28, 2.45)
+rotation = Vector3(0, 0, 1.5707963)
+mesh = SubResource("CylinderMesh_root_rail")
+surface_material_override/0 = SubResource("StandardMaterial3D_bark")
+
+[node name="RootSupportNearWest" type="MeshInstance3D" parent="LandingRootPad"]
+position = Vector3(-2.8, -1.05, -2.2)
+mesh = SubResource("CylinderMesh_root_support")
+surface_material_override/0 = SubResource("StandardMaterial3D_bark")
+
+[node name="RootSupportFarEast" type="MeshInstance3D" parent="LandingRootPad"]
+position = Vector3(2.8, -1.05, 2.2)
+mesh = SubResource("CylinderMesh_root_support")
+surface_material_override/0 = SubResource("StandardMaterial3D_bark")
+
+[node name="GlideLanding" type="Marker3D" parent="."]
+position = Vector3(50.35, 5.92, 0)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="RecoveryStepLow" type="StaticBody3D" parent="."]
+position = Vector3(55.9, 5.17, 0)
+collision_layer = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RecoveryStepLow"]
+shape = SubResource("BoxShape3D_recovery_step")
+
+[node name="RootStep" type="MeshInstance3D" parent="RecoveryStepLow"]
+mesh = SubResource("BoxMesh_recovery_step")
+surface_material_override/0 = SubResource("StandardMaterial3D_bark")
+
+[node name="MossTop" type="MeshInstance3D" parent="RecoveryStepLow"]
+position = Vector3(0, 0.1325, 0)
+mesh = SubResource("BoxMesh_recovery_moss")
+surface_material_override/0 = SubResource("StandardMaterial3D_moss")
+
+[node name="RecoveryStepMiddle" type="StaticBody3D" parent="."]
+position = Vector3(55.35, 5.37, 0)
+collision_layer = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RecoveryStepMiddle"]
+shape = SubResource("BoxShape3D_recovery_step")
+
+[node name="RootStep" type="MeshInstance3D" parent="RecoveryStepMiddle"]
+mesh = SubResource("BoxMesh_recovery_step")
+surface_material_override/0 = SubResource("StandardMaterial3D_bark")
+
+[node name="MossTop" type="MeshInstance3D" parent="RecoveryStepMiddle"]
+position = Vector3(0, 0.1325, 0)
+mesh = SubResource("BoxMesh_recovery_moss")
+surface_material_override/0 = SubResource("StandardMaterial3D_moss")
+
+[node name="RecoveryStepHigh" type="StaticBody3D" parent="."]
+position = Vector3(54.8, 5.57, 0)
+collision_layer = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RecoveryStepHigh"]
+shape = SubResource("BoxShape3D_recovery_step")
+
+[node name="RootStep" type="MeshInstance3D" parent="RecoveryStepHigh"]
+mesh = SubResource("BoxMesh_recovery_step")
+surface_material_override/0 = SubResource("StandardMaterial3D_bark")
+
+[node name="MossTop" type="MeshInstance3D" parent="RecoveryStepHigh"]
+position = Vector3(0, 0.1325, 0)
+mesh = SubResource("BoxMesh_recovery_moss")
+surface_material_override/0 = SubResource("StandardMaterial3D_moss")
+
+[node name="OvershootRunout" type="Marker3D" parent="."]
+position = Vector3(56.1, 5.2, 0)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="FinishArea" type="Area3D" parent="."]
+position = Vector3(50.35, 10.35, 0)
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FinishArea"]
+shape = SubResource("BoxShape3D_finish_area")
+
+[node name="Finish" type="Marker3D" parent="."]
+position = Vector3(51.2, 5.92, 0)
+rotation = Vector3(0, -1.5707963, 0)
+
+[node name="ValleyFinish" parent="." instance=ExtResource("5_finish")]
+
+[node name="MushroomCapWest" parent="." instance=ExtResource("6_mushroom_large")]
+position = Vector3(38.8, 5.42, -3.5)
+rotation = Vector3(0, 0.55, 0)
+scale = Vector3(0.54, 0.54, 0.54)
+
+[node name="MushroomCapEast" parent="." instance=ExtResource("7_mushroom_step")]
+position = Vector3(41.6, 5.7, 3.6)
+rotation = Vector3(0, -0.8, 0)
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="MushroomCapFar" parent="." instance=ExtResource("6_mushroom_large")]
+position = Vector3(45.8, 5.94, -3.6)
+rotation = Vector3(0, 1.4, 0)
+scale = Vector3(0.43, 0.43, 0.43)
+
+[node name="MossMoundEast" parent="." instance=ExtResource("8_moss_mound")]
+position = Vector3(48.8, 5.8, 3.45)
+rotation = Vector3(0, 0.6, 0)
+scale = Vector3(0.72, 0.72, 0.72)
+
+[node name="LeafShrubNear" parent="." instance=ExtResource("9_leaf_shrub")]
+position = Vector3(53.9, 5.55, -3.5)
+rotation = Vector3(0, -0.6, 0)
+scale = Vector3(0.72, 0.72, 0.72)
+
+[node name="MossMoundWest" parent="." instance=ExtResource("8_moss_mound")]
+position = Vector3(56.2, 5.15, 2.8)
+rotation = Vector3(0, -0.5, 0)
+scale = Vector3(0.7, 0.7, 0.7)

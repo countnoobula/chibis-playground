@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3]
+[gd_scene load_steps=41 format=3]
 
 [ext_resource type="Script" path="res://levels/first_steps/first_steps_valley_controller.gd" id="1_controller"]
 [ext_resource type="PackedScene" path="res://levels/first_steps/terrain/creek_terrain.tscn" id="2_terrain"]
@@ -32,6 +32,7 @@
 [ext_resource type="PackedScene" path="res://levels/first_steps/ambient_breeze.tscn" id="30_ambient_breeze"]
 [ext_resource type="PackedScene" path="res://levels/first_steps/root_ledges.tscn" id="31_root_ledges"]
 [ext_resource type="PackedScene" path="res://levels/first_steps/canopy_gap.tscn" id="32_canopy_gap"]
+[ext_resource type="PackedScene" path="res://levels/first_steps/wind_overlook.tscn" id="33_wind_overlook"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_summer"]
 sky_top_color = Color(0.29803923, 0.56078434, 0.6901961, 1)
@@ -759,4 +760,7 @@ rotation = Vector3(0, -1.0, 0)
 position = Vector3(4, 0, -16)
 
 [node name="CanopyGap" parent="." instance=ExtResource("32_canopy_gap")]
+position = Vector3(0, 0, -16)
+
+[node name="WindOverlook" parent="." instance=ExtResource("33_wind_overlook")]
 position = Vector3(0, 0, -16)
