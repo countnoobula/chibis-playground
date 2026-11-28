@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3]
+[gd_scene load_steps=39 format=3]
 
 [ext_resource type="Script" path="res://levels/first_steps/first_steps_valley_controller.gd" id="1_controller"]
 [ext_resource type="PackedScene" path="res://levels/first_steps/terrain/creek_terrain.tscn" id="2_terrain"]
@@ -30,6 +30,7 @@
 [ext_resource type="PackedScene" path="res://features/water/water_body_3d.tscn" id="28_water_body"]
 [ext_resource type="PackedScene" path="res://levels/first_steps/dry_crossing.tscn" id="29_dry_crossing"]
 [ext_resource type="PackedScene" path="res://levels/first_steps/ambient_breeze.tscn" id="30_ambient_breeze"]
+[ext_resource type="PackedScene" path="res://levels/first_steps/root_ledges.tscn" id="31_root_ledges"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_summer"]
 sky_top_color = Color(0.29803923, 0.56078434, 0.6901961, 1)
@@ -752,3 +753,6 @@ rotation = Vector3(0, 0.8, 0)
 [node name="PebblesEast" parent="Dressing/Bend" instance=ExtResource("20_painted_pebbles")]
 position = Vector3(20.1, 3.03, -20.5)
 rotation = Vector3(0, -1.0, 0)
+
+[node name="RootLedges" parent="." instance=ExtResource("31_root_ledges")]
+position = Vector3(4, 0, -16)

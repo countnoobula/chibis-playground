@@ -4,7 +4,7 @@
 
 ### Roaming Atlas and First Steps Valley
 
-**Owner** Codex · **Checkpoint** 7 of 11 · **Status** verified, player review pending · **Current tasks** 4/4 · **User-approved checkpoints** 5/11
+**Owner** Codex · **Checkpoint** 8 of 11 · **Status** verified, player review pending · **Current tasks** 4/4 · **User-approved checkpoints** 5/11
 
 #### 1. Art and tracker
 
@@ -103,14 +103,14 @@ User-approved. [Verification and review decision](changelog/2026-11-27-atlas-art
 
 #### 8. Root ledges
 
-- [ ] Place pole entry
-- [ ] Author a climbable root face
-- [ ] Tune mantle shelf and camera clearance
-- [ ] Verify checkpoint and retry
+- [x] Place pole entry
+- [x] Author a climbable root face
+- [x] Tune mantle shelf and camera clearance
+- [x] Verify checkpoint and retry
 
 **Review.** Complete pole → climb → mantle. Inspect handhold visibility, clearance, and safe reset.
 
-[Implementation plan, acceptance checks and handoff](changelog/atlas-08-root-ledges.md) · Planned.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-08-root-ledges.md) · Verified. Player review pending.
 
 #### 9. Canopy gap
 

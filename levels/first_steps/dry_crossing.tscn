@@ -86,6 +86,7 @@ position = Vector3(-22.5, 2.55, -16)
 rotation = Vector3(0, -1.5707963, 0)
 
 [node name="CheckpointArea" type="Area3D" parent="." groups=["first_steps_section_checkpoints"]]
+metadata/developer_action = &"debug_zone_1"
 position = Vector3(-22.5, 2.55, -16)
 collision_mask = 2
 

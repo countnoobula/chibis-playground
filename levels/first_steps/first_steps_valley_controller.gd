@@ -28,7 +28,7 @@ const SECTION_CAMERA_PITCH := -0.56
 
 var _runner: ParkourController
 var _safe_spawn: Marker3D
-var _developer_section_start: Node3D
+var _developer_checkpoints: Dictionary[StringName, Area3D] = {}
 var _active_checkpoint_transform := Transform3D.IDENTITY
 var _active_checkpoint_name := "Trailhead"
 var _active_checkpoint_camera_pitch := DEFAULT_CAMERA_PITCH
@@ -57,7 +57,6 @@ func _ready() -> void:
 	_journal_progress_provider = LevelProgressProvider.new("First Steps Valley")
 	_runner = get_node_or_null(runner_path) as ParkourController
 	_safe_spawn = get_node_or_null(safe_spawn_path) as Marker3D
-	_developer_section_start = get_node_or_null(developer_section_start_path) as Node3D
 	if _runner == null:
 		push_error("First Steps Valley could not find its ChibiRunner.")
 	if _safe_spawn == null:
@@ -146,8 +145,11 @@ func _configure_caustic_meshes(node: Node, water: WaterBody3D, configured_mesh_i
 func _physics_process(_delta: float) -> void:
 	if _runner == null or _safe_spawn == null:
 		return
-	if OS.is_debug_build() and developer_section_start_enabled and Input.is_action_just_pressed(&"debug_zone_1"):
-		start_at_developer_section()
+	if OS.is_debug_build() and developer_section_start_enabled:
+		for action in _developer_checkpoints:
+			if Input.is_action_just_pressed(action):
+				start_at_developer_section(action)
+				break
 	if _runner.global_position.y > fall_limit_y:
 		return
 	retry_section()
@@ -160,16 +162,23 @@ func retry_section() -> void:
 	_teleport_runner(_active_checkpoint_transform, _active_checkpoint_camera_pitch)
 
 
-## Developer-only shortcut used to inspect the dry crossing from its authored start marker.
-func start_at_developer_section() -> void:
+## Each section advertises an existing input action on its checkpoint area.
+func start_at_developer_section(action: StringName = &"debug_zone_1") -> void:
 	if not developer_section_start_enabled or not OS.is_debug_build() or _runner == null:
 		return
-	if _developer_section_start == null:
-		_developer_section_start = get_node_or_null(developer_section_start_path) as Node3D
-	if _developer_section_start == null:
+	var area: Area3D = _developer_checkpoints.get(action)
+	if area == null:
 		return
-	_activate_section_checkpoint(_developer_section_start.global_transform, "Dry Crossing", SECTION_CAMERA_PITCH)
-	_teleport_runner(_active_checkpoint_transform, _active_checkpoint_camera_pitch)
+	var marker := area.get_node_or_null("../DeveloperStart") as Node3D
+	if action == &"debug_zone_1":
+		marker = get_node_or_null(developer_section_start_path) as Node3D
+	if marker == null:
+		marker = area.get_node("Spawn") as Node3D
+	_activate_section_checkpoint(
+		marker.global_transform, area.get_meta("section_name", "Dry Crossing"),
+		area.get_meta("camera_pitch", SECTION_CAMERA_PITCH)
+	)
+	retry_section()
 
 
 func _bind_section_checkpoints() -> void:
@@ -177,6 +186,9 @@ func _bind_section_checkpoints() -> void:
 		if not (node is Area3D) or not is_ancestor_of(node):
 			continue
 		var checkpoint_area := node as Area3D
+		var action := StringName(checkpoint_area.get_meta("developer_action", ""))
+		if action != &"" and InputMap.has_action(action):
+			_developer_checkpoints[action] = checkpoint_area
 		checkpoint_area.body_entered.connect(_on_section_checkpoint_body_entered.bind(checkpoint_area))
 
 
@@ -188,7 +200,7 @@ func _on_section_checkpoint_body_entered(body: Node3D, checkpoint_area: Area3D) 
 	var section_name := str(checkpoint_area.get_meta("section_name", "Dry Crossing")).strip_edges()
 	if section_name.is_empty():
 		section_name = "Dry Crossing"
-	_activate_section_checkpoint(spawn_node.global_transform, section_name, SECTION_CAMERA_PITCH)
+	_activate_section_checkpoint(spawn_node.global_transform, section_name, checkpoint_area.get_meta("camera_pitch", SECTION_CAMERA_PITCH))
 
 
 func _activate_section_checkpoint(
