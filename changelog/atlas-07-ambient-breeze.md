@@ -1,6 +1,6 @@
 # Checkpoint 7 · Ambient breeze
 
-**Owner** Codex lead for integration and evidence, with scoped Luna Max implementation. **Status** Implemented and verified. Overnight checkpoint published for player review.
+**Owner** Codex lead for integration and evidence, with scoped Luna Max implementation. **Status** User-approved.
 
 [Previous checkpoint](atlas-06-first-dry-crossing.md) · [Milestone tracker](../changelog.md) · [Project instructions](../AGENTS.md)
 
@@ -39,3 +39,7 @@ The standalone regression passed 38 assertions against the exported pack. Matche
 Verified on Windows Vulkan Forward Mobile at 1280 × 720. Captured a fixed camera beside the creek bellflowers with the same render timing in both runs. [Breeze off/on animation](../source_art/LayoutReview/first-steps-ambient-breeze.gif) · [Movement regression](../tests/test_first_steps_breeze.gd) · [Windows build](../builds/first_steps_checkpoint_7/Chibi.exe)
 
 Review is deferred by the owner for this overnight run. Compare the strength at the trailhead and creek using B.
+
+### Player review · 2026-11-28
+
+The player approved the ambient breeze after reviewing its appearance in the Windows build.

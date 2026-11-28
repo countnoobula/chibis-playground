@@ -4,7 +4,7 @@
 
 ### Roaming Atlas and First Steps Valley
 
-**Owner** Codex · **Checkpoint** 11 of 11 · **Status** verified, player review pending · **Current tasks** 5/5 · **User-approved checkpoints** 6/11
+**Owner** Codex · **Checkpoint** 11 of 11 · **Status** verified, player review pending · **Current tasks** 5/5 · **User-approved checkpoints** 7/11
 
 #### 1. Art and tracker
 
@@ -99,7 +99,7 @@ User-approved. [Verification and review decision](changelog/2026-11-27-atlas-art
 
 **Review.** Observe Chibi standing still. Repeat identical run and jump inputs and verify that direction, speed, and trajectory match.
 
-[Implementation plan, acceptance checks and handoff](changelog/atlas-07-ambient-breeze.md) · Verified. Player review pending.
+[Implementation plan, acceptance checks and handoff](changelog/atlas-07-ambient-breeze.md) · User-approved.
 
 #### 8. Root ledges
 
